@@ -159,7 +159,7 @@ class Article {
   List<Widget> buildParagraphs(BuildContext context,
       {paragraphSpacing = 16, style, textAlign = TextAlign.justify, overflow}) {
     var builder = ArticleBuilder(
-        content: content,
+        content: rawContent,
         paragraphSpacing: paragraphSpacing,
         style: style,
         textAlign: textAlign,
@@ -370,7 +370,7 @@ class ArticleBuilder {
 
     for (var i = 0; i < parts.length; i++) {
       String paragraph = parts[i];
-      Text parsedParagaph = parseParagraph(paragraph, context);
+      Widget parsedParagaph = parseParagraph(paragraph, context);
       if (parsedParagaph != null) {
         children.add(parsedParagaph);
         children.add(SizedBox(
@@ -388,7 +388,7 @@ class ArticleBuilder {
     return children;
   }
 
-  Text parseParagraph(String paragraph, BuildContext context) {
+  Widget parseParagraph(String paragraph, BuildContext context) {
     RegExp imageExp = RegExp(r'!\[(.+)\]\((.+)\)');
     paragraph = paragraph.replaceAll(imageExp, '');
     if (paragraph.isEmpty) return null;
@@ -404,6 +404,7 @@ class ArticleBuilder {
           break;
         case Format.italic:
           style = TextStyle(fontStyle: FontStyle.italic);
+          print('Found italics');
           break;
         case Format.bold:
           style = TextStyle(fontWeight: FontWeight.bold);

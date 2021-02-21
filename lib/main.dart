@@ -6,6 +6,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'classes.dart';
 import 'themes.dart';
 import 'article_page.dart';
+import 'app_state.dart';
 
 void main() {
   LicenseRegistry.addLicense(() async* {
@@ -305,6 +306,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   List<Widget> buildDrawerChildren() {
+    final result = [];
+
+    for (var menu in AppMenu.values) {
+      result.add(
+        Padding(
+          padding: EdgeInsets.only(left: gutters, top: gutters),
+          child: ListTile(
+            selected: menu == AppMenu.home,
+            title: Text(menu.name),
+          ),
+        ),
+      );
+    }
+
     return [
       Padding(
         padding: EdgeInsets.only(left: gutters, top: gutters),
