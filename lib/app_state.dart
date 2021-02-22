@@ -31,6 +31,7 @@ class AppState extends ChangeNotifier {
   }
 
   bool get areArticlesLoading => _areArticlesLoading;
+  Future<bool> get areArticlesLoaded => _areArticlesLoaded;
 
   Article get selectedArticle => _selectedArticle;
 
@@ -181,22 +182,29 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
       key: navigatorKey,
       pages: appState.areArticlesLoading
           ? [
-              MaterialPage(
+              FadeAnimationPage(
                   child: Center(
-                child: CircularProgressIndicator(),
-              ))
+                    child: CircularProgressIndicator(),
+                  ),
+                  key: ValueKey('Loading'))
             ]
           : [
               if (appState.selectedMenu != null &&
                   appState.selectedArticle == null)
                 MaterialPage(
-                  child: AppShell(appState: appState),
+                  child: AppShell(
+                    appState: appState,
+                    handleMenuTapped: _handleMenuTapped,
+                  ),
+                  key: ValueKey('AppShell'),
                 ),
               if (appState.selectedArticle != null)
                 FadeAnimationPage(
                     child: ArticlePage(
-                  article: appState.selectedArticle,
-                )),
+                      key: ValueKey(appState.selectedArticle.title),
+                      article: appState.selectedArticle,
+                    ),
+                    key: ValueKey(appState.selectedArticle.title)),
               if (appState.selectedArticle == null &&
                   appState.selectedMenu == null)
                 //TODO
@@ -228,6 +236,11 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
       appState.selectedArticle = null;
       appState.selectedMenu = AppMenuParser.fromPath(path);
     }
+  }
+
+  void _handleMenuTapped(AppMenu menu) {
+    appState.selectedMenu = menu;
+    notifyListeners();
   }
 }
 

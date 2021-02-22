@@ -1,396 +1,45 @@
 import 'package:flutter/material.dart';
 import 'classes.dart';
 import 'app_state.dart';
+import 'app_shell.dart';
 
-class ShellState extends ChangeNotifier {
-  bool _displayMobileLayout;
-  double _margins;
-  double _gutters;
-  double _cardCornerRadius;
-
-  bool get displayMobileLayout => displayMobileLayout;
-  double get margins => margins;
-  double get gutters => gutters;
-  double get cardCornerRadius => cardCornerRadius;
-
-  set displayMobileLayout(bool value) {
-    _displayMobileLayout = value;
-    notifyListeners();
-  }
-
-  set margins(double value) {
-    _margins = value;
-    notifyListeners();
-  }
-
-  set gutters(double value) {
-    _gutters = value;
-    notifyListeners();
-  }
-
-  set cardCornerRadius(double value) {
-    _cardCornerRadius = value;
-    notifyListeners();
-  }
-}
-
-class HomePage extends StatefulWidget {
-  HomePage({Key key, this.onArticleTapped}) : super(key: key);
-
-  final void Function(Article) onArticleTapped;
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  double width, height, usefulWidth, usefulHeight, margins, gutters;
-  double appBarMargins;
-  double maxContentWidth = 600;
-  double contentWidth;
-  double webLayoutMinWidth;
-  double standardDrawerMaxWidth = 144;
-  double cardCornerRadius;
-
-  bool isInitialized = false;
-  bool isMobileLayout;
-  bool isAppBarElevated = false;
-
-  List<Article> articles = <Article>[];
-
-  DrawerState standardDrawerState;
-
-  AnimationController standardDrawerController;
-  Animation<double> standardDrawerWidth;
-  Animation<double> appBarSpacing;
-
-  ScrollController scrollController = ScrollController();
-
-  bool get displayMobileLayout {
-    return isMobileLayout && standardDrawerState == DrawerState.closed;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    standardDrawerState = DrawerState.open;
-    standardDrawerController = AnimationController(
-        value: 1.0, vsync: this, duration: Duration(milliseconds: 500));
-    standardDrawerController.addStatusListener((status) {
-      setState(() {
-        switch (status) {
-          case AnimationStatus.completed:
-            standardDrawerState = DrawerState.open;
-            break;
-          case AnimationStatus.dismissed:
-            standardDrawerState = DrawerState.closed;
-            break;
-          case AnimationStatus.forward:
-            standardDrawerState = DrawerState.opening;
-            break;
-          case AnimationStatus.reverse:
-            standardDrawerState = DrawerState.closing;
-            break;
-        }
-      });
-    });
-    standardDrawerWidth = Tween<double>(begin: 0, end: standardDrawerMaxWidth)
-        .animate(standardDrawerController);
-    standardDrawerWidth.addListener(() {
-      setState(() {});
-    });
-    appBarSpacing = Tween<double>(begin: 0, end: standardDrawerMaxWidth - 56)
-        .animate(standardDrawerController);
-    appBarSpacing.addListener(() {
-      setState(() {});
-    });
-    scrollController.addListener(() {
-      if (scrollController.offset > 0) {
-        setState(() {
-          isAppBarElevated = true;
-        });
-      } else if (isAppBarElevated) {
-        setState(() {
-          isAppBarElevated = false;
-        });
-      }
-    });
-
-    Article.fromAsset("posts/finding_gender.md").then((article) {
-      setState(() {
-        articles.add(article);
-      });
-    });
-  }
-
-  void toggleDrawer() {
-    print('Pressed button');
-    print(standardDrawerState);
-    switch (standardDrawerState) {
-      case DrawerState.closed:
-        {
-          standardDrawerController.fling();
-          print('Opened drawer');
-        }
-        break;
-      case DrawerState.closing:
-        {
-          standardDrawerController.fling();
-          print('Opened drawer');
-        }
-        break;
-      case DrawerState.open:
-        {
-          standardDrawerController.fling(velocity: -1);
-        }
-        break;
-      case DrawerState.opening:
-        {
-          standardDrawerController.fling(velocity: -1);
-        }
-        break;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    buildState(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        elevation: isAppBarElevated ? 4 : 0,
-        backgroundColor: isAppBarElevated
-            ? Theme.of(context).appBarTheme.backgroundColor
-            : Theme.of(context).backgroundColor,
-        leadingWidth: 56 + appBarMargins,
-        title: Padding(
-            padding: EdgeInsets.only(left: appBarSpacing.value),
-            child: Text('The Duckling') //Text("To Papáki"),
-            ),
-        leading: !displayMobileLayout
-            ? IconButton(
-                icon: AnimatedIcon(
-                  progress: standardDrawerController,
-                  icon: AnimatedIcons.menu_close,
-                ),
-                onPressed: toggleDrawer)
-            : null,
-      ),
-      drawer: displayMobileLayout ? buildModalDrawer() : null,
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildStandardDrawer(),
-        ],
-      ),
-    );
-  }
-
-  void buildState(BuildContext context) {
-    setState(() {
-      Size size = MediaQuery.of(context).size;
-      width = size.width;
-      usefulWidth = size.width - standardDrawerWidth.value;
-      height = size.height;
-
-      if (width < 720) {
-        gutters = 24;
-        appBarMargins = 0;
-      } else {
-        gutters = 24;
-        appBarMargins = 24;
-      }
-
-      webLayoutMinWidth =
-          maxContentWidth + standardDrawerMaxWidth + gutters * 2;
-
-      isMobileLayout = width < webLayoutMinWidth;
-
-      if (usefulWidth < maxContentWidth + gutters * 2) {
-        if (usefulWidth < maxContentWidth)
-          margins = 0;
-        else
-          margins = gutters;
-      } else {
-        margins = (usefulWidth - maxContentWidth) / 2;
-      }
-
-      if (isMobileLayout && !standardDrawerController.isDismissed) {
-        if (isInitialized)
-          standardDrawerController.fling(velocity: -1);
-        else {
-          standardDrawerController.value = 0;
-          standardDrawerState = DrawerState.closed;
-        }
-      }
-
-      contentWidth = usefulWidth - margins * 2;
-
-      if (margins == 0)
-        cardCornerRadius = 0;
-      else
-        cardCornerRadius = gutters / 4;
-
-      isInitialized = true;
-    });
-  }
-
-  Widget buildStandardDrawer() {
-    return Container(
-      width: standardDrawerWidth.value + 0.1,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: NeverScrollableScrollPhysics(),
-        child: Row(
-          children: [
-            Container(
-              width: 256,
-              child: Drawer(
-                elevation: 0,
-                child: ListView(children: buildDrawerChildren()),
-              ),
-            ),
-            // if (!isMobileLayout) VerticalDivider(width: 0),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildModalDrawer() {
-    return Drawer(
-        child: ListTileTheme(
-      style: ListTileStyle.list,
-      child: ListView(
-        children: <Widget>[
-              AppBar(
-                elevation: 16,
-                shadowColor: Colors.transparent,
-                backgroundColor: Theme.of(context).canvasColor,
-                leadingWidth: 56 + appBarMargins,
-                title: Padding(
-                    padding: EdgeInsets.only(left: appBarSpacing.value),
-                    child: Text('The Duckling') //Text("To Papáki"),
-                    ),
-                leading: IconButton(
-                    icon: Icon(
-                      Icons.close,
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    }),
-              ),
-            ] +
-            buildDrawerChildren(),
-      ),
-    ));
-  }
-
-  List<Widget> buildDrawerChildren() {
-    final result = [];
-
-    for (var menu in AppMenu.values) {
-      result.add(
-        Padding(
-          padding: EdgeInsets.only(left: gutters, top: gutters),
-          child: ListTile(
-            selected: menu == AppMenu.home,
-            title: Text(menu.name),
-          ),
-        ),
-      );
-    }
-
-    return [
-      Padding(
-        padding: EdgeInsets.only(left: gutters, top: gutters),
-        child: ListTile(
-          selected: true,
-          title: Text('Home'),
-        ),
-      ),
-      Padding(
-        padding: EdgeInsets.only(left: gutters),
-        child: ListTile(
-          title: Text('About'),
-        ),
-      ),
-      Padding(
-        padding: EdgeInsets.only(left: gutters),
-        child: ListTile(
-          title: Text('Essays'),
-        ),
-      ),
-      Padding(
-        padding: EdgeInsets.only(left: gutters),
-        child: ListTile(
-          title: Text('Projects'),
-        ),
-      )
-    ];
-  }
-}
-
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({
     Key key,
-    @required this.scrollController,
     @required this.onArticleTapped,
-    @required this.appState,
     @required this.shellState,
   }) : super(key: key);
 
-  final ScrollController scrollController;
   final void Function(Article) onArticleTapped;
-  final AppState appState;
   final ShellState shellState;
 
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  bool displayMobileLayout;
-  double margins;
-  double gutters;
-  double cardCornerRadius;
-
-  List<Article> articles;
-
-  @override
-  void initState() {
-    super.initState();
-    displayMobileLayout = widget.shellState.displayMobileLayout;
-    margins = widget.shellState.margins;
-    gutters = widget.shellState.gutters;
-    cardCornerRadius = widget.shellState.cardCornerRadius;
-    articles = widget.appState.articles.values;
-  }
+  bool get displayMobileLayout => shellState.displayMobileLayout;
+  double get margins => shellState.margins;
+  double get gutters => shellState.gutters;
+  double get cardCornerRadius => shellState.cardCornerRadius;
+  List<Article> get articles => shellState.articles;
+  ScrollController get scrollController => shellState.scrollController;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Scrollbar(
+    return Scaffold(
+      body:
+          // Container(color: Colors.red),
+          Scrollbar(
         // thickness: 4
         isAlwaysShown: !displayMobileLayout,
-        controller: widget.scrollController,
-        child: ListView(
-          controller: widget.scrollController,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                  left: margins, right: margins, top: gutters, bottom: gutters),
-              child: articles.isNotEmpty
-                  ? ArticleCard(
-                      articles[0],
-                      onArticleTapped: widget.onArticleTapped,
-                      cardCornerRadius: cardCornerRadius,
-                      gutters: gutters,
-                    )
-                  : null,
-            ),
-          ],
+        controller: scrollController,
+        child: ListView.builder(
+          controller: scrollController,
+          padding: EdgeInsets.only(
+              left: margins, right: margins, top: gutters, bottom: gutters),
+          itemCount: articles.length,
+          itemBuilder: (context, int i) {
+            return ArticleCard(articles[i],
+                cardCornerRadius: cardCornerRadius,
+                gutters: gutters,
+                onArticleTapped: onArticleTapped);
+          },
         ),
       ),
     );
