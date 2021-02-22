@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:guilhermepata_blog/article_page.dart';
 import 'classes.dart';
@@ -235,102 +236,118 @@ class UnknownPage extends StatelessWidget {
     Key key,
   }) : super(key: key);
 
-  final double imageWidth = 600;
-
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+    var imageWidth;
+    var messageWidth = 300.0;
+
+    if (width > height * 1.5) {
+      imageWidth = width - messageWidth - 48;
+    } else {
+      imageWidth = width - 48;
+      messageWidth = width - 48;
+    }
+    if (messageWidth == 300.0 && imageWidth > 600) imageWidth = 600;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        elevation: 0,
-        // title: Text('The Duckling'),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 56,
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width - 48),
-                child: Container(
-                  width: 300,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 0, left: 16),
-                        child: Text('404',
-                            style: Theme.of(context)
-                                .textTheme
-                                .subtitle1
-                                .copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withOpacity(.6),
-                                    fontSize: 40,
-                                    fontFamily: GoogleFonts.roboto().fontFamily,
-                                    fontWeight: FontWeight.w100)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text('Lost in space',
-                            style: Theme.of(context)
-                                .textTheme
-                                .subtitle1
-                                .copyWith(fontSize: 50)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            top: 16.0, left: 16, right: 16, bottom: 24),
-                        child: Text(
-                            "You have reached the edge of the Universe. The page you requested could not be found... Don't worry, you can return to the previous page.",
-                            textAlign: TextAlign.left,
-                            style:
-                                Theme.of(context).textTheme.bodyText2.copyWith(
+      // appBar: AppBar(
+      //   elevation: 0,
+      //   // title: Text('The Duckling'),
+      // ),
+      body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: height),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                // spacing: 56,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width - 48),
+                    child: Container(
+                      width: messageWidth,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 0, left: 16),
+                            child: Text('404',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .subtitle1
+                                    .copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(.6),
+                                        fontSize: 40,
+                                        fontFamily:
+                                            GoogleFonts.roboto().fontFamily,
+                                        fontWeight: FontWeight.w100)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text('Lost in space',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .subtitle1
+                                    .copyWith(fontSize: 50)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                top: 16.0, left: 16, right: 16, bottom: 24),
+                            child: Text(
+                                "You have reached the edge of the Universe. The page you requested could not be found... But don't worry, you can return to the previous page.",
+                                textAlign: TextAlign.left,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText2
+                                    .copyWith(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface
                                           .withOpacity(.6),
                                     )),
-                      ),
-                      ButtonBar(
-                        // alignment: MainAxisAlignment.start,
-                        // mainAxisSize: MainAxisSize.min,
-                        buttonPadding: EdgeInsets.all(16),
-                        children: [
-                          OutlinedButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('Go back')),
-                          ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('Go home')),
+                          ),
+                          ButtonBar(
+                            // alignment: MainAxisAlignment.start,
+                            // mainAxisSize: MainAxisSize.min,
+                            buttonPadding: EdgeInsets.all(16),
+                            children: [
+                              OutlinedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('Go back')),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('Go home')),
+                            ],
+                          )
                         ],
-                      )
-                    ],
+                      ),
+                    ),
                   ),
-                ),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                        minWidth: imageWidth, maxWidth: imageWidth),
+                    child: Image.asset(
+                        Theme.of(context).brightness == Brightness.light
+                            ? 'image404_light.png'
+                            : 'image404_dark.png'),
+                  )
+                ],
               ),
-              ConstrainedBox(
-                  constraints: BoxConstraints(
-                      minWidth:
-                          MediaQuery.of(context).size.width - 48 < imageWidth
-                              ? MediaQuery.of(context).size.width - 48
-                              : imageWidth,
-                      maxWidth: imageWidth),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Image.asset('image404.png'),
-                  ))
-            ],
+            ),
           ),
         ),
       ),

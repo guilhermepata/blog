@@ -237,6 +237,18 @@ class _ArticlePageState extends State<ArticlePage>
                             // width: usefulWidth,
                             // height: height,
                             semanticLabel: widget.article.altText,
+                            frameBuilder: (BuildContext context, Widget child,
+                                int frame, bool wasSynchronouslyLoaded) {
+                              if (wasSynchronouslyLoaded ?? false) {
+                                return child;
+                              }
+                              return AnimatedOpacity(
+                                child: child,
+                                opacity: frame == null ? 0 : 1,
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeIn,
+                              );
+                            },
                           ),
                         ),
                       ),

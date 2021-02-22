@@ -8,7 +8,7 @@ class AppShell extends StatefulWidget {
 
   AppShell({
     @required this.appState,
-  });
+  }) {}
 
   @override
   _AppShellState createState() => _AppShellState();

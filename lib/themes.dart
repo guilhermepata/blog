@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static Color primary = Color(0xff5500e8);
-  static Color primaryVariant = Color(0xff0000b4);
-  static Color secondary = Color(0xffe7c3f9);
-  static Color secondaryVariant = Color(0xffb492c6);
+  static Color primaryLight = Color(0xff5500e8);
+  static Color primaryVariantLight = Color(0xff0000b4);
+  static Color secondaryLight = Color(0xffe7c3f9);
+  static Color secondaryVariantLight = Color(0xffb492c6);
+
+  static Color primaryDark = Color(0xffB995F6);
+  static Color primaryVariantDark = Color(0xff8767c3);
+  static Color secondaryDark = Color(0xff92b0ed);
+  static Color secondaryVariantDark = Color(0xff6181ba);
 
   static TextTheme appTextTheme({ColorScheme finalScheme}) {
     final data = ThemeData.from(colorScheme: finalScheme);
@@ -106,17 +111,17 @@ class AppTheme {
 
   static ThemeData dark() {
     return fromScheme(ColorScheme.dark().copyWith(
-        primary: primary,
-        primaryVariant: primaryVariant,
-        secondary: secondary,
-        secondaryVariant: secondaryVariant));
+        primary: primaryDark,
+        primaryVariant: primaryVariantDark,
+        secondary: secondaryDark,
+        secondaryVariant: secondaryVariantDark));
   }
 
   static ThemeData light() {
     return fromScheme(ColorScheme.light().copyWith(
-        primary: primary,
-        primaryVariant: primaryVariant,
-        secondary: secondary,
-        secondaryVariant: secondaryVariant));
+        primary: primaryLight,
+        primaryVariant: primaryVariantLight,
+        secondary: secondaryLight,
+        secondaryVariant: secondaryVariantLight));
   }
 }

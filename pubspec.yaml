@@ -29,6 +29,7 @@ dependencies:
   icon_shadow: ^1.0.1
   auto_size_text: ^2.1.0
   url_strategy: ^0.1.1
+  flutter_svg: ^0.20.0-nullsafety.3
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -57,7 +58,8 @@ flutter:
   assets:
       - google-fonts/
       - assets/posts/finding_gender.md
-      - assets/image404.png
+      - assets/image404_light.png
+      - assets/image404_dark.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

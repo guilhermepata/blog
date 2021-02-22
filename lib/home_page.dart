@@ -2,6 +2,38 @@ import 'package:flutter/material.dart';
 import 'classes.dart';
 import 'app_state.dart';
 
+class ShellState extends ChangeNotifier {
+  bool _displayMobileLayout;
+  double _margins;
+  double _gutters;
+  double _cardCornerRadius;
+
+  bool get displayMobileLayout => displayMobileLayout;
+  double get margins => margins;
+  double get gutters => gutters;
+  double get cardCornerRadius => cardCornerRadius;
+
+  set displayMobileLayout(bool value) {
+    _displayMobileLayout = value;
+    notifyListeners();
+  }
+
+  set margins(double value) {
+    _margins = value;
+    notifyListeners();
+  }
+
+  set gutters(double value) {
+    _gutters = value;
+    notifyListeners();
+  }
+
+  set cardCornerRadius(double value) {
+    _cardCornerRadius = value;
+    notifyListeners();
+  }
+}
+
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.onArticleTapped}) : super(key: key);
 
@@ -150,33 +182,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           buildStandardDrawer(),
-          Expanded(
-            child: Scrollbar(
-              // thickness: 4
-              isAlwaysShown: !displayMobileLayout,
-              controller: scrollController,
-              child: ListView(
-                controller: scrollController,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: margins,
-                        right: margins,
-                        top: gutters,
-                        bottom: gutters),
-                    child: articles.isNotEmpty
-                        ? ArticleCard(
-                            articles[0],
-                            onArticleTapped: widget.onArticleTapped,
-                            cardCornerRadius: cardCornerRadius,
-                            gutters: gutters,
-                          )
-                        : null,
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -324,6 +329,71 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
       )
     ];
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({
+    Key key,
+    @required this.scrollController,
+    @required this.onArticleTapped,
+    @required this.appState,
+    @required this.shellState,
+  }) : super(key: key);
+
+  final ScrollController scrollController;
+  final void Function(Article) onArticleTapped;
+  final AppState appState;
+  final ShellState shellState;
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool displayMobileLayout;
+  double margins;
+  double gutters;
+  double cardCornerRadius;
+
+  List<Article> articles;
+
+  @override
+  void initState() {
+    super.initState();
+    displayMobileLayout = widget.shellState.displayMobileLayout;
+    margins = widget.shellState.margins;
+    gutters = widget.shellState.gutters;
+    cardCornerRadius = widget.shellState.cardCornerRadius;
+    articles = widget.appState.articles.values;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Scrollbar(
+        // thickness: 4
+        isAlwaysShown: !displayMobileLayout,
+        controller: widget.scrollController,
+        child: ListView(
+          controller: widget.scrollController,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(
+                  left: margins, right: margins, top: gutters, bottom: gutters),
+              child: articles.isNotEmpty
+                  ? ArticleCard(
+                      articles[0],
+                      onArticleTapped: widget.onArticleTapped,
+                      cardCornerRadius: cardCornerRadius,
+                      gutters: gutters,
+                    )
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
