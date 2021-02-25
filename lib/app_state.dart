@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:guilhermepata_blog/article_page.dart';
@@ -101,6 +102,7 @@ class BlogRouteInformationParser extends RouteInformationParser<BlogPath> {
     if (configuration is BlogHomePath) {
       return RouteInformation(location: '/');
     } else if (configuration is BlogAboutPath) {
+      print('I tried setting the route to about');
       return RouteInformation(location: '/about');
     } else if (configuration is BlogEssaysPath) {
       return RouteInformation(location: '/essays');
@@ -160,16 +162,16 @@ class BlogArticlePath extends BlogPath {
 class BlogRouterDelegate extends RouterDelegate<BlogPath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<BlogPath> {
   final GlobalKey<NavigatorState> navigatorKey;
+  final AppState appState;
 
-  AppState appState = AppState();
-
-  BlogRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>() {
-    appState.addListener(notifyListeners);
-  }
+  BlogRouterDelegate(AppState appState)
+      : this.navigatorKey = GlobalKey<NavigatorState>(),
+        this.appState = appState;
 
   // When the app state changes, the configuration is updated
   BlogPath get currentConfiguration {
     if (appState.selectedArticle == null) {
+      print('I tried to change the config');
       return appState.selectedMenu.configuration;
     } else {
       return BlogArticlePath.fromTitle(appState.selectedArticle.title);
@@ -178,13 +180,20 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
 
   @override
   Widget build(BuildContext context) {
+    // return Consumer<AppState>(
+    //   builder: (context, appState, _) {
+    //     },
+    // );
+
     return Navigator(
       key: navigatorKey,
       pages: appState.areArticlesLoading
           ? [
               FadeAnimationPage(
-                  child: Center(
-                    child: CircularProgressIndicator(),
+                  child: Scaffold(
+                    body: Center(
+                      child: CircularProgressIndicator(),
+                    ),
                   ),
                   key: ValueKey('Loading'))
             ]
@@ -192,16 +201,13 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
               if (appState.selectedMenu != null &&
                   appState.selectedArticle == null)
                 MaterialPage(
-                  child: AppShell(
-                    appState: appState,
-                    handleMenuTapped: _handleMenuTapped,
-                  ),
+                  child: AppShell(handleMenuTapped),
                   key: ValueKey('AppShell'),
                 ),
               if (appState.selectedArticle != null)
                 FadeAnimationPage(
                     child: ArticlePage(
-                      key: ValueKey(appState.selectedArticle.title),
+                      key: ValueKey(appState.selectedArticle.title + '1'),
                       article: appState.selectedArticle,
                     ),
                     key: ValueKey(appState.selectedArticle.title)),
@@ -211,36 +217,40 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
                 // must design unknown page
                 MaterialPage(child: UnknownPage()),
             ],
-      onPopPage: (route, result) {
-        if (!route.didPop(result)) {
-          return false;
-        }
-
-        if (appState.selectedArticle != null) {
-          appState.selectedArticle = null;
-        }
-        if (appState.selectedMenu == null) {
-          appState.selectedMenu = AppMenu.home;
-        }
-        notifyListeners();
-        return true;
-      },
+      onPopPage: _onPopPage,
     );
+  }
+
+  bool _onPopPage(route, result) {
+    if (!route.didPop(result)) {
+      return false;
+    }
+
+    if (appState.selectedArticle != null) {
+      appState.selectedArticle = null;
+    }
+    if (appState.selectedMenu == null) {
+      appState.selectedMenu = AppMenu.home;
+    }
+    notifyListeners();
+    return true;
+  }
+
+  void handleMenuTapped(AppMenu menu) {
+    appState.selectedMenu = menu;
+    notifyListeners();
   }
 
   @override
   Future<void> setNewRoutePath(BlogPath path) async {
     if (path is BlogArticlePath) {
       appState.setSelectedArticleByUrl(path.urlTitle);
+      notifyListeners();
     } else {
       appState.selectedArticle = null;
       appState.selectedMenu = AppMenuParser.fromPath(path);
+      notifyListeners();
     }
-  }
-
-  void _handleMenuTapped(AppMenu menu) {
-    appState.selectedMenu = menu;
-    notifyListeners();
   }
 }
 

@@ -1,64 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'app_state.dart';
 import 'home_page.dart';
 import 'classes.dart';
 
 class ShellState extends ChangeNotifier {
-  /// These states are super private because I want
-  /// private setters so that only the _AppShellState can change them
-  /// I need setters because I must call notifyListeners()
-  bool __isMobileLayout;
-  double __margins;
-  double __gutters;
-  double __cardCornerRadius;
-  DrawerState __standardDrawerState;
+  final BuildContext context;
+
+  bool _isMobileLayout = false;
+  double _margins = 0;
+  double _gutters = 24;
+  double _cardCornerRadius = 8;
+  DrawerState _standardDrawerState = DrawerState.closed;
   List<Article> articles = <Article>[];
   ScrollController scrollController = ScrollController();
 
-  bool get isMobileLayout => __isMobileLayout;
-  double get margins => __margins;
-  double get gutters => __gutters;
-  double get cardCornerRadius => __cardCornerRadius;
-  DrawerState get standardDrawerState => __standardDrawerState;
+  ShellState(this.context) {
+    context.read<AppState>().areArticlesLoaded.then((value) {
+      for (var article in context.read<AppState>().articles.values)
+        articles.add(article);
+      notifyListeners();
+    });
+  }
+
+  bool get isMobileLayout => _isMobileLayout;
+  double get margins => _margins;
+  double get gutters => _gutters;
+  double get cardCornerRadius => _cardCornerRadius;
+  DrawerState get standardDrawerState => _standardDrawerState;
 
   bool get displayMobileLayout {
-    return isMobileLayout && standardDrawerState == DrawerState.closed;
+    return (isMobileLayout ?? false) &&
+        (standardDrawerState == DrawerState.closed ?? false);
   }
 
-  set _isMobileLayout(bool value) {
-    __isMobileLayout = value;
+  set isMobileLayout(bool value) {
+    _isMobileLayout = value;
     notifyListeners();
   }
 
-  set _margins(double value) {
-    __margins = value;
+  set margins(double value) {
+    _margins = value;
     notifyListeners();
   }
 
-  set _gutters(double value) {
-    __gutters = value;
+  set gutters(double value) {
+    _gutters = value;
     notifyListeners();
   }
 
-  set _cardCornerRadius(double value) {
-    __cardCornerRadius = value;
+  set cardCornerRadius(double value) {
+    _cardCornerRadius = value;
     notifyListeners();
   }
 
-  set _standardDrawerState(DrawerState value) {
-    __standardDrawerState = value;
+  set standardDrawerState(DrawerState value) {
+    _standardDrawerState = value;
     notifyListeners();
   }
 }
 
 class AppShell extends StatefulWidget {
-  final AppState appState;
   final void Function(AppMenu) handleMenuTapped;
 
-  AppShell({
-    @required this.appState,
-    @required this.handleMenuTapped,
-  });
+  AppShell(this.handleMenuTapped);
 
   @override
   _AppShellState createState() => _AppShellState();
@@ -66,41 +71,46 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell>
     with SingleTickerProviderStateMixin {
-  // my state
-  ShellState shellState = ShellState();
+  bool _isMobileLayout;
+  double _margins;
+  double _gutters;
+  double _cardCornerRadius;
+  DrawerState _standardDrawerState;
+  // List<Article> articles = <Article>[];
+  ScrollController scrollController = ScrollController();
 
-  /// These are the variables that need ot be in shellState.
-  /// If we need more we can just add more.
-
-  bool get isMobileLayout => shellState.isMobileLayout;
-  bool get displayMobileLayout => shellState.displayMobileLayout;
-  double get margins => shellState.margins;
-  double get gutters => shellState.gutters;
-  double get cardCornerRadius => shellState.cardCornerRadius;
-  DrawerState get standardDrawerState => shellState.standardDrawerState;
-  List<Article> get articles => shellState.articles;
-  ScrollController get scrollController => shellState.scrollController;
+  bool get isMobileLayout => _isMobileLayout;
+  double get margins => _margins;
+  double get gutters => _gutters;
+  double get cardCornerRadius => _cardCornerRadius;
+  DrawerState get standardDrawerState => _standardDrawerState;
 
   set isMobileLayout(bool value) {
-    shellState._isMobileLayout = value;
+    _isMobileLayout = value;
+    // context.read<ShellState>().isMobileLayout = value;
   }
 
   set margins(double value) {
-    shellState._margins = value;
+    _margins = value;
+    // context.read<ShellState>().margins = value;
   }
 
   set gutters(double value) {
-    shellState._gutters = value;
+    _gutters = value;
+    // context.read<ShellState>().gutters = value;
   }
 
   set cardCornerRadius(double value) {
-    shellState._cardCornerRadius = value;
+    _cardCornerRadius = value;
+    // context.read<ShellState>().cardCornerRadius = value;
   }
 
   set standardDrawerState(DrawerState value) {
-    shellState._standardDrawerState = value;
+    _standardDrawerState = value;
+    // context.read<ShellState>().standardDrawerState = value;
   }
 
+  // rigth now these don't need to notify the listeners, I think
   double width, height, usefulWidth, usefulHeight;
   double appBarMargins;
   double maxContentWidth = 600;
@@ -110,75 +120,19 @@ class _AppShellState extends State<AppShell>
 
   bool isInitialized = false;
   bool isAppBarElevated = false;
+  //
+  bool get displayMobileLayout {
+    return isMobileLayout && standardDrawerState == DrawerState.closed;
+  }
 
+  // Animations
   AnimationController standardDrawerController;
   Animation<double> standardDrawerWidth;
   Animation<double> appBarSpacing;
 
   //for the delegate
-  InnerRouterDelegate _routerDelegate;
+  InnerRouterDelegate _routerDelegate = InnerRouterDelegate();
   ChildBackButtonDispatcher _backButtonDispatcher;
-
-  void initState() {
-    super.initState();
-    _routerDelegate =
-        InnerRouterDelegate(appState: widget.appState, shellState: shellState);
-
-    standardDrawerState = DrawerState.open;
-    standardDrawerController = AnimationController(
-        value: 1.0, vsync: this, duration: Duration(milliseconds: 500));
-    standardDrawerController.addStatusListener((status) {
-      setState(() {
-        switch (status) {
-          case AnimationStatus.completed:
-            standardDrawerState = DrawerState.open;
-            break;
-          case AnimationStatus.dismissed:
-            standardDrawerState = DrawerState.closed;
-            break;
-          case AnimationStatus.forward:
-            standardDrawerState = DrawerState.opening;
-            break;
-          case AnimationStatus.reverse:
-            standardDrawerState = DrawerState.closing;
-            break;
-        }
-      });
-    });
-    standardDrawerWidth = Tween<double>(begin: 0, end: standardDrawerMaxWidth)
-        .animate(standardDrawerController);
-    standardDrawerWidth.addListener(() {
-      setState(() {});
-    });
-    appBarSpacing = Tween<double>(begin: 0, end: standardDrawerMaxWidth - 56)
-        .animate(standardDrawerController);
-    appBarSpacing.addListener(() {
-      setState(() {});
-    });
-    scrollController.addListener(() {
-      if (scrollController.offset > 0) {
-        setState(() {
-          isAppBarElevated = true;
-        });
-      } else if (isAppBarElevated) {
-        setState(() {
-          isAppBarElevated = false;
-        });
-      }
-    });
-
-    widget.appState.areArticlesLoaded.then((value) {
-      for (var article in widget.appState.articles.values)
-        articles.add(article);
-      setState(() {});
-    });
-  }
-
-  @override
-  void didUpdateWidget(covariant AppShell oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _routerDelegate.appState = widget.appState;
-  }
 
   @override
   void didChangeDependencies() {
@@ -189,59 +143,107 @@ class _AppShellState extends State<AppShell>
         .createChildBackButtonDispatcher();
   }
 
-  void buildState(BuildContext context) {
-    setState(() {
-      Size size = MediaQuery.of(context).size;
-      width = size.width;
-      usefulWidth = size.width - standardDrawerWidth.value;
-      height = size.height;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
 
-      if (width < 720) {
-        gutters = 24;
-        appBarMargins = 0;
-      } else {
-        gutters = 24;
-        appBarMargins = 24;
-      }
+    // not sure this works
+    context.read<ShellState>().scrollController = scrollController;
 
-      webLayoutMinWidth =
-          maxContentWidth + standardDrawerMaxWidth + gutters * 2;
-
-      isMobileLayout = width < webLayoutMinWidth;
-
-      if (usefulWidth < maxContentWidth + gutters * 2) {
-        if (usefulWidth < maxContentWidth)
-          margins = 0;
-        else
-          margins = gutters;
-      } else {
-        margins = (usefulWidth - maxContentWidth) / 2;
-      }
-
-      if (isMobileLayout && !standardDrawerController.isDismissed) {
-        if (isInitialized)
-          standardDrawerController.fling(velocity: -1);
-        else {
-          standardDrawerController.value = 0;
+    standardDrawerController = AnimationController(
+        value: 1.0, vsync: this, duration: Duration(milliseconds: 500));
+    standardDrawerController.addStatusListener((status) {
+      switch (status) {
+        case AnimationStatus.completed:
+          standardDrawerState = DrawerState.open;
+          break;
+        case AnimationStatus.dismissed:
           standardDrawerState = DrawerState.closed;
-        }
+          break;
+        case AnimationStatus.forward:
+          standardDrawerState = DrawerState.opening;
+          break;
+        case AnimationStatus.reverse:
+          standardDrawerState = DrawerState.closing;
+          break;
       }
-
-      contentWidth = usefulWidth - margins * 2;
-
-      if (margins == 0)
-        cardCornerRadius = 0;
-      else
-        cardCornerRadius = gutters / 4;
-
-      isInitialized = true;
+      context.read<ShellState>().standardDrawerState = standardDrawerState;
     });
+
+    standardDrawerWidth = Tween<double>(begin: 0, end: standardDrawerMaxWidth)
+        .animate(standardDrawerController);
+    standardDrawerWidth.addListener(() {
+      setState(() {});
+    });
+    appBarSpacing = Tween<double>(begin: 0, end: standardDrawerMaxWidth - 56)
+        .animate(standardDrawerController);
+    appBarSpacing.addListener(() {
+      setState(() {});
+    });
+
+    scrollController.addListener(() {
+      if (scrollController.offset > 0) {
+        isAppBarElevated = true;
+        setState(() {});
+      } else if (isAppBarElevated) {
+        isAppBarElevated = false;
+        setState(() {});
+      }
+    });
+  }
+
+  void buildState(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    width = size.width;
+    usefulWidth = size.width - standardDrawerWidth.value;
+    height = size.height;
+
+    if (width < 720) {
+      gutters = 24;
+      appBarMargins = 0;
+    } else {
+      gutters = 24;
+      appBarMargins = 24;
+    }
+
+    webLayoutMinWidth = maxContentWidth + standardDrawerMaxWidth + gutters * 2;
+
+    isMobileLayout = width < webLayoutMinWidth;
+
+    if (usefulWidth < maxContentWidth + gutters * 2) {
+      if (usefulWidth < maxContentWidth)
+        margins = 0;
+      else
+        margins = gutters;
+    } else {
+      margins = (usefulWidth - maxContentWidth) / 2;
+    }
+
+    contentWidth = usefulWidth - margins * 2;
+
+    if (margins == 0)
+      cardCornerRadius = 0;
+    else
+      cardCornerRadius = gutters / 4;
+
+    if (isMobileLayout && !standardDrawerController.isDismissed) {
+      if (isInitialized)
+        standardDrawerController.fling(velocity: -1);
+      else {
+        standardDrawerController.value = 0;
+        standardDrawerState = DrawerState.closed;
+      }
+    }
+
+    if (!isInitialized) {
+      isInitialized = true;
+      standardDrawerState = DrawerState.open;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    var appState = widget.appState;
-
     // Claim priority, If there are parallel sub router, you will need
     // to pick which one should take priority;
     _backButtonDispatcher.takePriority();
@@ -265,7 +267,7 @@ class _AppShellState extends State<AppShell>
                   progress: standardDrawerController,
                   icon: AnimatedIcons.menu_close,
                 ),
-                onPressed: toggleDrawer)
+                onPressed: () => toggleDrawer(context))
             : null,
       ),
       drawer: displayMobileLayout ? buildModalDrawer() : null,
@@ -281,7 +283,7 @@ class _AppShellState extends State<AppShell>
     );
   }
 
-  void toggleDrawer() {
+  void toggleDrawer(BuildContext context) {
     print('Pressed button');
     print(standardDrawerState);
     switch (standardDrawerState) {
@@ -370,12 +372,14 @@ class _AppShellState extends State<AppShell>
         Padding(
           padding:
               EdgeInsets.only(left: gutters, top: topGutters ? gutters : 0),
-          child: ListTile(
-            selected: menu == widget.appState.selectedMenu,
-            title: Text(menu.name),
-            onTap: () {
-              widget.handleMenuTapped(menu);
-            },
+          child: Consumer<AppState>(
+            builder: (context, state, _) => ListTile(
+              selected: menu == state.selectedMenu,
+              title: Text(menu.name),
+              onTap: () {
+                widget.handleMenuTapped(menu);
+              },
+            ),
           ),
         ),
       );
@@ -410,43 +414,28 @@ class FadeAnimationPage extends Page {
 class InnerRouterDelegate extends RouterDelegate<BlogPath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<BlogPath> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  AppState get appState => _appState;
-  AppState _appState;
-  ShellState shellState;
 
-  set appState(AppState value) {
-    if (value == _appState) {
-      return;
-    }
-    _appState = value;
-    notifyListeners();
-  }
-
-  InnerRouterDelegate(
-      {@required AppState appState, @required this.shellState}) {
-    this._appState = appState;
-  }
+  InnerRouterDelegate();
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: navigatorKey,
-      pages: [
-        //TODO
-        if (appState.selectedMenu == AppMenu.home)
-          MaterialPage(
-              key: ValueKey('HomeScreen'),
-              child: HomeScreen(
-                  key: ValueKey('HomeScreen'),
-                  shellState: shellState,
-                  onArticleTapped: _handleArticleTapped)),
-        if (appState.selectedMenu != AppMenu.home)
-          MaterialPage(child: Container())
-      ],
-      onPopPage: (route, value) {
-        return true;
-      }, // doesn't need to handle pops
-    );
+    return Consumer<AppState>(builder: (context, appState, _) {
+      return Navigator(
+        key: navigatorKey,
+        pages: [
+          //TODO
+          if (appState.selectedMenu == AppMenu.home)
+            MaterialPage(
+                key: ValueKey('HomeScreen1'),
+                child: HomeScreen(key: ValueKey('HomeScreen'))),
+          if (appState.selectedMenu != AppMenu.home)
+            MaterialPage(child: Container())
+        ],
+        onPopPage: (route, value) {
+          return true;
+        }, // doesn't need to handle pops
+      );
+    });
   }
 
   @override
@@ -454,10 +443,5 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
     // This is not required for inner router delegate because it does not
     // parse route
     assert(false);
-  }
-
-  void _handleArticleTapped(Article article) {
-    appState.selectedArticle = article;
-    notifyListeners();
   }
 }

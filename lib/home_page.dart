@@ -1,44 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'classes.dart';
 import 'app_state.dart';
 import 'app_shell.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     Key key,
-    @required this.onArticleTapped,
-    @required this.shellState,
   }) : super(key: key);
 
-  final void Function(Article) onArticleTapped;
-  final ShellState shellState;
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
-  bool get displayMobileLayout => shellState.displayMobileLayout;
-  double get margins => shellState.margins;
-  double get gutters => shellState.gutters;
-  double get cardCornerRadius => shellState.cardCornerRadius;
-  List<Article> get articles => shellState.articles;
-  ScrollController get scrollController => shellState.scrollController;
-
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    //   return Consumer<ShellState>(
+    //     builder: (context, state, child) {
+    //       // bool displayMobileLayout = state.displayMobileLayout;
+    //       // double margins = state.margins;
+    //       // double gutters = state.gutters;
+    //       // double cardCornerRadius = state.cardCornerRadius;
+    //       // List<Article> articles = state.articles;
+    //       // ScrollController scrollController = state.scrollController;
+
+    //       },
+    //   );
+    // }
     return Scaffold(
       body:
           // Container(color: Colors.red),
           Scrollbar(
         // thickness: 4
-        isAlwaysShown: !displayMobileLayout,
-        controller: scrollController,
+        isAlwaysShown: !context.read<ShellState>().displayMobileLayout ?? false,
+        controller: context.read<ShellState>().scrollController,
         child: ListView.builder(
-          controller: scrollController,
+          controller: context.read<ShellState>().scrollController,
           padding: EdgeInsets.only(
-              left: margins, right: margins, top: gutters, bottom: gutters),
-          itemCount: articles.length,
+              left: context.read<ShellState>().margins,
+              right: context.read<ShellState>().margins,
+              top: context.read<ShellState>().gutters,
+              bottom: context.read<ShellState>().gutters),
+          itemCount: context.read<ShellState>().articles.length,
           itemBuilder: (context, int i) {
-            return ArticleCard(articles[i],
-                cardCornerRadius: cardCornerRadius,
-                gutters: gutters,
-                onArticleTapped: onArticleTapped);
+            return ArticleCard(context.read<ShellState>().articles[i]);
           },
         ),
       ),
@@ -50,160 +56,175 @@ class ArticleCard extends StatelessWidget {
   const ArticleCard(
     this.article, {
     Key key,
-    @required this.cardCornerRadius,
-    @required this.gutters,
-    @required this.onArticleTapped,
   }) : super(key: key);
 
-  final double cardCornerRadius;
-  final double gutters;
   // final AsyncSnapshot<String> snapshot;
   final Article article;
-  final void Function(Article) onArticleTapped;
+
+  void onArticleTapped(BuildContext context, Article article) {
+    context.read<AppState>().selectedArticle = article;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: article.load(),
-        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-          return Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(cardCornerRadius)),
-            margin: EdgeInsets.zero,
-            clipBehavior: Clip.hardEdge,
-            child: Column(
-              children: [
-                CrossFadeWidgets(
-                    showFirst: article.isLoaded,
-                    firstChild: article.isLoaded
-                        ? Image.network(
-                            article.imageUrl,
-                            frameBuilder: (BuildContext context, Widget child,
-                                int frame, bool wasSynchronouslyLoaded) {
-                              if (wasSynchronouslyLoaded ?? false) {
-                                return child;
-                              }
-                              return Stack(
-                                children: [
-                                  Skeleton(
-                                    width: 600,
-                                    height: 600 / 21 * 9,
-                                  ),
-                                  AnimatedOpacity(
-                                    child: child,
-                                    opacity: frame == null ? 0 : 1,
-                                    duration: const Duration(milliseconds: 200),
-                                    curve: Curves.easeIn,
-                                  ),
-                                ],
-                              );
-                            },
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent progress) {
-                              return Stack(
-                                children: [
-                                  if (progress != null)
-                                    Skeleton(
-                                      width: 600,
-                                      height: 600 / 21 * 9,
-                                    ),
-                                  child
-                                ],
-                              );
-                            },
-                            semanticLabel: article.altText,
-                            width: 600,
-                            height: 600 / 21 * 9,
-                            fit: BoxFit.cover,
-                            // width: 300,
-                          )
-                        : null,
-                    secondChild: Skeleton(
-                      width: 600,
-                      height: 600 / 21 * 9,
-                    )),
-                Padding(
-                  padding: EdgeInsets.only(
-                      top: gutters, left: gutters, right: gutters),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CrossFadeText(
-                        article.isLoaded ? article.title : null,
-                        showText: article.isLoaded,
-                        style: Theme.of(context).textTheme.headline5,
-                        // width: 200,
-                      ),
-                      SizedBox(
-                        height: 6,
-                      ),
-                      CrossFadeText(
-                        article.isLoaded ? article.subtitle : null,
-                        showText: article.isLoaded,
-                        style: Theme.of(context).textTheme.subtitle1.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withOpacity(.60)),
-                        // width: 300,
-                      ),
-                      SizedBox(height: 12),
-                      Container(
-                        height: 14 * 1.5 * 3.9,
-                        child: CrossFadeTextWidgetBlock(
-                            article.isLoaded
-                                ? article
-                                    .buildParagraphs(context,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2
-                                            .copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withOpacity(.60)),
-                                        overflow: TextOverflow.fade,
-                                        textAlign: TextAlign.justify)
-                                    .first
-                                : null,
+    return Consumer<ShellState>(
+      builder: (context, state, _) {
+        // final cardCornerRadius = state.cardCornerRadius;
+        // final gutters = state.gutters;
+
+        return FutureBuilder(
+            future: article.load(),
+            builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+              return Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(state.cardCornerRadius)),
+                margin: EdgeInsets.zero,
+                clipBehavior: Clip.hardEdge,
+                child: Column(
+                  children: [
+                    CrossFadeWidgets(
+                        showFirst: article.isLoaded,
+                        firstChild: article.isLoaded
+                            ? Image.network(
+                                article.imageUrl,
+                                frameBuilder: (BuildContext context,
+                                    Widget child,
+                                    int frame,
+                                    bool wasSynchronouslyLoaded) {
+                                  if (wasSynchronouslyLoaded ?? false) {
+                                    return child;
+                                  }
+                                  return Stack(
+                                    children: [
+                                      Skeleton(
+                                        width: 600,
+                                        height: 600 / 21 * 9,
+                                      ),
+                                      AnimatedOpacity(
+                                        child: child,
+                                        opacity: frame == null ? 0 : 1,
+                                        duration:
+                                            const Duration(milliseconds: 200),
+                                        curve: Curves.easeIn,
+                                      ),
+                                    ],
+                                  );
+                                },
+                                loadingBuilder: (BuildContext context,
+                                    Widget child, ImageChunkEvent progress) {
+                                  return Stack(
+                                    children: [
+                                      if (progress != null)
+                                        Skeleton(
+                                          width: 600,
+                                          height: 600 / 21 * 9,
+                                        ),
+                                      child
+                                    ],
+                                  );
+                                },
+                                semanticLabel: article.altText,
+                                width: 600,
+                                height: 600 / 21 * 9,
+                                fit: BoxFit.cover,
+                                // width: 300,
+                              )
+                            : null,
+                        secondChild: Skeleton(
+                          width: 600,
+                          height: 600 / 21 * 9,
+                        )),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: state.gutters,
+                          left: state.gutters,
+                          right: state.gutters),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CrossFadeText(
+                            article.isLoaded ? article.title : null,
+                            showText: article.isLoaded,
+                            style: Theme.of(context).textTheme.headline5,
+                            // width: 200,
+                          ),
+                          SizedBox(
+                            height: 6,
+                          ),
+                          CrossFadeText(
+                            article.isLoaded ? article.subtitle : null,
                             showText: article.isLoaded,
                             style: Theme.of(context)
                                 .textTheme
-                                .bodyText2
+                                .subtitle1
                                 .copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurface
                                         .withOpacity(.60)),
-                            overflow: TextOverflow.fade,
-                            textAlign: TextAlign.justify),
+                            // width: 300,
+                          ),
+                          SizedBox(height: 12),
+                          Container(
+                            height: 14 * 1.5 * 3.9,
+                            child: CrossFadeTextWidgetBlock(
+                                article.isLoaded
+                                    ? article
+                                        .buildParagraphs(context,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyText2
+                                                .copyWith(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withOpacity(.60)),
+                                            overflow: TextOverflow.fade,
+                                            textAlign: TextAlign.justify)
+                                        .first
+                                    : null,
+                                showText: article.isLoaded,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText2
+                                    .copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(.60)),
+                                overflow: TextOverflow.fade,
+                                textAlign: TextAlign.justify),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    CrossFadeWidgets(
+                      showFirst: article.isLoaded,
+                      firstChild: ButtonBar(
+                        buttonPadding: EdgeInsets.all(state.gutters),
+                        children: [
+                          ElevatedButton(
+                              onPressed: () {
+                                onArticleTapped(context, article);
+                              },
+                              child: Text('Read more')),
+                        ],
+                      ),
+                      secondChild: ButtonBar(
+                        buttonPadding: EdgeInsets.all(state.gutters),
+                        children: [
+                          ElevatedButton(
+                              onPressed: null, child: Text('Read more')),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                CrossFadeWidgets(
-                  showFirst: article.isLoaded,
-                  firstChild: ButtonBar(
-                    buttonPadding: EdgeInsets.all(gutters),
-                    children: [
-                      ElevatedButton(
-                          onPressed: () {
-                            onArticleTapped(article);
-                          },
-                          child: Text('Read more')),
-                    ],
-                  ),
-                  secondChild: ButtonBar(
-                    buttonPadding: EdgeInsets.all(gutters),
-                    children: [
-                      ElevatedButton(onPressed: null, child: Text('Read more')),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        });
+              );
+            });
+      },
+    );
   }
 }
 
