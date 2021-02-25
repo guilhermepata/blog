@@ -21,7 +21,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => AppState()),
-    ChangeNotifierProvider(create: (context) => ShellState(context))
   ], child: BlogApp()));
 }
 

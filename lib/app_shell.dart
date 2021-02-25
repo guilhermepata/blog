@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'app_state.dart';
 import 'home_page.dart';
 import 'classes.dart';
+import 'about_page.dart';
 
 class ShellState extends ChangeNotifier {
   final BuildContext context;
@@ -41,6 +42,7 @@ class ShellState extends ChangeNotifier {
 
   set margins(double value) {
     _margins = value;
+    print('Margins changed');
     notifyListeners();
   }
 
@@ -61,9 +63,10 @@ class ShellState extends ChangeNotifier {
 }
 
 class AppShell extends StatefulWidget {
-  final void Function(AppMenu) handleMenuTapped;
+  final void Function(AppMenu) onMenuTapped;
+  final void Function(Article) onArticleTapped;
 
-  AppShell(this.handleMenuTapped);
+  AppShell({@required this.onMenuTapped, @required this.onArticleTapped});
 
   @override
   _AppShellState createState() => _AppShellState();
@@ -71,6 +74,11 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell>
     with SingleTickerProviderStateMixin {
+  //
+  ShellState shellState;
+
+  //
+
   bool _isMobileLayout;
   double _margins;
   double _gutters;
@@ -87,27 +95,29 @@ class _AppShellState extends State<AppShell>
 
   set isMobileLayout(bool value) {
     _isMobileLayout = value;
-    // context.read<ShellState>().isMobileLayout = value;
+    shellState.isMobileLayout = value;
   }
 
   set margins(double value) {
+    // setState(() {
     _margins = value;
-    // context.read<ShellState>().margins = value;
+    shellState.margins = value;
+    // });
   }
 
   set gutters(double value) {
     _gutters = value;
-    // context.read<ShellState>().gutters = value;
+    shellState.gutters = value;
   }
 
   set cardCornerRadius(double value) {
     _cardCornerRadius = value;
-    // context.read<ShellState>().cardCornerRadius = value;
+    shellState.cardCornerRadius = value;
   }
 
   set standardDrawerState(DrawerState value) {
     _standardDrawerState = value;
-    // context.read<ShellState>().standardDrawerState = value;
+    shellState.standardDrawerState = value;
   }
 
   // rigth now these don't need to notify the listeners, I think
@@ -131,7 +141,7 @@ class _AppShellState extends State<AppShell>
   Animation<double> appBarSpacing;
 
   //for the delegate
-  InnerRouterDelegate _routerDelegate = InnerRouterDelegate();
+  InnerRouterDelegate _routerDelegate;
   ChildBackButtonDispatcher _backButtonDispatcher;
 
   @override
@@ -148,8 +158,13 @@ class _AppShellState extends State<AppShell>
     // TODO: implement initState
     super.initState();
 
+    shellState = ShellState(context);
+
+    _routerDelegate = InnerRouterDelegate(
+        onArticleTapped: widget.onArticleTapped, shellState: shellState);
+
     // not sure this works
-    context.read<ShellState>().scrollController = scrollController;
+    shellState.scrollController = scrollController;
 
     standardDrawerController = AnimationController(
         value: 1.0, vsync: this, duration: Duration(milliseconds: 500));
@@ -168,7 +183,7 @@ class _AppShellState extends State<AppShell>
           standardDrawerState = DrawerState.closing;
           break;
       }
-      context.read<ShellState>().standardDrawerState = standardDrawerState;
+      shellState.standardDrawerState = standardDrawerState;
     });
 
     standardDrawerWidth = Tween<double>(begin: 0, end: standardDrawerMaxWidth)
@@ -227,6 +242,11 @@ class _AppShellState extends State<AppShell>
     else
       cardCornerRadius = gutters / 4;
 
+    if (!isInitialized) {
+      isInitialized = true;
+      standardDrawerState = DrawerState.open;
+    }
+
     if (isMobileLayout && !standardDrawerController.isDismissed) {
       if (isInitialized)
         standardDrawerController.fling(velocity: -1);
@@ -234,11 +254,6 @@ class _AppShellState extends State<AppShell>
         standardDrawerController.value = 0;
         standardDrawerState = DrawerState.closed;
       }
-    }
-
-    if (!isInitialized) {
-      isInitialized = true;
-      standardDrawerState = DrawerState.open;
     }
   }
 
@@ -377,7 +392,7 @@ class _AppShellState extends State<AppShell>
               selected: menu == state.selectedMenu,
               title: Text(menu.name),
               onTap: () {
-                widget.handleMenuTapped(menu);
+                widget.onMenuTapped(menu);
               },
             ),
           ),
@@ -415,27 +430,37 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<BlogPath> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  InnerRouterDelegate();
+  final void Function(Article) onArticleTapped;
+  final ShellState shellState;
+
+  InnerRouterDelegate(
+      {@required this.onArticleTapped, @required this.shellState});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppState>(builder: (context, appState, _) {
-      return Navigator(
-        key: navigatorKey,
-        pages: [
-          //TODO
-          if (appState.selectedMenu == AppMenu.home)
-            MaterialPage(
-                key: ValueKey('HomeScreen1'),
-                child: HomeScreen(key: ValueKey('HomeScreen'))),
-          if (appState.selectedMenu != AppMenu.home)
-            MaterialPage(child: Container())
-        ],
-        onPopPage: (route, value) {
-          return true;
-        }, // doesn't need to handle pops
-      );
-    });
+    return ChangeNotifierProvider.value(
+      value: shellState,
+      child: Consumer<AppState>(builder: (context, appState, _) {
+        return Navigator(
+          key: navigatorKey,
+          pages: (appState.selectedMenu == AppMenu.home)
+              ? [
+                  FadeAnimationPage(
+                      key: ValueKey('HomeScreen1'),
+                      child: HomeScreen(
+                        key: ValueKey('HomeScreen'),
+                        onArticleTapped: onArticleTapped,
+                      )),
+                ]
+              : (appState.selectedMenu == AppMenu.about)
+                  ? [FadeAnimationPage(child: AboutPage())]
+                  : [FadeAnimationPage(child: Container())],
+          onPopPage: (route, value) {
+            return true;
+          }, // doesn't need to handle pops
+        );
+      }),
+    );
   }
 
   @override

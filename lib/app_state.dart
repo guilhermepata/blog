@@ -48,11 +48,11 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  setSelectedArticleByTitle(String title) {
+  void setSelectedArticleByTitle(String title) {
     selectedArticle = articles[title];
   }
 
-  setSelectedArticleByUrl(String urlTitle) async {
+  Future<void> setSelectedArticleByUrl(String urlTitle) async {
     await _areArticlesLoaded;
     for (var title in articles.keys) {
       if (urlTitle.isUrlOf(title)) {
@@ -102,7 +102,7 @@ class BlogRouteInformationParser extends RouteInformationParser<BlogPath> {
     if (configuration is BlogHomePath) {
       return RouteInformation(location: '/');
     } else if (configuration is BlogAboutPath) {
-      print('I tried setting the route to about');
+      // print('I tried setting the route to about');
       return RouteInformation(location: '/about');
     } else if (configuration is BlogEssaysPath) {
       return RouteInformation(location: '/essays');
@@ -171,7 +171,7 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
   // When the app state changes, the configuration is updated
   BlogPath get currentConfiguration {
     if (appState.selectedArticle == null) {
-      print('I tried to change the config');
+      // print('I tried to change the config');
       return appState.selectedMenu.configuration;
     } else {
       return BlogArticlePath.fromTitle(appState.selectedArticle.title);
@@ -200,8 +200,10 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
           : [
               if (appState.selectedMenu != null &&
                   appState.selectedArticle == null)
-                MaterialPage(
-                  child: AppShell(handleMenuTapped),
+                FadeAnimationPage(
+                  child: AppShell(
+                      onMenuTapped: _handleMenuTapped,
+                      onArticleTapped: _handleArticleTapped),
                   key: ValueKey('AppShell'),
                 ),
               if (appState.selectedArticle != null)
@@ -215,7 +217,7 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
                   appState.selectedMenu == null)
                 //TODO
                 // must design unknown page
-                MaterialPage(child: UnknownPage()),
+                FadeAnimationPage(child: UnknownPage()),
             ],
       onPopPage: _onPopPage,
     );
@@ -236,15 +238,20 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
     return true;
   }
 
-  void handleMenuTapped(AppMenu menu) {
+  void _handleMenuTapped(AppMenu menu) {
     appState.selectedMenu = menu;
+    notifyListeners();
+  }
+
+  void _handleArticleTapped(Article article) {
+    appState.selectedArticle = article;
     notifyListeners();
   }
 
   @override
   Future<void> setNewRoutePath(BlogPath path) async {
     if (path is BlogArticlePath) {
-      appState.setSelectedArticleByUrl(path.urlTitle);
+      await appState.setSelectedArticleByUrl(path.urlTitle);
       notifyListeners();
     } else {
       appState.selectedArticle = null;
