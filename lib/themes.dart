@@ -49,20 +49,20 @@ class AppTheme {
         fontWeight: FontWeight.w500,
         color: finalScheme.onSurface.withOpacity(.87),
       ),
-      subtitle2: GoogleFonts.lora(
+      subtitle2: GoogleFonts.domine(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: finalScheme.onSurface.withOpacity(.87)),
-      caption: GoogleFonts.lora(
+      caption: GoogleFonts.rubik(
           fontSize: 12,
           fontWeight: FontWeight.w400,
           fontStyle: FontStyle.italic,
           letterSpacing: 0.4,
           color: finalScheme.onSurface.withOpacity(.6)),
-      bodyText1: GoogleFonts.lora(
+      bodyText1: GoogleFonts.domine(
           color: finalScheme.onSurface.withOpacity(.87),
           fontSize: 16,
-          height: 1.5,
+          height: 2,
           fontWeight: FontWeight.w500),
       bodyText2: GoogleFonts.rubik(
           color: finalScheme.onSurface.withOpacity(.87),
@@ -73,9 +73,8 @@ class AppTheme {
 
   static ThemeData fromScheme(ColorScheme initialScheme) {
     ColorScheme finalScheme = initialScheme.copyWith(
-        background: Color.alphaBlend(
-            initialScheme.primaryVariant.withOpacity(0.00),
-            initialScheme.surface), //light theme
+        // surface: Color.alphaBlend(
+        //     initialScheme.secondary.withOpacity(0.5), initialScheme.surface),
         onSurface: initialScheme.onSurface,
         onBackground: initialScheme.onBackground);
     TextTheme textTheme = appTextTheme(finalScheme: finalScheme);
@@ -122,6 +121,8 @@ class AppTheme {
         primary: primaryLight,
         primaryVariant: primaryVariantLight,
         secondary: secondaryLight,
-        secondaryVariant: secondaryVariantLight));
+        secondaryVariant: secondaryVariantLight,
+        background:
+            Color.alphaBlend(Colors.black.withOpacity(0.015), Colors.white)));
   }
 }

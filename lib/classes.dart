@@ -129,11 +129,6 @@ class Article {
     }
   }
 
-  // Future<bool> get isLoaded async {
-  //   await load();
-  //   return true;
-  // }
-
   void cleanContent() {
     _content = _rawContent;
 
@@ -157,8 +152,11 @@ class Article {
   }
 
   List<Widget> buildParagraphs(BuildContext context,
-      {paragraphSpacing = 16, style, textAlign = TextAlign.justify, overflow}) {
-    var builder = ArticleBuilder(
+      {double paragraphSpacing = 16,
+      TextStyle style,
+      TextAlign textAlign = TextAlign.justify,
+      TextOverflow overflow}) {
+    var builder = BodyTextBuilder(
         content: rawContent,
         paragraphSpacing: paragraphSpacing,
         style: style,
@@ -250,6 +248,27 @@ class FormatedString {
         }
       }
 
+      // var length = matches[i].group(2).length;
+
+      // // var j = matches[i].start + 1;
+      // // letterFormats.removeAt(j);
+      // // string = string.replaceRange(j, j + 1, '');
+
+      // for (var k = 0; k < numSymbols; k++) {
+      //   letterFormats.removeAt(matches[i].start + 1);
+      //   string =
+      //       string.replaceRange(matches[i].start + 1, matches[i].start + 2, '');
+      // }
+
+      // for (var k = 0; k < numSymbols; k++) {
+      //   letterFormats.removeAt(matches[i].start + 1 + length);
+      //   string = string.replaceRange(
+      //       matches[i].start + 1 + length, matches[i].start + 2 + length, '');
+      // }
+    }
+
+    while (matches.length > 0) {
+      var i = 0;
       var length = matches[i].group(2).length;
 
       // var j = matches[i].start + 1;
@@ -267,16 +286,17 @@ class FormatedString {
         string = string.replaceRange(
             matches[i].start + 1 + length, matches[i].start + 2 + length, '');
       }
+      matches = exp.allMatches(string).toList();
     }
   }
 
-  List<TextSegment> toTextSegments() {
+  List<SingleFormatString> toSingleFormatStrings() {
     var normalIntervals = makeIntervals(normalLetters);
     var italicIntervals = makeIntervals(italicLetters);
     var boldIntervals = makeIntervals(boldLetters);
     var boldItalicIntervals = makeIntervals(boldItalicLetters);
 
-    var result = <TextSegment>[];
+    var result = <SingleFormatString>[];
 
     var currentIndex = 0;
 
@@ -287,28 +307,28 @@ class FormatedString {
         0) {
       if (normalIntervals.isNotEmpty &&
           normalIntervals.first.first == currentIndex) {
-        result.add(TextSegment(
+        result.add(SingleFormatString(
             string.substring(currentIndex, normalIntervals.first.last),
             format: Format.normal));
         currentIndex = normalIntervals.first.last;
         normalIntervals.removeAt(0);
       } else if (italicIntervals.isNotEmpty &&
           italicIntervals.first.first == currentIndex) {
-        result.add(TextSegment(
+        result.add(SingleFormatString(
             string.substring(currentIndex, italicIntervals.first.last),
             format: Format.italic));
         currentIndex = italicIntervals.first.last;
         italicIntervals.removeAt(0);
       } else if (boldIntervals.isNotEmpty &&
           boldIntervals.first.first == currentIndex) {
-        result.add(TextSegment(
+        result.add(SingleFormatString(
             string.substring(currentIndex, boldIntervals.first.last),
             format: Format.bold));
         currentIndex = boldIntervals.first.last;
         boldIntervals.removeAt(0);
       } else if (boldItalicIntervals.isNotEmpty &&
           boldItalicIntervals.first.first == currentIndex) {
-        result.add(TextSegment(
+        result.add(SingleFormatString(
             string.substring(currentIndex, boldItalicIntervals.first.last),
             format: Format.boldItalic));
         currentIndex = boldItalicIntervals.first.last;
@@ -338,16 +358,16 @@ class FormatedString {
   }
 }
 
-class TextSegment {
+class SingleFormatString {
   final String text;
   final Format format;
 
-  TextSegment(this.text, {this.format = Format.normal});
+  SingleFormatString(this.text, {this.format = Format.normal});
 }
 
 enum Format { normal, italic, bold, boldItalic }
 
-class ArticleBuilder {
+class BodyTextBuilder {
   String content;
   double paragraphSpacing;
   TextStyle style;
@@ -355,7 +375,7 @@ class ArticleBuilder {
   TextOverflow overflow;
   List<Widget> children = <Widget>[];
 
-  ArticleBuilder(
+  BodyTextBuilder(
       {@required this.content,
       this.paragraphSpacing = 16,
       this.style,
@@ -392,10 +412,10 @@ class ArticleBuilder {
     RegExp imageExp = RegExp(r'!\[(.+)\]\((.+)\)');
     paragraph = paragraph.replaceAll(imageExp, '');
     if (paragraph.isEmpty) return null;
-    var segments = FormatedString(paragraph).toTextSegments();
+    var segments = FormatedString(paragraph).toSingleFormatStrings();
     // print('The number of segments is:');
     // print(segments.length);
-    var spans = <TextSpan>[];
+    var spans = <InlineSpan>[];
     for (var i = 0; i < segments.length; i++) {
       var style = TextStyle();
       switch (segments[i].format) {
@@ -404,7 +424,7 @@ class ArticleBuilder {
           break;
         case Format.italic:
           style = TextStyle(fontStyle: FontStyle.italic);
-          print('Found italics');
+          // print('Found italics');
           break;
         case Format.bold:
           style = TextStyle(fontWeight: FontWeight.bold);
@@ -416,19 +436,206 @@ class ArticleBuilder {
       }
       spans.add(TextSpan(text: segments[i].text, style: style));
     }
+
+    final textSpan = parseLinks(
+        TextSpan(
+          children: spans,
+        ),
+        context);
+
     return Text.rich(
-      TextSpan(
-        children: spans,
-      ),
+      textSpan,
       style: style ?? Theme.of(context).textTheme.bodyText1,
       textAlign: textAlign,
       overflow: overflow,
+      strutStyle: StrutStyle(
+        height: style != null
+            ? style.height
+            : Theme.of(context).textTheme.bodyText1.height,
+        forceStrutHeight: true,
+      ),
     );
+  }
+
+  InlineSpan parseLinks(InlineSpan inputSpan, BuildContext context) {
+    if (inputSpan is TextSpan) {
+      var newSpan = inputSpan;
+      final newChildren = <InlineSpan>[];
+      if (newSpan.text != null) {
+        final linkExp = RegExp(r'\[(.+?)\]\((.+?)\)');
+        var text = newSpan.text;
+        var match = linkExp.firstMatch(text);
+
+        if (match != null) {
+          final firstText = text.substring(0, match.start);
+          final lastText = text.substring(match.end);
+          final linkLabel = match.group(1);
+          final url = match.group(2);
+
+          final linkSpan = WidgetSpan(
+              // style: style ?? Theme.of(context).textTheme.bodyText1,
+              baseline: TextBaseline.alphabetic,
+              alignment: PlaceholderAlignment.baseline,
+              child: LinkTextWidget(linkLabel,
+                  style: style ?? Theme.of(context).textTheme.bodyText1,
+                  onTap: () {
+                onTapLink(url);
+              }));
+
+          newSpan = TextSpan(
+              text: firstText,
+              children: <InlineSpan>[linkSpan, TextSpan(text: lastText)] +
+                  ((newSpan.children != null)
+                      ? newSpan.children.toList()
+                      : <InlineSpan>[]));
+        }
+      }
+      if (newSpan.children != null) {
+        final newChildren = <InlineSpan>[];
+        for (var span in newSpan.children.toList()) {
+          span = parseLinks(span, context);
+          newChildren.add(span);
+        }
+        return TextSpan(text: newSpan.text, children: newChildren);
+      } else
+        return newSpan;
+    } else
+      return inputSpan;
+  }
+
+  void onTapLink(String url) {
+    // TODO
   }
 
   Widget parseImage(String url, {String altText = ''}) {
     return Image.network(
       url,
+    );
+  }
+}
+
+/// Creates a text widget which can be tapped.
+///
+/// If you want to integrate it in a Text.rich, remeber to set the StrutStyle
+/// so that the line height stays fixed, since the underline takes up some
+/// space.
+class LinkTextWidget extends StatefulWidget {
+  /// Defaults to the theme accent color.
+  final Color decorationColor;
+
+  /// Function to run when the text is tapped.
+  /// Can trigger a navigator or hyperlink
+  final void Function() onTap;
+
+  /// The string to display.
+  final String text;
+
+  /// The text style. This widget does not properly inherit the [TextStyle] of
+  /// the parent Text.rich
+  final TextStyle style;
+
+  const LinkTextWidget(this.text,
+      {Key key, this.decorationColor, this.onTap, this.style})
+      : super(key: key);
+
+  @override
+  _LinkTextWidgetState createState() => _LinkTextWidgetState();
+}
+
+class _LinkTextWidgetState extends State<LinkTextWidget> {
+  bool wasHovering = false;
+  Color decorationColor;
+  double textOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    decorationColor =
+        widget.style.color.withOpacity(widget.style.color.opacity * 0.5);
+    textOpacity = widget.style.color.opacity;
+  }
+
+  void onHighlightChanged(bool isHovering) {
+    if (wasHovering != isHovering) {
+      {
+        if (isHovering) {
+          setState(() {
+            decorationColor = widget.decorationColor ??
+                Theme.of(context).colorScheme.secondaryVariant;
+            textOpacity = 1;
+          });
+        } else {
+          setState(() {
+            decorationColor = widget.style.color
+                .withOpacity(widget.style.color.opacity * 0.5);
+            textOpacity = widget.style.color.opacity;
+          });
+        }
+      }
+    }
+    wasHovering = isHovering;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      focusColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      onTap: widget.onTap,
+      onHover: onHighlightChanged,
+      // radius: 20,
+      child: AnimatedContainer(
+        // height: 14 * 1.5,
+        duration: Duration(milliseconds: 100),
+        padding: EdgeInsets.only(bottom: 1),
+        decoration: BoxDecoration(
+            border: Border(
+                bottom: BorderSide(
+          color: decorationColor, // Text color here
+          width: 1.5, // Underline width
+        ))),
+        child: AnimatedOpacity(
+          opacity: textOpacity,
+          duration: Duration(milliseconds: 100),
+          child: Text(
+            widget.text,
+            style:
+                widget.style.copyWith(color: widget.style.color.withOpacity(1)),
+            maxLines: 1,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class BodyText extends StatelessWidget {
+  final String content;
+  final TextStyle style;
+  final double paragraphSpacing;
+  final TextAlign textAlign;
+  final TextOverflow overflow;
+
+  const BodyText(this.content,
+      {Key key,
+      this.style,
+      this.paragraphSpacing,
+      this.textAlign,
+      this.overflow})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveStyle = DefaultTextStyle.of(context).style.merge(style);
+    final builder = BodyTextBuilder(
+        content: content,
+        style: effectiveStyle,
+        paragraphSpacing: paragraphSpacing,
+        textAlign: textAlign,
+        overflow: overflow);
+    return Column(
+      children: builder.buildWidgets(context),
     );
   }
 }

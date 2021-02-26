@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'app_state.dart';
@@ -12,14 +13,17 @@ class ShellState extends ChangeNotifier {
   double _margins = 0;
   double _gutters = 24;
   double _cardCornerRadius = 8;
-  DrawerState _standardDrawerState = DrawerState.closed;
+  StandardDrawerState _standardDrawerState = StandardDrawerState.closed;
   List<Article> articles = <Article>[];
   ScrollController scrollController = ScrollController();
+
+  bool _areArticlesLoaded = false;
 
   ShellState(this.context) {
     context.read<AppState>().areArticlesLoaded.then((value) {
       for (var article in context.read<AppState>().articles.values)
         articles.add(article);
+      _areArticlesLoaded = true;
       notifyListeners();
     });
   }
@@ -28,11 +32,13 @@ class ShellState extends ChangeNotifier {
   double get margins => _margins;
   double get gutters => _gutters;
   double get cardCornerRadius => _cardCornerRadius;
-  DrawerState get standardDrawerState => _standardDrawerState;
+  StandardDrawerState get standardDrawerState => _standardDrawerState;
+
+  bool get areArticlesLoaded => _areArticlesLoaded;
 
   bool get displayMobileLayout {
     return (isMobileLayout ?? false) &&
-        (standardDrawerState == DrawerState.closed ?? false);
+        (standardDrawerState == StandardDrawerState.closed ?? false);
   }
 
   set isMobileLayout(bool value) {
@@ -42,7 +48,7 @@ class ShellState extends ChangeNotifier {
 
   set margins(double value) {
     _margins = value;
-    print('Margins changed');
+    // print('Margins changed');
     notifyListeners();
   }
 
@@ -56,7 +62,7 @@ class ShellState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set standardDrawerState(DrawerState value) {
+  set standardDrawerState(StandardDrawerState value) {
     _standardDrawerState = value;
     notifyListeners();
   }
@@ -83,7 +89,7 @@ class _AppShellState extends State<AppShell>
   double _margins;
   double _gutters;
   double _cardCornerRadius;
-  DrawerState _standardDrawerState;
+  StandardDrawerState _standardDrawerState;
   // List<Article> articles = <Article>[];
   ScrollController scrollController = ScrollController();
 
@@ -91,7 +97,7 @@ class _AppShellState extends State<AppShell>
   double get margins => _margins;
   double get gutters => _gutters;
   double get cardCornerRadius => _cardCornerRadius;
-  DrawerState get standardDrawerState => _standardDrawerState;
+  StandardDrawerState get standardDrawerState => _standardDrawerState;
 
   set isMobileLayout(bool value) {
     _isMobileLayout = value;
@@ -115,7 +121,7 @@ class _AppShellState extends State<AppShell>
     shellState.cardCornerRadius = value;
   }
 
-  set standardDrawerState(DrawerState value) {
+  set standardDrawerState(StandardDrawerState value) {
     _standardDrawerState = value;
     shellState.standardDrawerState = value;
   }
@@ -126,13 +132,13 @@ class _AppShellState extends State<AppShell>
   double maxContentWidth = 600;
   double contentWidth;
   double webLayoutMinWidth;
-  double standardDrawerMaxWidth = 144;
+  double standardDrawerMaxWidth = 144 + 8.0;
 
   bool isInitialized = false;
   bool isAppBarElevated = false;
   //
   bool get displayMobileLayout {
-    return isMobileLayout && standardDrawerState == DrawerState.closed;
+    return isMobileLayout && standardDrawerState == StandardDrawerState.closed;
   }
 
   // Animations
@@ -163,7 +169,6 @@ class _AppShellState extends State<AppShell>
     _routerDelegate = InnerRouterDelegate(
         onArticleTapped: widget.onArticleTapped, shellState: shellState);
 
-    // not sure this works
     shellState.scrollController = scrollController;
 
     standardDrawerController = AnimationController(
@@ -171,16 +176,16 @@ class _AppShellState extends State<AppShell>
     standardDrawerController.addStatusListener((status) {
       switch (status) {
         case AnimationStatus.completed:
-          standardDrawerState = DrawerState.open;
+          standardDrawerState = StandardDrawerState.open;
           break;
         case AnimationStatus.dismissed:
-          standardDrawerState = DrawerState.closed;
+          standardDrawerState = StandardDrawerState.closed;
           break;
         case AnimationStatus.forward:
-          standardDrawerState = DrawerState.opening;
+          standardDrawerState = StandardDrawerState.opening;
           break;
         case AnimationStatus.reverse:
-          standardDrawerState = DrawerState.closing;
+          standardDrawerState = StandardDrawerState.closing;
           break;
       }
       shellState.standardDrawerState = standardDrawerState;
@@ -243,8 +248,7 @@ class _AppShellState extends State<AppShell>
       cardCornerRadius = gutters / 4;
 
     if (!isInitialized) {
-      isInitialized = true;
-      standardDrawerState = DrawerState.open;
+      standardDrawerState = StandardDrawerState.open;
     }
 
     if (isMobileLayout && !standardDrawerController.isDismissed) {
@@ -252,9 +256,11 @@ class _AppShellState extends State<AppShell>
         standardDrawerController.fling(velocity: -1);
       else {
         standardDrawerController.value = 0;
-        standardDrawerState = DrawerState.closed;
+        standardDrawerState = StandardDrawerState.closed;
       }
     }
+
+    isInitialized = true;
   }
 
   @override
@@ -268,6 +274,14 @@ class _AppShellState extends State<AppShell>
     return Scaffold(
       appBar: AppBar(
         elevation: isAppBarElevated ? 4 : 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0),
+            child: IconButton(
+                icon: Icon(Icons.more_vert),
+                onPressed: context.read<AppState>().flipTheme),
+          )
+        ],
         backgroundColor: isAppBarElevated
             ? Theme.of(context).appBarTheme.backgroundColor
             : Theme.of(context).backgroundColor,
@@ -299,27 +313,27 @@ class _AppShellState extends State<AppShell>
   }
 
   void toggleDrawer(BuildContext context) {
-    print('Pressed button');
-    print(standardDrawerState);
+    // print('Pressed button');
+    // print(standardDrawerState);
     switch (standardDrawerState) {
-      case DrawerState.closed:
+      case StandardDrawerState.closed:
         {
           standardDrawerController.fling();
-          print('Opened drawer');
+          // print('Opened drawer');
         }
         break;
-      case DrawerState.closing:
+      case StandardDrawerState.closing:
         {
           standardDrawerController.fling();
-          print('Opened drawer');
+          // print('Opened drawer');
         }
         break;
-      case DrawerState.open:
+      case StandardDrawerState.open:
         {
           standardDrawerController.fling(velocity: -1);
         }
         break;
-      case DrawerState.opening:
+      case StandardDrawerState.opening:
         {
           standardDrawerController.fling(velocity: -1);
         }
@@ -379,31 +393,35 @@ class _AppShellState extends State<AppShell>
   }
 
   List<Widget> buildDrawerChildren() {
-    final result = <Widget>[];
-    var topGutters = true;
+    final result = <Widget>[
+      SizedBox(
+        height: gutters,
+      )
+    ];
 
     for (var menu in AppMenu.values) {
       result.add(
-        Padding(
-          padding:
-              EdgeInsets.only(left: gutters, top: topGutters ? gutters : 0),
-          child: Consumer<AppState>(
-            builder: (context, state, _) => ListTile(
-              selected: menu == state.selectedMenu,
-              title: Text(menu.name),
-              onTap: () {
-                widget.onMenuTapped(menu);
-              },
-            ),
+        Consumer<AppState>(
+          builder: (context, state, _) => ListTile(
+            contentPadding:
+                EdgeInsets.only(left: gutters + 16, right: gutters + 16),
+            selected: menu == state.selectedMenu,
+            title: Text(menu.name),
+            onTap: () {
+              widget.onMenuTapped(menu);
+              if (displayMobileLayout) Navigator.of(context).pop();
+            },
           ),
         ),
       );
-      topGutters = false;
+      // topGutters = false;
     }
 
     return result;
   }
 }
+
+enum StandardDrawerState { closed, closing, open, opening }
 
 class FadeAnimationPage extends Page {
   final Widget child;
@@ -413,11 +431,14 @@ class FadeAnimationPage extends Page {
   Route createRoute(BuildContext context) {
     return PageRouteBuilder(
       settings: this,
-      pageBuilder: (context, animation, animation2) {
+      pageBuilder: (context, animation, secondaryAnimation) {
         var curveTween = CurveTween(curve: Curves.easeIn);
-        return FadeTransition(
-          key: key,
-          opacity: animation.drive(curveTween),
+        return FadeThroughTransition(
+          fillColor: Theme.of(context).backgroundColor,
+          // key: key,
+          // opacity: animation.drive(curveTween),
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
           child: child,
         );
       },
@@ -453,8 +474,14 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
                       )),
                 ]
               : (appState.selectedMenu == AppMenu.about)
-                  ? [FadeAnimationPage(child: AboutPage())]
-                  : [FadeAnimationPage(child: Container())],
+                  ? [
+                      FadeAnimationPage(
+                          key: ValueKey('About'), child: AboutPage())
+                    ]
+                  : [
+                      FadeAnimationPage(
+                          key: ValueKey('Else'), child: Container())
+                    ],
           onPopPage: (route, value) {
             return true;
           }, // doesn't need to handle pops
@@ -462,6 +489,11 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
       }),
     );
   }
+
+  // void _handleArticleTapped(Article article) {
+  //   onArticleTapped(article);
+  //   notifyListeners();
+  // }
 
   @override
   Future<void> setNewRoutePath(BlogPath path) async {

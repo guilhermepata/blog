@@ -123,7 +123,7 @@ class _ArticlePageState extends State<ArticlePage>
         appBarColor = ColorTween(
                 begin: Colors.transparent,
                 end: Color.alphaBlend(Colors.white.withOpacity(.09),
-                    Theme.of(context).colorScheme.background))
+                    Theme.of(context).colorScheme.surface))
             .animate(appBarStateController);
         appBarColor.addListener(() {
           setState(() {});
@@ -267,16 +267,24 @@ class _ArticlePageState extends State<ArticlePage>
                             children: [
                               buildTitles(context),
                               Card(
-                                elevation: 4,
+                                elevation: 2,
                                 margin: EdgeInsets.only(bottom: gutters),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
                                         cardCornerRadius)),
                                 child: Padding(
                                   padding: EdgeInsets.all(gutters),
-                                  child: Column(
+                                  child: Wrap(
                                       children: widget.article.buildParagraphs(
                                           context,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyText1
+                                              .copyWith(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withOpacity(.6)),
                                           textAlign: TextAlign.left)),
                                 ),
                               ),

@@ -45,8 +45,12 @@ class _BlogAppState extends State<BlogApp> {
 
     return MaterialApp.router(
       title: 'The Duckling',
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: !context.watch<AppState>().isThemeFlipped
+          ? AppTheme.light()
+          : AppTheme.dark(),
+      darkTheme: !context.watch<AppState>().isThemeFlipped
+          ? AppTheme.dark()
+          : AppTheme.light(),
       routerDelegate: _routerDelegate,
       routeInformationParser: _routeInformationParser,
     );

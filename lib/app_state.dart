@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,12 +10,14 @@ import 'classes.dart';
 import 'app_shell.dart';
 
 class AppState extends ChangeNotifier {
-  final List<String> assets = ["posts/finding_gender.md"];
+  final List<String> assets = [];
   final Map<String, Article> articles = Map();
   Article _selectedArticle;
   AppMenu _selectedMenu;
   bool _areArticlesLoading = false;
   Future<bool> _areArticlesLoaded;
+
+  bool _isThemeFlipped = false;
 
   AppState() {
     _areArticlesLoaded = loadArticles();
@@ -21,6 +26,18 @@ class AppState extends ChangeNotifier {
   }
 
   Future<bool> loadArticles() async {
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    // >> To get paths you need these 2 lines
+
+    final imagePaths = manifestMap.keys
+        .where((String key) => key.contains('posts/'))
+        .where((String key) => key.contains('.md'))
+        .toList();
+
+    assets.addAll(imagePaths);
+
     for (var asset in assets)
       await Article.fromAsset(asset).then((article) {
         articles[article.title] = article;
@@ -43,9 +60,20 @@ class AppState extends ChangeNotifier {
 
   AppMenu get selectedMenu => _selectedMenu;
 
+  bool get isThemeFlipped => _isThemeFlipped;
+
   set selectedMenu(AppMenu menu) {
     _selectedMenu = menu;
     notifyListeners();
+  }
+
+  set isThemeFlipped(bool value) {
+    _isThemeFlipped = value;
+    notifyListeners();
+  }
+
+  void flipTheme() {
+    isThemeFlipped = !isThemeFlipped;
   }
 
   void setSelectedArticleByTitle(String title) {
@@ -372,8 +400,8 @@ class UnknownPage extends StatelessWidget {
                         minWidth: imageWidth, maxWidth: imageWidth),
                     child: Image.asset(
                         Theme.of(context).brightness == Brightness.light
-                            ? 'image404_light.png'
-                            : 'image404_dark.png'),
+                            ? 'images/image404_light.png'
+                            : 'images/image404_dark.png'),
                   )
                 ],
               ),
