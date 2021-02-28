@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -25,18 +26,27 @@ class AppState extends ChangeNotifier {
     _selectedMenu = AppMenu.home;
   }
 
-  Future<bool> loadArticles() async {
-    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+  static Map<String, dynamic> jsonDecode(String string) {
+    return json.decode(string);
+  }
 
-    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-    // >> To get paths you need these 2 lines
-
-    final imagePaths = manifestMap.keys
+  static List<String> getArticlePaths(Map<String, dynamic> manifestMap) {
+    return manifestMap.keys
         .where((String key) => key.contains('posts/'))
         .where((String key) => key.contains('.md'))
         .toList();
+  }
 
-    assets.addAll(imagePaths);
+  Future<bool> loadArticles() async {
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+
+    final Map<String, dynamic> manifestMap =
+        await compute(jsonDecode, manifestContent);
+    // >> To get paths you need these 2 lines
+
+    final articlePaths = await compute(getArticlePaths, manifestMap);
+
+    assets.addAll(articlePaths);
 
     for (var asset in assets)
       await Article.fromAsset(asset).then((article) {
@@ -218,10 +228,8 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
       pages: appState.areArticlesLoading
           ? [
               FadeAnimationPage(
-                  child: Scaffold(
-                    body: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                  child: LoadingScreen(
+                    key: ValueKey('Loading1'),
                   ),
                   key: ValueKey('Loading'))
             ]
@@ -234,7 +242,7 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
                   key: ValueKey('AppShell'),
                 ),
               if (appState.selectedArticle != null)
-                MaterialPage(
+                FadeAnimationPage(
                     child: ArticlePage(
                       key: ValueKey(appState.selectedArticle.title + '1'),
                       article: appState.selectedArticle,
@@ -285,6 +293,26 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
       appState.selectedMenu = AppMenuParser.fromPath(path);
       notifyListeners();
     }
+  }
+}
+
+class LoadingScreen extends StatefulWidget {
+  const LoadingScreen({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _LoadingScreenState createState() => _LoadingScreenState();
+}
+
+class _LoadingScreenState extends State<LoadingScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
   }
 }
 
