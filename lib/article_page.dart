@@ -258,7 +258,7 @@ class _ArticlePageState extends State<ArticlePage>
                       ),
                     ),
                     Scrollbar(
-                      isAlwaysShown: !displayMobileLayout,
+                      isAlwaysShown: MousePresence().value,
                       controller: scrollController,
                       child: SmoothScroller(
                         controller: scrollController,

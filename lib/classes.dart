@@ -131,7 +131,7 @@ class Article {
 
       cleanContent();
 
-      // parser = BodyTextParser(rawContent);
+      parser = BodyTextParser(rawContent);
       // bool parsed = await parser.isParsed;
 
       _isLoaded = true;
@@ -463,13 +463,12 @@ class BodyTextParser {
   Future<bool> isParsed;
 
   BodyTextParser(this.content) {
+    contentParts = content.split(RegExp(r'\n\s{1,}'));
     isParsed = parse();
   }
 
   Future<bool> parse() async {
     isParsing = true;
-    contentParts =
-        await compute(splitString, Tuple2(content, RegExp(r'\n\s{1,}')));
     for (var paragraph in contentParts) {
       var parsedParagraph = await compute(parseParagraph, paragraph);
       paragraphs.add(parsedParagraph);
@@ -612,8 +611,8 @@ class BodyTextBuilder {
                 top: (containsHeadline || isQuote) && index != 0
                     ? paragraphSpacing * 0.5
                     : 0,
-                left: isQuote ? 32 : 0,
-                right: isQuote ? 32 : 0);
+                left: isQuote ? 48 : 0,
+                right: isQuote ? 48 : 0);
 
             result = Text.rich(
               textSpan,

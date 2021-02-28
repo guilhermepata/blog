@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -28,37 +29,98 @@ class SmoothScroller extends StatefulWidget {
 
 class _SmoothScrollerState extends State<SmoothScroller> {
   // final int animationLength = 250;
-  final double scrollSpeed = 1;
-  final double scrollExtent = 2;
+  final double touchPadSpeed = 8100; // in logical pixels per second
+  final double touchPadExtentFactor = .9;
+
+  final double scrollWheelSpeed = 710;
+  final double scrollWheelExtentFactor = 1.5;
+  final double _increaseSpeedFactor = 1.2;
+  double increaseSpeedFactor = 1;
+
   double scroll = 0;
   double delta = 0;
   bool locked = false;
+  // bool triedWhenLocked = false;
+  bool isScrollWheel = false;
+
+  Future<bool> hasAnimated;
 
   void onPointerSignal(PointerSignalEvent pointerSignal) {
-    scroll = widget.controller.position.pixels;
-
-    int micros;
-
-    if (pointerSignal is PointerScrollEvent && !locked) {
-      delta = pointerSignal.scrollDelta.dy * scrollExtent;
-      scroll = scroll + delta;
-      if (scroll > widget.controller.position.maxScrollExtent) {
-        delta = delta - (scroll - widget.controller.position.maxScrollExtent);
-        scroll = widget.controller.position.maxScrollExtent;
-      } else if (scroll < 0) {
-        delta = delta + scroll;
-        scroll = 0;
+    if (pointerSignal is PointerScrollEvent) {
+      if (locked) {
+        hasAnimated
+            .then((value) => animate(pointerSignal, wasScheduled: true))
+            .then((value) {
+          if (isScrollWheel) locked = false;
+        });
+      } else {
+        animate(pointerSignal);
+        // locked = true;
       }
-      micros = (delta.abs() * 1000 / scrollSpeed).round();
-      locked = true;
-      widget.controller
-          .animateTo(
-            scroll,
-            duration: Duration(microseconds: micros + 1),
-            curve: Curves.linear,
-          )
-          .whenComplete(() => locked = false);
     }
+  }
+
+  void animate(PointerScrollEvent pointerSignal, {bool wasScheduled = false}) {
+    locked = true;
+    scroll = widget.controller.position.pixels;
+    int micros;
+    double dy;
+
+    dy = pointerSignal.scrollDelta.dy;
+    isScrollWheel = dy.abs() % 100 == 0;
+    if (isScrollWheel)
+      delta = dy * scrollWheelExtentFactor;
+    else
+      delta = dy * touchPadExtentFactor;
+
+    // if (triedWhenLocked) {
+    //   if (isScrollWheel) {
+    //     increaseSpeedFactor = increaseSpeedFactor * _increaseSpeedFactor;
+    //     delta = delta * increaseSpeedFactor;
+    //   }
+    //   triedWhenLocked = false;
+    // } else {
+    //   increaseSpeedFactor = 1;
+    // }
+
+    // print('Speed factor is $increaseSpeedFactor');
+
+    scroll = scroll + delta;
+    if (scroll > widget.controller.position.maxScrollExtent) {
+      delta = delta - (scroll - widget.controller.position.maxScrollExtent);
+      scroll = widget.controller.position.maxScrollExtent;
+    } else if (scroll < 0) {
+      delta = delta + scroll;
+      scroll = 0;
+    }
+    var scrollSpeed = isScrollWheel ? scrollWheelSpeed : touchPadSpeed;
+
+    if (wasScheduled) {
+      if (isScrollWheel) {
+        increaseSpeedFactor = increaseSpeedFactor * _increaseSpeedFactor;
+        scrollSpeed = scrollSpeed * increaseSpeedFactor;
+      }
+    } else {
+      increaseSpeedFactor = 1;
+    }
+
+    micros = (delta.abs() * 1000 / (scrollSpeed / 1000)).round();
+    locked = true;
+
+    hasAnimated = widget.controller
+        .animateTo(
+      scroll,
+      duration: Duration(microseconds: micros + 1),
+      curve: isScrollWheel && !wasScheduled ? Curves.ease : Curves.linear,
+      // curve: SpeedCurve(speed: animationSpeed),
+    )
+        .then((value) {
+      // if (isScrollWheel) locked = false;
+      // locked = false;
+      return true;
+    });
+
+    // if (triedWhenLocked) triedWhenLocked = false;
   }
 
   @override

@@ -54,11 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           return Scaffold(
-            body:
-                // Container(color: Colors.red),
-                Scrollbar(
-              // thickness: 4
-              isAlwaysShown: !state.item1 ?? false,
+            body: Scrollbar(
+              isAlwaysShown: MousePresence().value,
               controller: scrollController,
               child: SmoothScroller(
                 controller: scrollController,
