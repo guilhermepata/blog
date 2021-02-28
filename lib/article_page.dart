@@ -2,9 +2,18 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:icon_shadow/icon_shadow.dart';
+import 'package:provider/provider.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'classes.dart';
+import 'widgets.dart';
+
+class ImagePositionNotifier extends ValueNotifier {
+  ImagePositionNotifier(value) : super(value);
+}
 
 class ArticlePage extends StatefulWidget {
   final Article article;
@@ -17,7 +26,8 @@ class ArticlePage extends StatefulWidget {
 
 class _ArticlePageState extends State<ArticlePage>
     with SingleTickerProviderStateMixin {
-  double width, height, usefulWidth, usefulHeight, margins, gutters;
+  double width, height, usefulWidth, usefulHeight, gutters;
+
   double appBarMargins;
   double maxContentWidth = 600;
   double contentWidth;
@@ -27,7 +37,9 @@ class _ArticlePageState extends State<ArticlePage>
   double maxSheetHeight;
   double totalSheetHeightDelta;
 
-  double imageScrollPosition = 0.0;
+  // double imageScrollPosition = 0.0;
+
+  ImagePositionNotifier imagePositionNotifier = ImagePositionNotifier(0.0);
 
   bool isInitialized = false;
   bool isMobileLayout;
@@ -46,13 +58,7 @@ class _ArticlePageState extends State<ArticlePage>
 
   @override
   void initState() {
-    scrollController.addListener(() {
-      if (scrollController.offset > totalSheetHeightDelta) {
-        appBarStateController.fling();
-      } else if (isAppBarElevated) {
-        appBarStateController.fling(velocity: -1);
-      }
-    });
+    VisibilityDetectorController.instance.updateInterval = Duration.zero;
 
     appBarStateController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 100));
@@ -70,12 +76,21 @@ class _ArticlePageState extends State<ArticlePage>
       setState(() {});
     });
 
-    testFuture = Future.delayed(
-      Duration(seconds: 2),
-      () => 'Large Latte',
-    );
+    MousePresence().addListener(() {
+      setState(() {});
+    });
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    appBarStateController.dispose();
+    MousePresence().removeListener(() {
+      setState(() {});
+    });
+    super.dispose();
   }
 
   void buildState(BuildContext context) {
@@ -103,18 +118,7 @@ class _ArticlePageState extends State<ArticlePage>
 
       isMobileLayout = width < webLayoutMinWidth;
 
-      if (usefulWidth < maxContentWidth + gutters * 2) {
-        if (usefulWidth < maxContentWidth)
-          margins = 0;
-        else
-          margins = gutters;
-      } else {
-        margins = (usefulWidth - maxContentWidth) / 2;
-      }
-
-      contentWidth = usefulWidth - margins * 2;
-
-      if (margins == 0)
+      if (usefulWidth < maxContentWidth)
         cardCornerRadius = 0;
       else
         cardCornerRadius = gutters / 4;
@@ -151,13 +155,11 @@ class _ArticlePageState extends State<ArticlePage>
           if (!widget.article.isLoaded)
             return Scaffold(
                 appBar: AppBar(
-                  // elevation: appBarStateController.value * 4,
                   shadowColor: Colors.black.withOpacity(
                       appBarStateController.value *
                           appBarStateController.value),
                   backgroundColor: appBarColor.value,
                   backwardsCompatibility: false,
-                  // foregroundColor: appBarForegroundColor.value,
                   leadingWidth: 56 + appBarMargins,
                   leading: IconButton(
                     icon: IconShadowWidget(
@@ -184,7 +186,6 @@ class _ArticlePageState extends State<ArticlePage>
             return Scaffold(
               extendBodyBehindAppBar: true,
               appBar: AppBar(
-                // elevation: appBarStateController.value * 4,
                 shadowColor: Colors.black.withOpacity(
                     appBarStateController.value * appBarStateController.value),
                 backgroundColor: appBarColor.value,
@@ -202,8 +203,8 @@ class _ArticlePageState extends State<ArticlePage>
                   },
                 ),
                 title: Text(
-                  widget.article.title,
-                  overflow: TextOverflow.fade,
+                  'Essay: ' + widget.article.title,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.headline6.copyWith(
                       color: Theme.of(context)
                           .colorScheme
@@ -214,28 +215,31 @@ class _ArticlePageState extends State<ArticlePage>
               body: NotificationListener(
                 onNotification: (notification) {
                   if (notification is ScrollUpdateNotification)
-                    setState(() =>
-                        imageScrollPosition -= notification.scrollDelta / 4);
+                    imagePositionNotifier.value -= notification.scrollDelta / 4;
                 },
                 child: Stack(
                   children: [
-                    Positioned(
-                      top: imageScrollPosition,
-                      child: // Container()
-                          ConstrainedBox(
-                        constraints: BoxConstraints(
-                            maxWidth: usefulWidth,
-                            minWidth: usefulWidth,
-                            minHeight: height * 2 / 3,
-                            maxHeight: height),
+                    ChangeNotifierProvider.value(
+                      value: imagePositionNotifier,
+                      child: Consumer<ImagePositionNotifier>(
+                        builder: (context, imageScrollPosition, child) =>
+                            Positioned(
+                          top: imageScrollPosition.value,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                                maxWidth: usefulWidth,
+                                minWidth: usefulWidth,
+                                minHeight: height * 2 / 3,
+                                maxHeight: height),
+                            child: child,
+                          ),
+                        ),
                         child: Material(
                           elevation: 4,
                           child: Image.network(
                             widget.article.imageUrl,
                             fit: BoxFit.cover,
                             alignment: Alignment.center,
-                            // width: usefulWidth,
-                            // height: height,
                             semanticLabel: widget.article.altText,
                             frameBuilder: (BuildContext context, Widget child,
                                 int frame, bool wasSynchronouslyLoaded) {
@@ -254,42 +258,46 @@ class _ArticlePageState extends State<ArticlePage>
                       ),
                     ),
                     Scrollbar(
-                      // thickness: 4,
                       isAlwaysShown: !displayMobileLayout,
                       controller: scrollController,
-                      child: SingleChildScrollView(
+                      child: SmoothScroller(
                         controller: scrollController,
-                        child: Padding(
-                          padding:
-                              EdgeInsets.only(left: margins, right: margins),
-                          child: Column(
-                            // verticalDirection: VerticalDirection.up,
-                            children: [
-                              buildTitles(context),
-                              Card(
-                                elevation: 2,
-                                margin: EdgeInsets.only(bottom: gutters),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        cardCornerRadius)),
-                                child: Padding(
-                                  padding: EdgeInsets.all(gutters),
-                                  child: Wrap(
-                                      children: widget.article.buildParagraphs(
-                                          context,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText1
-                                              .copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withOpacity(.6)),
-                                          textAlign: TextAlign.left)),
+                        child: ListView(
+                          controller: scrollController,
+                          physics: MousePresence().value
+                              ? NeverScrollableScrollPhysics()
+                              : null,
+                          children: [
+                            SizedBox(
+                              height: height * 0.4,
+                            ),
+                            Center(
+                              child: Container(
+                                constraints:
+                                    BoxConstraints(maxWidth: maxContentWidth),
+                                child: Card(
+                                  margin: EdgeInsets.only(bottom: gutters),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          cardCornerRadius)),
+                                  child: CustomScrollView(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    // controller: scrollController,
+                                    slivers: [
+                                      SliverList(
+                                        delegate: SliverChildBuilderDelegate(
+                                          buildContentCard,
+                                          childCount:
+                                              3 + widget.article.numParagraphs,
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -300,52 +308,31 @@ class _ArticlePageState extends State<ArticlePage>
         });
   }
 
-  Widget buildTitles(BuildContext context) {
-    var marginLeft = 0.0;
-    if (margins + marginLeft < appBarMargins + 72) {
-      marginLeft = marginLeft + appBarMargins + 72 - (margins + marginLeft);
-    }
-    return PreferredSize(
-      preferredSize: Size.fromHeight(height / 2),
-      // constraints: BoxConstraints(minHeight: height / 2),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: height / 2),
-        child: Container(
-          decoration: BoxDecoration(
-              gradient: RadialGradient(
-                  center: Alignment(0.0, 1.2),
-                  radius: 0.8,
-                  colors: <Color>[Colors.black, Colors.transparent])),
-          child: Padding(
-            padding: EdgeInsets.only(
-                bottom: gutters,
-                top: gutters,
-                left: marginLeft,
-                right: marginLeft),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
+  Widget buildContentCard(BuildContext context, int index) {
+    Widget result;
+    if (index == 0)
+      result = Padding(
+        padding: EdgeInsets.symmetric(horizontal: gutters),
+        child: Padding(
+          padding: EdgeInsets.only(top: gutters),
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 AutoSizeText(
                   widget.article.title,
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                  minFontSize: 10,
-                  style: Theme.of(context).textTheme.headline3.copyWith(
-                    color: Color.alphaBlend(
-                        Colors.white.withOpacity(.87), Colors.black),
-                    shadows: <Shadow>[
-                      Shadow(
-                        blurRadius: 3.0,
-                        color: Colors.black38,
+                  maxLines:
+                      (widget.article.title.split(RegExp(r'[ ]')).length / 5)
+                          .ceil(),
+                  presetFontSizes: [93, 58, 46, 33],
+                  style: Theme.of(context).textTheme.headline1.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(.87),
                       ),
-                      Shadow(
-                        blurRadius: 8.0,
-                        color: Colors.black38,
-                      ),
-                    ],
-                  ),
                 ),
                 SizedBox(
                   height: 8,
@@ -354,27 +341,61 @@ class _ArticlePageState extends State<ArticlePage>
                   AutoSizeText(
                     widget.article.subtitle,
                     overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                    style: Theme.of(context).textTheme.headline6.copyWith(
-                      color: Color.alphaBlend(
-                          Colors.white.withOpacity(.6), Colors.black),
-                      shadows: <Shadow>[
-                        Shadow(
-                          blurRadius: 3.0,
-                          color: Colors.black38,
+                    presetFontSizes: [19, 18, 14],
+                    minFontSize: 18,
+                    maxLines:
+                        (widget.article.subtitle.split(RegExp(r'[ ]')).length /
+                                10)
+                            .ceil(),
+                    style: Theme.of(context).textTheme.subtitle2.copyWith(
+                          fontWeight: FontWeight.w400,
+                          height: 1.3,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(.6),
                         ),
-                        Shadow(
-                          blurRadius: 8.0,
-                          color: Colors.black38,
-                        ),
-                      ],
-                    ),
                   ),
-              ],
-            ),
-          ),
+              ]),
         ),
-      ),
-    );
+      );
+    else if (index == 1)
+      return Divider(height: 36, indent: 24, endIndent: 24);
+    else if (index == 2)
+      result = Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: ButtonBar(
+          buttonPadding: EdgeInsets.zero,
+          alignment: MainAxisAlignment.center,
+          children: [
+            TextButton.icon(
+                onPressed: () {},
+                label: Padding(
+                  padding: const EdgeInsets.only(right: 8.0, top: 8, bottom: 8),
+                  child: Text('Share'),
+                ),
+                icon: Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
+                  child: Icon(
+                    Icons.share,
+                    size: 18,
+                  ),
+                ))
+          ],
+        ),
+      );
+    else if (index > 2)
+      result = Padding(
+          padding: EdgeInsets.symmetric(horizontal: gutters),
+          child: widget.article.buildParagraph(context, index - 3,
+              style: Theme.of(context).textTheme.bodyText1.copyWith(
+                  fontSize: 16,
+                  height: 2,
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(.6)),
+              textAlign: TextAlign.left));
+    else
+      result = SizedBox(height: 0);
+    return result;
   }
 }

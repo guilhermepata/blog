@@ -1,14 +1,20 @@
+// import 'dart:html';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:tuple/tuple.dart';
+import 'home_page.dart';
 
 class Article {
   String _title, _subtitle, _rawContent, _imageUrl, _altText;
   String _content;
   String _asset;
   bool _isLoaded;
+
+  BodyTextParser parser;
 
   String get title => _title;
   String get subtitle => _subtitle;
@@ -66,7 +72,7 @@ class Article {
 
     result._isLoaded = true;
 
-    result.cleanContent();
+    // result.cleanContent();
 
     return result;
   }
@@ -125,6 +131,9 @@ class Article {
 
       cleanContent();
 
+      // parser = BodyTextParser(rawContent);
+      // bool parsed = await parser.isParsed;
+
       _isLoaded = true;
     }
   }
@@ -151,150 +160,208 @@ class Article {
         (match) => match.group(1) + match.group(2) + match.group(3));
   }
 
-  List<Widget> buildParagraphs(BuildContext context,
+  bool get isParsing {
+    if (parser == null) parser = BodyTextParser(rawContent);
+    return parser.isParsing;
+  }
+
+  int get numParagraphs {
+    if (parser == null) parser = BodyTextParser(rawContent);
+    return isParsing ? parser.contentParts.length : parser.paragraphs.length;
+  }
+
+  Widget buildParagraph(BuildContext context, int index,
       {double paragraphSpacing = 16,
       TextStyle style,
+      TextStyle headlineStyle,
+      TextStyle quoteStyle,
       TextAlign textAlign = TextAlign.justify,
-      TextOverflow overflow}) {
-    var builder = BodyTextBuilder(
-        content: rawContent,
+      TextOverflow overflow,
+      int maxLines}) {
+    if (parser == null) parser = BodyTextParser(rawContent);
+
+    final builder = BodyTextBuilder(
+        parser: parser,
         paragraphSpacing: paragraphSpacing,
-        style: style,
+        normalStyle: style,
+        headlineStyle: headlineStyle,
+        quoteStyle: quoteStyle,
         textAlign: textAlign,
-        overflow: overflow);
+        overflow: overflow,
+        maxLines: maxLines);
+
+    return builder.buildParagraph(context, index);
+  }
+
+  List<Widget> buildContents(BuildContext context,
+      {double paragraphSpacing = 16,
+      TextStyle style,
+      TextStyle headlineStyle,
+      TextStyle quoteStyle,
+      TextAlign textAlign = TextAlign.justify,
+      TextOverflow overflow,
+      int maxLines}) {
+    if (parser == null) parser = BodyTextParser(rawContent);
+
+    final builder = BodyTextBuilder(
+        parser: parser,
+        paragraphSpacing: paragraphSpacing,
+        normalStyle: style,
+        headlineStyle: headlineStyle,
+        quoteStyle: quoteStyle,
+        textAlign: textAlign,
+        overflow: overflow,
+        maxLines: maxLines);
+
     return builder.buildWidgets(context);
   }
 }
 
-class FormatedString {
-  String string;
-  final List<Format> letterFormats = <Format>[];
+/// An object that contains a string where each character is associated with a
+/// [Format].
+///
+/// A [FormattedString] will change the input string to remove any markdown
+/// format indicators (asterisks and underscores) and format the characters
+/// appropriately.
+///
+/// This class can be converted into a list of [SingleFormatString].
+class FormattedString {
+  String _string;
+  final List<Format> _characterFormats = <Format>[];
 
-  List<int> get boldItalicLetters {
+  /// Final string.
+  String get string => _string;
+
+  /// List of [Format] objects where the format at index i corresponds to the
+  /// format of the character at index i in the final string.
+  List<Format> get characterFormats => _characterFormats;
+
+  /// List of indices of characters whose [Format] is [Format.boldItalic].
+  List<int> get boldItalicLCharacters {
     var result = <int>[];
-    for (var i = 0; i < letterFormats.length; i++) {
-      if (letterFormats[i] == Format.boldItalic) {
+    for (var i = 0; i < _characterFormats.length; i++) {
+      if (_characterFormats[i] == Format.boldItalic) {
         result.add(i);
       }
     }
     return result;
   }
 
-  List<int> get boldLetters {
+  /// List of indices of characters whose [Format] is [Format.bold].
+  List<int> get boldCharacters {
     var result = <int>[];
-    for (var i = 0; i < letterFormats.length; i++) {
-      if (letterFormats[i] == Format.bold) {
+    for (var i = 0; i < _characterFormats.length; i++) {
+      if (_characterFormats[i] == Format.bold) {
         result.add(i);
       }
     }
     return result;
   }
 
-  List<int> get italicLetters {
+  /// List of indices of characters whose [Format] is [Format.italic].
+  List<int> get italicCharacters {
     var result = <int>[];
-    for (var i = 0; i < letterFormats.length; i++) {
-      if (letterFormats[i] == Format.italic) {
+    for (var i = 0; i < _characterFormats.length; i++) {
+      if (_characterFormats[i] == Format.italic) {
         result.add(i);
       }
     }
     return result;
   }
 
-  List<int> get normalLetters {
+  /// List of indices of characters whose [Format] is [Format.normal].
+  List<int> get normalCharacters {
     var result = <int>[];
-    for (var i = 0; i < letterFormats.length; i++) {
-      if (letterFormats[i] == Format.normal) {
+    for (var i = 0; i < _characterFormats.length; i++) {
+      if (_characterFormats[i] == Format.normal) {
         result.add(i);
       }
     }
     return result;
   }
 
-  FormatedString(this.string) {
-    for (var i = 0; i < string.length; i++) {
-      letterFormats.add(Format.normal);
+  /// Creates a [FormattedString].
+  ///
+  /// Markdown format indicators (asterisks and underscores) will be removed
+  /// from the input string and each character in the final string will be given
+  /// the appropriate format.
+  FormattedString(String inputString) : this._string = inputString {
+    for (var i = 0; i < _string.length; i++) {
+      _characterFormats.add(Format.normal);
     }
 
-    RegExp asteriskItalic =
-        RegExp(r'([^\n\*])[\*]{1}([^\n\*].+?[^\n\*])[\*]{1}([^\n\*])');
-    RegExp underscoreItalic =
-        RegExp(r'([^\n\_])[\_]{1}([^\n\_].+?[^\n\_])[\_]{1}([^\n\_])');
+    RegExp asteriskItalic = RegExp(r'[\*]{1}([^\n\*].+?[^\n\*])[\*]{1}');
+    RegExp underscoreItalic = RegExp(r'[\_]{1}([^\n\_].+?[^\n\_])[\_]{1}');
 
-    formatLetters(asteriskItalic, Format.italic);
-    formatLetters(underscoreItalic, Format.italic);
+    formatLetters(asteriskItalic, '*', Format.italic);
+    formatLetters(underscoreItalic, '_', Format.italic);
 
-    RegExp asteriskBold =
-        RegExp(r'([^\n\*])[\*]{2}([^\n\*].+?[^\n\*])[\*]{2}([^\n\*])');
-    RegExp underscoreBold =
-        RegExp(r'([^\n\_])[\_]{2}([^\n\_].+?[^\n\_])[\_]{2}([^\n\_])');
+    RegExp asteriskBold = RegExp(r'[\*]{2}([^\n\*].+?[^\n\*])[\*]{2}');
+    RegExp underscoreBold = RegExp(r'[\_]{2}([^\n\_].+?[^\n\_])[\_]{2}');
 
-    formatLetters(asteriskBold, Format.bold);
-    formatLetters(underscoreBold, Format.bold);
+    formatLetters(asteriskBold, '*', Format.bold);
+    formatLetters(underscoreBold, '_', Format.bold);
   }
 
-  void formatLetters(RegExp exp, format) {
-    var numSymbols = format == Format.italic ? 1 : 2;
-    var matches = exp.allMatches(string).toList();
+  void formatLetters(RegExp exp, String symbol, format) {
+    final numSymbols = format == Format.italic ? 1 : 2;
+    var matches = exp.allMatches(_string).toList();
+    final rejectedMatches = <RegExpMatch>[];
 
-    for (var i = 0; i < matches.length; i++) {
-      for (var j = matches[i].start + 1 + numSymbols;
-          j < matches[i].end - 1 - numSymbols;
-          j++) {
-        if (letterFormats[j] == Format.italic && format == Format.bold ||
-            letterFormats[j] == Format.bold && format == Format.italic) {
-          letterFormats[j] = Format.boldItalic;
-        } else {
-          letterFormats[j] = format;
+    var i = 0;
+    while (i < matches.length) {
+      if (numSymbols == 2 ||
+          (numSymbols == 1 &&
+              (matches[i].start == 0 ||
+                  _string.substring(matches[i].start - 1, matches[i].start) !=
+                      symbol))) {
+        for (var j = matches[i].start + numSymbols;
+            j < matches[i].end - numSymbols;
+            j++) {
+          if (_characterFormats[j] == Format.italic && format == Format.bold ||
+              _characterFormats[j] == Format.bold && format == Format.italic) {
+            _characterFormats[j] = Format.boldItalic;
+          } else {
+            _characterFormats[j] = format;
+          }
         }
+        i++;
+      } else {
+        rejectedMatches.add(matches[i]);
+        matches.removeAt(i);
       }
-
-      // var length = matches[i].group(2).length;
-
-      // // var j = matches[i].start + 1;
-      // // letterFormats.removeAt(j);
-      // // string = string.replaceRange(j, j + 1, '');
-
-      // for (var k = 0; k < numSymbols; k++) {
-      //   letterFormats.removeAt(matches[i].start + 1);
-      //   string =
-      //       string.replaceRange(matches[i].start + 1, matches[i].start + 2, '');
-      // }
-
-      // for (var k = 0; k < numSymbols; k++) {
-      //   letterFormats.removeAt(matches[i].start + 1 + length);
-      //   string = string.replaceRange(
-      //       matches[i].start + 1 + length, matches[i].start + 2 + length, '');
-      // }
     }
 
+    final m = 0;
     while (matches.length > 0) {
-      var i = 0;
-      var length = matches[i].group(2).length;
-
-      // var j = matches[i].start + 1;
-      // letterFormats.removeAt(j);
-      // string = string.replaceRange(j, j + 1, '');
+      var length = matches[m].group(1).length;
 
       for (var k = 0; k < numSymbols; k++) {
-        letterFormats.removeAt(matches[i].start + 1);
-        string =
-            string.replaceRange(matches[i].start + 1, matches[i].start + 2, '');
+        _characterFormats.removeAt(matches[m].start);
+        _string =
+            _string.replaceRange(matches[m].start, matches[m].start + 1, '');
       }
 
       for (var k = 0; k < numSymbols; k++) {
-        letterFormats.removeAt(matches[i].start + 1 + length);
-        string = string.replaceRange(
-            matches[i].start + 1 + length, matches[i].start + 2 + length, '');
+        _characterFormats.removeAt(matches[m].start + length);
+        _string = _string.replaceRange(
+            matches[m].start + length, matches[m].start + 1 + length, '');
       }
-      matches = exp.allMatches(string).toList();
+      matches = exp.allMatches(_string).toList();
+      for (var rejectedMatch in rejectedMatches) {
+        matches.remove(rejectedMatch);
+      }
     }
   }
 
+  /// Returns a list of [SingleFormatString] objects, where each object
+  /// corresponds to intervals of characters with the same [Format] in the
+  /// [FormattedString].
   List<SingleFormatString> toSingleFormatStrings() {
-    var normalIntervals = makeIntervals(normalLetters);
-    var italicIntervals = makeIntervals(italicLetters);
-    var boldIntervals = makeIntervals(boldLetters);
-    var boldItalicIntervals = makeIntervals(boldItalicLetters);
+    var normalIntervals = makeIntervals(normalCharacters);
+    var italicIntervals = makeIntervals(italicCharacters);
+    var boldIntervals = makeIntervals(boldCharacters);
+    var boldItalicIntervals = makeIntervals(boldItalicLCharacters);
 
     var result = <SingleFormatString>[];
 
@@ -308,28 +375,28 @@ class FormatedString {
       if (normalIntervals.isNotEmpty &&
           normalIntervals.first.first == currentIndex) {
         result.add(SingleFormatString(
-            string.substring(currentIndex, normalIntervals.first.last),
+            _string.substring(currentIndex, normalIntervals.first.last),
             format: Format.normal));
         currentIndex = normalIntervals.first.last;
         normalIntervals.removeAt(0);
       } else if (italicIntervals.isNotEmpty &&
           italicIntervals.first.first == currentIndex) {
         result.add(SingleFormatString(
-            string.substring(currentIndex, italicIntervals.first.last),
+            _string.substring(currentIndex, italicIntervals.first.last),
             format: Format.italic));
         currentIndex = italicIntervals.first.last;
         italicIntervals.removeAt(0);
       } else if (boldIntervals.isNotEmpty &&
           boldIntervals.first.first == currentIndex) {
         result.add(SingleFormatString(
-            string.substring(currentIndex, boldIntervals.first.last),
+            _string.substring(currentIndex, boldIntervals.first.last),
             format: Format.bold));
         currentIndex = boldIntervals.first.last;
         boldIntervals.removeAt(0);
       } else if (boldItalicIntervals.isNotEmpty &&
           boldItalicIntervals.first.first == currentIndex) {
         result.add(SingleFormatString(
-            string.substring(currentIndex, boldItalicIntervals.first.last),
+            _string.substring(currentIndex, boldItalicIntervals.first.last),
             format: Format.boldItalic));
         currentIndex = boldItalicIntervals.first.last;
         boldItalicIntervals.removeAt(0);
@@ -339,6 +406,7 @@ class FormatedString {
   }
 
   /// Returns a list of intervals from a list of indices
+  ///
   /// First element is start of interval (i.e., inclusive)
   /// Second element is end of interval + 1 (i.e., exclusive)
   static List<List<int>> makeIntervals(List<int> indices) {
@@ -358,152 +426,276 @@ class FormatedString {
   }
 }
 
+/// An object that contains a [String] associated with a [Format] and a
+/// [TypeStyle]. If [TypeStyle] is [TypeStyle.link], it will also include the
+/// link's URL.
 class SingleFormatString {
-  final String text;
-  final Format format;
+  final String string;
+  Format format;
+  TypeStyle style;
+  String _url;
 
-  SingleFormatString(this.text, {this.format = Format.normal});
+  /// Creates a [SingleFormatString]
+  SingleFormatString(this.string,
+      {this.format = Format.normal, this.style = TypeStyle.body, String url})
+      : this._url = url {
+    if (url != null) style = TypeStyle.link;
+  }
+
+  String get url => _url;
+
+  set url(String value) {
+    this._url = value;
+    if (value != null) style = TypeStyle.link;
+  }
 }
 
 enum Format { normal, italic, bold, boldItalic }
 
-class BodyTextBuilder {
-  String content;
-  double paragraphSpacing;
-  TextStyle style;
-  TextAlign textAlign;
-  TextOverflow overflow;
-  List<Widget> children = <Widget>[];
+enum TypeStyle { body, headline, quote, link, reference }
 
-  BodyTextBuilder(
-      {@required this.content,
-      this.paragraphSpacing = 16,
-      this.style,
-      this.textAlign = TextAlign.justify,
-      this.overflow});
+class BodyTextParser {
+  final String content;
+  final List<List<SingleFormatString>> paragraphs = [];
+  List<String> contentParts = [];
 
-  List<Widget> buildWidgets(BuildContext context) {
-    var parts = content.split(RegExp(r'\n\s{2,}'));
+  bool isParsing = true;
+  Future<bool> isParsed;
 
-    // print('The number of paragraphs is:');
-    // print(parts.length);
+  BodyTextParser(this.content) {
+    isParsed = parse();
+  }
 
-    for (var i = 0; i < parts.length; i++) {
-      String paragraph = parts[i];
-      Widget parsedParagaph = parseParagraph(paragraph, context);
-      if (parsedParagaph != null) {
-        children.add(parsedParagaph);
-        children.add(SizedBox(
-          height: 16,
-        ));
-      }
+  Future<bool> parse() async {
+    isParsing = true;
+    contentParts =
+        await compute(splitString, Tuple2(content, RegExp(r'\n\s{1,}')));
+    for (var paragraph in contentParts) {
+      var parsedParagraph = await compute(parseParagraph, paragraph);
+      paragraphs.add(parsedParagraph);
+    }
+    isParsing = false;
+    return true;
+  }
 
-      RegExp imageExp = RegExp(r'!\[(.+)\]\((.+)\)');
-      var matches = imageExp.allMatches(content).toList();
-      for (var j = 0; j < matches.length; j++) {
-        children
-            .add(parseImage(matches[i].group(2), altText: matches[i].group(1)));
+  static List<String> splitString(Tuple2<String, Pattern> tuple) {
+    return tuple.item1.split(tuple.item2);
+  }
+
+  static List<SingleFormatString> parseParagraph(String paragraph) {
+    final segments = <SingleFormatString>[];
+    RegExp imageExp = RegExp(r'!\[(.+)\]\((.+)\)');
+    paragraph = paragraph.replaceAll(imageExp, '');
+    if (paragraph.isEmpty) return segments;
+
+    var isQuote = false;
+
+    if (paragraph.substring(0, 2) == '> ') {
+      isQuote = true;
+      paragraph = paragraph.replaceFirst('> ', '');
+    }
+
+    if (!isQuote) {
+      final headlineExp = RegExp(r'#+ +(.+?\s\n)');
+      final matches = headlineExp.allMatches(paragraph).toList();
+
+      if (matches.length > 0 && matches.first.start == 0) {
+        paragraph = paragraph.replaceFirst(matches.first.group(0), '');
+        final headline = matches.first.group(1);
+        final headlineSegments =
+            FormattedString(headline).toSingleFormatStrings();
+        for (var segment in headlineSegments)
+          segment.style = TypeStyle.headline;
+        segments.addAll(headlineSegments);
       }
     }
+
+    segments.addAll(FormattedString(paragraph).toSingleFormatStrings());
+
+    if (isQuote) {
+      for (var segment in segments) segment.style = TypeStyle.quote;
+    }
+
+    var i = 0;
+    while (i < segments.length) {
+      var segment = segments[i];
+      final linkExp = RegExp(r'\[(.+?)\]\((.+?)\)');
+      var string = segment.string;
+      var match = linkExp.firstMatch(string);
+
+      if (match != null) {
+        final firstText = string.substring(0, match.start);
+        final lastText = string.substring(match.end);
+        final linkLabel = match.group(1);
+        final url = match.group(2);
+
+        final firstSegment = SingleFormatString(firstText,
+            style: segment.style, format: segment.format);
+        final linkSegment =
+            SingleFormatString(linkLabel, url: url, format: segment.format);
+        final lastSegment = SingleFormatString(lastText,
+            style: segment.style, format: segment.format);
+
+        segments[i] = firstSegment;
+        segments.insertAll(i + 1, [linkSegment, lastSegment]);
+        i++;
+      }
+      i++;
+    }
+
+    return segments;
+
+    // final segments = headlineSegments + FormattedString(paragraph).toSingleFormatStrings();
+  }
+}
+
+class BodyTextBuilder {
+  // final String content;
+  final double paragraphSpacing;
+  final TextStyle normalStyle;
+  final TextStyle headlineStyle;
+  final TextStyle quoteStyle;
+  final TextAlign textAlign;
+  final TextOverflow overflow;
+  final int maxLines;
+
+  // final List<List<SingleFormatString>> paragraphs = [];
+  // List<String> contentParts;
+
+  final BodyTextParser parser;
+
+  BodyTextBuilder(
+      {@required this.parser,
+      this.paragraphSpacing = 16,
+      this.normalStyle,
+      this.headlineStyle,
+      this.quoteStyle,
+      this.textAlign = TextAlign.justify,
+      this.overflow,
+      this.maxLines});
+
+  int get numParagraphs => parser.paragraphs.length;
+
+  List<List<SingleFormatString>> get paragraphs => parser.paragraphs;
+
+  Widget buildParagraph(BuildContext context, int index) {
+    return FutureBuilder(
+        future: parser.isParsed,
+        builder: (context, snapshot) {
+          Widget result;
+          EdgeInsets padding;
+          if (!parser.isParsing) {
+            final effectiveNormalStyle = normalStyle ??
+                Theme.of(context).textTheme.bodyText1.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(.6));
+            final effectiveHeadlineStyle =
+                headlineStyle ?? Theme.of(context).textTheme.headline6;
+            final effectiveQuoteStyle = quoteStyle ??
+                GoogleFonts.ibmPlexSerif(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w300,
+                    color: Theme.of(context).colorScheme.onSurface);
+
+            final textSpan = toSpan(paragraphs[index], effectiveNormalStyle,
+                effectiveHeadlineStyle, effectiveQuoteStyle);
+
+            final isQuote = paragraphs[index]
+                .any((element) => element.style == TypeStyle.quote);
+            final containsHeadline =
+                paragraphs[index].first.style == TypeStyle.headline;
+
+            padding = EdgeInsets.only(
+                bottom: isQuote ? paragraphSpacing * 1.5 : paragraphSpacing,
+                top: (containsHeadline || isQuote) && index != 0
+                    ? paragraphSpacing * 0.5
+                    : 0,
+                left: isQuote ? 32 : 0,
+                right: isQuote ? 32 : 0);
+
+            result = Text.rich(
+              textSpan,
+              strutStyle: StrutStyle(
+                height: effectiveNormalStyle.height,
+                forceStrutHeight: true,
+              ),
+              maxLines: maxLines,
+              overflow: overflow,
+            );
+          } else {
+            padding = EdgeInsets.only(bottom: paragraphSpacing);
+            result = Container();
+          }
+          return Padding(
+            padding: padding,
+            child:
+                CrossFadeTextWidgetBlock(result, showText: !parser.isParsing),
+          );
+        });
+  }
+
+  List<Widget> buildWidgets(BuildContext context) {
+    final children = <Widget>[];
+    for (var i = 0; i < numParagraphs; i++)
+      children.add(buildParagraph(context, i));
     return children;
   }
 
-  Widget parseParagraph(String paragraph, BuildContext context) {
-    RegExp imageExp = RegExp(r'!\[(.+)\]\((.+)\)');
-    paragraph = paragraph.replaceAll(imageExp, '');
-    if (paragraph.isEmpty) return null;
-    var segments = FormatedString(paragraph).toSingleFormatStrings();
-    // print('The number of segments is:');
-    // print(segments.length);
-    var spans = <InlineSpan>[];
+  static TextSpan toSpan(
+    List<SingleFormatString> segments,
+    TextStyle normalStyle,
+    TextStyle headlineStyle,
+    TextStyle quoteStyle,
+  ) {
+    TextStyle spanStyle = normalStyle;
+    final isQuote = segments.any((element) => element.style == TypeStyle.quote);
+    if (isQuote) spanStyle = quoteStyle;
+    final containsHeadline = segments.first.style == TypeStyle.headline;
+
+    final spans = <InlineSpan>[];
     for (var i = 0; i < segments.length; i++) {
-      var style = TextStyle();
+      var segmentStyle = TextStyle();
       switch (segments[i].format) {
-        case Format.normal:
-          // do nothing
-          break;
         case Format.italic:
-          style = TextStyle(fontStyle: FontStyle.italic);
-          // print('Found italics');
+          segmentStyle = TextStyle(fontStyle: FontStyle.italic);
           break;
         case Format.bold:
-          style = TextStyle(fontWeight: FontWeight.bold);
+          segmentStyle = TextStyle(fontWeight: FontWeight.bold);
           break;
         case Format.boldItalic:
-          style = TextStyle(
+          segmentStyle = TextStyle(
               fontWeight: FontWeight.bold, fontStyle: FontStyle.italic);
           break;
+        default:
+          break;
       }
-      spans.add(TextSpan(text: segments[i].text, style: style));
-    }
-
-    final textSpan = parseLinks(
-        TextSpan(
-          children: spans,
-        ),
-        context);
-
-    return Text.rich(
-      textSpan,
-      style: style ?? Theme.of(context).textTheme.bodyText1,
-      textAlign: textAlign,
-      overflow: overflow,
-      strutStyle: StrutStyle(
-        height: style != null
-            ? style.height
-            : Theme.of(context).textTheme.bodyText1.height,
-        forceStrutHeight: true,
-      ),
-    );
-  }
-
-  InlineSpan parseLinks(InlineSpan inputSpan, BuildContext context) {
-    if (inputSpan is TextSpan) {
-      var newSpan = inputSpan;
-      final newChildren = <InlineSpan>[];
-      if (newSpan.text != null) {
-        final linkExp = RegExp(r'\[(.+?)\]\((.+?)\)');
-        var text = newSpan.text;
-        var match = linkExp.firstMatch(text);
-
-        if (match != null) {
-          final firstText = text.substring(0, match.start);
-          final lastText = text.substring(match.end);
-          final linkLabel = match.group(1);
-          final url = match.group(2);
-
-          final linkSpan = WidgetSpan(
-              // style: style ?? Theme.of(context).textTheme.bodyText1,
+      switch (segments[i].style) {
+        case TypeStyle.link:
+          spans.add(WidgetSpan(
+              style: spanStyle,
               baseline: TextBaseline.alphabetic,
               alignment: PlaceholderAlignment.baseline,
-              child: LinkTextWidget(linkLabel,
-                  style: style ?? Theme.of(context).textTheme.bodyText1,
-                  onTap: () {
-                onTapLink(url);
-              }));
-
-          newSpan = TextSpan(
-              text: firstText,
-              children: <InlineSpan>[linkSpan, TextSpan(text: lastText)] +
-                  ((newSpan.children != null)
-                      ? newSpan.children.toList()
-                      : <InlineSpan>[]));
-        }
+              child: LinkTextWidget(segments[i].string,
+                  style: normalStyle.merge(segmentStyle), onTap: () {
+                onTapLink(segments[i].url);
+              })));
+          break;
+        case TypeStyle.headline:
+          spans.add(TextSpan(
+              text: segments[i].string,
+              style: headlineStyle.merge(segmentStyle)));
+          break;
+        default:
+          spans.add(TextSpan(text: segments[i].string, style: segmentStyle));
+          break;
       }
-      if (newSpan.children != null) {
-        final newChildren = <InlineSpan>[];
-        for (var span in newSpan.children.toList()) {
-          span = parseLinks(span, context);
-          newChildren.add(span);
-        }
-        return TextSpan(text: newSpan.text, children: newChildren);
-      } else
-        return newSpan;
-    } else
-      return inputSpan;
+    }
+    return (TextSpan(children: spans, style: spanStyle));
   }
 
-  void onTapLink(String url) {
+  static void onTapLink(String url) {
     // TODO
   }
 
@@ -514,11 +706,11 @@ class BodyTextBuilder {
   }
 }
 
-/// Creates a text widget which can be tapped.
+/// Creates a [Text] widget which can be tapped.
 ///
-/// If you want to integrate it in a Text.rich, remeber to set the StrutStyle
-/// so that the line height stays fixed, since the underline takes up some
-/// space.
+/// If you want to integrate it in a [Text.rich], remeber to set the
+/// [StrutStyle] so that the line height stays fixed, since the underline
+/// takes up some space.
 class LinkTextWidget extends StatefulWidget {
   /// Defaults to the theme accent color.
   final Color decorationColor;
@@ -561,7 +753,7 @@ class _LinkTextWidgetState extends State<LinkTextWidget> {
         if (isHovering) {
           setState(() {
             decorationColor = widget.decorationColor ??
-                Theme.of(context).colorScheme.secondaryVariant;
+                Theme.of(context).colorScheme.secondary;
             textOpacity = 1;
           });
         } else {
@@ -578,23 +770,21 @@ class _LinkTextWidgetState extends State<LinkTextWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      focusColor: Colors.transparent,
-      hoverColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      onTap: widget.onTap,
-      onHover: onHighlightChanged,
-      // radius: 20,
-      child: AnimatedContainer(
-        // height: 14 * 1.5,
-        duration: Duration(milliseconds: 100),
-        padding: EdgeInsets.only(bottom: 1),
-        decoration: BoxDecoration(
-            border: Border(
-                bottom: BorderSide(
-          color: decorationColor, // Text color here
-          width: 1.5, // Underline width
-        ))),
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 100),
+      padding: EdgeInsets.only(bottom: 0),
+      decoration: BoxDecoration(
+          border: Border(
+              bottom: BorderSide(
+        color: decorationColor, // Text color here
+        width: 1.5, // Underline width
+      ))),
+      child: InkWell(
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onTap: widget.onTap,
+        onHover: onHighlightChanged,
         child: AnimatedOpacity(
           opacity: textOpacity,
           duration: Duration(milliseconds: 100),
@@ -606,36 +796,6 @@ class _LinkTextWidgetState extends State<LinkTextWidget> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class BodyText extends StatelessWidget {
-  final String content;
-  final TextStyle style;
-  final double paragraphSpacing;
-  final TextAlign textAlign;
-  final TextOverflow overflow;
-
-  const BodyText(this.content,
-      {Key key,
-      this.style,
-      this.paragraphSpacing,
-      this.textAlign,
-      this.overflow})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final effectiveStyle = DefaultTextStyle.of(context).style.merge(style);
-    final builder = BodyTextBuilder(
-        content: content,
-        style: effectiveStyle,
-        paragraphSpacing: paragraphSpacing,
-        textAlign: textAlign,
-        overflow: overflow);
-    return Column(
-      children: builder.buildWidgets(context),
     );
   }
 }

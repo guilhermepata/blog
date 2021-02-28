@@ -226,8 +226,7 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
                   key: ValueKey('Loading'))
             ]
           : [
-              if (appState.selectedMenu != null &&
-                  appState.selectedArticle == null)
+              if (appState.selectedMenu != null)
                 FadeAnimationPage(
                   child: AppShell(
                       onMenuTapped: _handleMenuTapped,
@@ -235,7 +234,7 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
                   key: ValueKey('AppShell'),
                 ),
               if (appState.selectedArticle != null)
-                FadeAnimationPage(
+                MaterialPage(
                     child: ArticlePage(
                       key: ValueKey(appState.selectedArticle.title + '1'),
                       article: appState.selectedArticle,
@@ -421,10 +420,13 @@ extension StringCompare on String {
   }
 
   bool isUrlOf(String biggerString) {
-    final substring = this
-        .split(RegExp(r'[_]'))
-        .reduce((value, element) => value + ' ' + element)
-        .toLowerCase();
+    final bigParts = biggerString.split(RegExp(r'[ —]'));
+    final smallParts = this.split(RegExp(r'[_]'));
+    if (smallParts.length < 5 && smallParts.length < bigParts.length)
+      return false;
+    biggerString = bigParts.reduce((value, element) => value + ' ' + element);
+    final substring =
+        smallParts.reduce((value, element) => value + ' ' + element);
     return biggerString.containsLowerCase(substring);
   }
 }

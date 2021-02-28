@@ -1,12 +1,13 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:guilhermepata_blog/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 import 'classes.dart';
 import 'app_state.dart';
 import 'app_shell.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     Key key,
     @required this.onArticleTapped,
@@ -15,33 +16,65 @@ class HomeScreen extends StatelessWidget {
   final void Function(Article) onArticleTapped;
 
   @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  ScrollController scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = context.read<ShellState>().scrollController;
+    MousePresence().addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    MousePresence().removeListener(() {
+      setState(() {});
+    });
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Selector<ShellState,
-            Tuple5<ScrollController, bool, double, List<Article>, bool>>(
-        selector: (_, state) => Tuple5(
-            state.scrollController,
-            state.displayMobileLayout,
-            state.gutters,
-            state.articles,
-            state.areArticlesLoaded),
+    return Selector<ShellState, Tuple4<bool, double, List<Article>, bool>>(
+        selector: (_, state) => Tuple4(state.displayMobileLayout, state.gutters,
+            state.articles, state.areArticlesLoaded),
         builder: (context, state, _) {
+          final articles = state.item3;
+          final articleCards = <Widget>[];
+
+          for (var article in articles) {
+            articleCards.add(
+                ArticleCard(article, onArticleTapped: widget.onArticleTapped));
+          }
+
           return Scaffold(
             body:
                 // Container(color: Colors.red),
                 Scrollbar(
               // thickness: 4
-              isAlwaysShown: !state.item2 ?? false,
-              controller: state.item1,
-              child: ListView.builder(
-                controller: state.item1,
-                padding: EdgeInsets.symmetric(vertical: state.item3),
-                itemCount: state.item4.length,
-                itemBuilder: (context, int i) {
-                  return ArticleCard(
-                    state.item4[i],
-                    onArticleTapped: onArticleTapped,
-                  );
-                },
+              isAlwaysShown: !state.item1 ?? false,
+              controller: scrollController,
+              child: SmoothScroller(
+                controller: scrollController,
+                child: ListView.separated(
+                  physics: MousePresence().value
+                      ? NeverScrollableScrollPhysics()
+                      : null,
+                  controller: scrollController,
+                  padding: EdgeInsets.symmetric(vertical: state.item2),
+                  itemCount: state.item3.length,
+                  separatorBuilder: (context, int i) =>
+                      SizedBox(height: state.item2),
+                  itemBuilder: (context, int i) {
+                    return articleCards[i];
+                  },
+                ),
               ),
             ),
           );
@@ -76,12 +109,17 @@ class ArticleCard extends StatelessWidget {
           return Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 600),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        context.watch<ShellState>().cardCornerRadius)),
-                margin: EdgeInsets.zero,
-                clipBehavior: Clip.hardEdge,
+              child: Selector<ShellState, double>(
+                selector: (_, state) => state.cardCornerRadius,
+                builder: (contex, cardCornerRadius, child) {
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(cardCornerRadius)),
+                    margin: EdgeInsets.zero,
+                    clipBehavior: Clip.hardEdge,
+                    child: child,
+                  );
+                },
                 child: Column(
                   children: [
                     CrossFadeWidgets(
@@ -136,11 +174,15 @@ class ArticleCard extends StatelessWidget {
                           width: 600,
                           height: 600 / 21 * 9,
                         )),
-                    Padding(
-                      padding: EdgeInsets.only(
-                          top: context.read<ShellState>().gutters,
-                          left: context.read<ShellState>().gutters,
-                          right: context.read<ShellState>().gutters),
+                    Selector<ShellState, double>(
+                      selector: (_, state) => state.gutters,
+                      builder: (context, gutters, child) {
+                        return Padding(
+                          padding: EdgeInsets.only(
+                              top: gutters, left: gutters, right: gutters),
+                          child: child,
+                        );
+                      },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -167,44 +209,33 @@ class ArticleCard extends StatelessWidget {
                             // width: 300,
                           ),
                           SizedBox(height: 12),
-                          Container(
-                            height: 14 * 1.5 * 3.9,
-                            child: CrossFadeTextWidgetBlock(
-                                article.isLoaded
-                                    ? ShaderMask(
-                                        shaderCallback: (bounds) =>
-                                            ui.Gradient.linear(
-                                                Offset(0, 0), Offset(0, 0.5), [
-                                          Colors.transparent,
-                                          Colors.black
-                                        ]),
-                                        child: article
-                                            .buildParagraphs(context,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyText2
-                                                    .copyWith(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurface
-                                                            .withOpacity(.60)),
-                                                overflow: TextOverflow.clip,
-                                                textAlign: TextAlign.justify)
-                                            .first,
-                                      )
-                                    : null,
-                                showText: article.isLoaded,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText2
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface
-                                            .withOpacity(.60)),
-                                overflow: TextOverflow.fade,
-                                textAlign: TextAlign.justify),
-                          ),
+                          CrossFadeTextWidgetBlock(
+                              article.isLoaded
+                                  ? article.buildParagraph(context, 0,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText2
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(.60)),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 4,
+                                      textAlign: TextAlign.justify)
+                                  : null,
+                              showText: article.isLoaded,
+                              numLines: 4,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText2
+                                  .copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withOpacity(.60)),
+                              overflow: TextOverflow.fade,
+                              textAlign: TextAlign.justify),
                         ],
                       ),
                     ),
@@ -269,7 +300,7 @@ class CrossFadeTextWidgetBlock extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           children: [
             Text(
-              ' ',
+              '',
               style: style,
               textAlign: textAlign,
               overflow: overflow,
@@ -386,7 +417,7 @@ class BodyCard extends StatelessWidget {
         child: Padding(
       padding: EdgeInsets.all(gutters),
       child: Column(
-        children: article.buildParagraphs(context),
+        children: article.buildContents(context),
       ),
     ));
   }
