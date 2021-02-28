@@ -5,6 +5,8 @@ import 'app_shell.dart';
 import 'classes.dart';
 
 class AboutPage extends StatelessWidget {
+  const AboutPage({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ShellState>(
