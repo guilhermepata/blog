@@ -76,7 +76,7 @@ class _ArticlePageState extends State<ArticlePage>
       setState(() {});
     });
 
-    MousePresence().addListener(() {
+    MouseState().addListener(() {
       setState(() {});
     });
 
@@ -87,7 +87,7 @@ class _ArticlePageState extends State<ArticlePage>
   void dispose() {
     scrollController.dispose();
     appBarStateController.dispose();
-    MousePresence().removeListener(() {
+    MouseState().removeListener(() {
       setState(() {});
     });
     super.dispose();
@@ -229,7 +229,7 @@ class _ArticlePageState extends State<ArticlePage>
                             constraints: BoxConstraints(
                                 maxWidth: usefulWidth,
                                 minWidth: usefulWidth,
-                                minHeight: height * 2 / 3,
+                                minHeight: height * 1 / 3,
                                 maxHeight: height),
                             child: child,
                           ),
@@ -258,18 +258,28 @@ class _ArticlePageState extends State<ArticlePage>
                       ),
                     ),
                     Scrollbar(
-                      isAlwaysShown: MousePresence().value,
+                      isAlwaysShown: MouseState().isPresent,
                       controller: scrollController,
                       child: SmoothScroller(
                         controller: scrollController,
                         child: ListView(
                           controller: scrollController,
-                          physics: MousePresence().value
+                          physics: MouseState().isPresent
                               ? NeverScrollableScrollPhysics()
                               : null,
                           children: [
-                            SizedBox(
-                              height: height * 0.4,
+                            VisibilityDetector(
+                              key: ValueKey('detector'),
+                              onVisibilityChanged: (info) {
+                                if (info.visibleFraction >= 0.01) {
+                                  appBarStateController.fling();
+                                } else if (info.visibleFraction < 0.01) {
+                                  appBarStateController.fling(velocity: -1);
+                                }
+                              },
+                              child: SizedBox(
+                                height: height / 3 - 56,
+                              ),
                             ),
                             Center(
                               child: Container(
@@ -370,16 +380,10 @@ class _ArticlePageState extends State<ArticlePage>
           children: [
             TextButton.icon(
                 onPressed: () {},
-                label: Padding(
-                  padding: const EdgeInsets.only(right: 8.0, top: 8, bottom: 8),
-                  child: Text('Share'),
-                ),
-                icon: Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
-                  child: Icon(
-                    Icons.share,
-                    size: 18,
-                  ),
+                label: Text('Share'),
+                icon: Icon(
+                  Icons.share,
+                  size: 18,
                 ))
           ],
         ),

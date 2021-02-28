@@ -1,14 +1,19 @@
 import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-class MousePresence extends ValueNotifier {
-  MousePresence._privateConstructor(value) : super(value);
+class MouseState extends ValueNotifier {
+  MouseState._privateConstructor(value) : super(value);
 
-  static final MousePresence _instance =
-      MousePresence._privateConstructor(false);
+  bool get isPresent => value;
+  set isPresent(bool newValue) {
+    this.value = newValue;
+  }
 
-  factory MousePresence() {
+  static final MouseState _instance = MouseState._privateConstructor(false);
+
+  factory MouseState() {
     return _instance;
   }
 }
@@ -45,8 +50,16 @@ class _SmoothScrollerState extends State<SmoothScroller> {
 
   Future<bool> hasAnimated;
 
+  bool hasTriedToDetect = false;
+
   void onPointerSignal(PointerSignalEvent pointerSignal) {
+    if (hasTriedToDetect && !MouseState().isPresent) return;
+
     if (pointerSignal is PointerScrollEvent) {
+      if (!hasTriedToDetect) {
+        MouseState().isPresent = false;
+        hasTriedToDetect = true;
+      }
       if (locked) {
         hasAnimated
             .then((value) => animate(pointerSignal, wasScheduled: true))
@@ -125,13 +138,13 @@ class _SmoothScrollerState extends State<SmoothScroller> {
 
   @override
   Widget build(BuildContext context) {
-    return MousePresence().value
+    return (hasTriedToDetect && MouseState().isPresent)
         ? Listener(
             onPointerSignal: onPointerSignal,
             child: widget.child,
           )
-        : MouseRegion(
-            onHover: (_) => MousePresence().value = true,
+        : Container(
+            child: widget.child,
           );
   }
 }

@@ -34,48 +34,48 @@ class Article {
     this._asset = asset;
   }
 
-  factory Article.fromMarkdown(String markdown) {
-    String title, subtitle, rawContent, imageUrl, altText;
+  // factory Article.fromMarkdown(String markdown) {
+  //   String title, subtitle, rawContent, imageUrl, altText;
 
-    // matches something like:
-    // Title
-    // ===
-    // (the group is the title)
-    RegExp titleExp = RegExp(r'(.+)\s*\n[=-]{3,}\s*\n*');
-    // print(markdown);
-    var matches = titleExp.allMatches(markdown);
-    assert(matches.length > 0, 'The article must have a title');
-    title = matches.first.group(1);
-    if (matches.length > 1) subtitle = matches.elementAt(1).group(1);
+  //   // matches something like:
+  //   // Title
+  //   // ===
+  //   // (the group is the title)
+  //   RegExp titleExp = RegExp(r'(.+)\s*\n[=-]{3,}\s*\n*');
+  //   // print(markdown);
+  //   var matches = titleExp.allMatches(markdown);
+  //   assert(matches.length > 0, 'The article must have a title');
+  //   title = matches.first.group(1);
+  //   if (matches.length > 1) subtitle = matches.elementAt(1).group(1);
 
-    // matches something like:
-    // ![alt text](url)
-    // (the first group is the alt text and the second is the url)
-    RegExp imageExp = RegExp(r'!\[(.+)\]\((.+)\)');
-    matches = imageExp.allMatches(markdown);
-    if (matches.length > 0) {
-      altText = matches.first.group(1);
-      imageUrl = matches.first.group(2);
-    }
+  //   // matches something like:
+  //   // ![alt text](url)
+  //   // (the first group is the alt text and the second is the url)
+  //   RegExp imageExp = RegExp(r'!\[(.+)\]\((.+)\)');
+  //   matches = imageExp.allMatches(markdown);
+  //   if (matches.length > 0) {
+  //     altText = matches.first.group(1);
+  //     imageUrl = matches.first.group(2);
+  //   }
 
-    rawContent = markdown;
-    rawContent = rawContent.replaceFirst(titleExp, '');
-    rawContent = rawContent.replaceFirst(titleExp, '');
-    rawContent = rawContent.replaceFirst(imageExp, '');
+  //   rawContent = markdown;
+  //   rawContent = rawContent.replaceFirst(titleExp, '');
+  //   rawContent = rawContent.replaceFirst(titleExp, '');
+  //   rawContent = rawContent.replaceFirst(imageExp, '');
 
-    var result = Article._(
-        title: title,
-        subtitle: subtitle,
-        rawContent: rawContent,
-        imageUrl: imageUrl,
-        altText: altText);
+  //   var result = Article._(
+  //       title: title,
+  //       subtitle: subtitle,
+  //       rawContent: rawContent,
+  //       imageUrl: imageUrl,
+  //       altText: altText);
 
-    result._isLoaded = true;
+  //   result._isLoaded = true;
 
-    // result.cleanContent();
+  //   // result.cleanContent();
 
-    return result;
-  }
+  //   return result;
+  // }
 
   static Future<Article> fromAsset(String asset) async {
     var result = Article._(asset: asset);
@@ -96,6 +96,7 @@ class Article {
   }
 
   Future load() async {
+    if (isLoaded) return;
     if (_asset != null) {
       var markdown = await rootBundle.loadString(_asset);
       String subtitle, rawContent, imageUrl, altText;
@@ -598,8 +599,15 @@ class BodyTextBuilder {
                     fontWeight: FontWeight.w300,
                     color: Theme.of(context).colorScheme.onSurface);
 
-            final textSpan = toSpan(paragraphs[index], effectiveNormalStyle,
-                effectiveHeadlineStyle, effectiveQuoteStyle);
+            final colorLinkDecorationColor =
+                Theme.of(context).colorScheme.secondary;
+
+            final textSpan = toSpan(
+                paragraphs[index],
+                effectiveNormalStyle,
+                effectiveHeadlineStyle,
+                effectiveQuoteStyle,
+                colorLinkDecorationColor);
 
             final isQuote = paragraphs[index]
                 .any((element) => element.style == TypeStyle.quote);
@@ -647,6 +655,7 @@ class BodyTextBuilder {
     TextStyle normalStyle,
     TextStyle headlineStyle,
     TextStyle quoteStyle,
+    Color linkDecorationColor,
   ) {
     TextStyle spanStyle = normalStyle;
     final isQuote = segments.any((element) => element.style == TypeStyle.quote);
@@ -722,7 +731,7 @@ class LinkTextWidget extends StatefulWidget {
   final String text;
 
   /// The text style. This widget does not properly inherit the [TextStyle] of
-  /// the parent Text.rich
+  /// the parent [Text.rich] if placed inside a [WidgetSpan].
   final TextStyle style;
 
   const LinkTextWidget(this.text,
