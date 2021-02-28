@@ -161,7 +161,6 @@ class _AppShellState extends State<AppShell>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     shellState = ShellState(context);
@@ -476,7 +475,8 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
               : (appState.selectedMenu == AppMenu.about)
                   ? [
                       FadeAnimationPage(
-                          key: ValueKey('About'), child: AboutPage())
+                          key: ValueKey('About1'),
+                          child: AboutPage(key: ValueKey('About')))
                     ]
                   : [
                       FadeAnimationPage(
