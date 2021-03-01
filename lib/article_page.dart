@@ -50,8 +50,6 @@ class _ArticlePageState extends State<ArticlePage>
   Animation<Color> appBarColor;
   Animation<Color> appBarForegroundColor;
 
-  Future<String> testFuture;
-
   bool get displayMobileLayout {
     return isMobileLayout;
   }
@@ -73,6 +71,22 @@ class _ArticlePageState extends State<ArticlePage>
         });
     });
     appBarStateController.addListener(() {
+      setState(() {});
+    });
+
+    appBarColor = ColorTween(
+            begin: Colors.transparent,
+            end: Color.alphaBlend(Colors.white.withOpacity(.09),
+                Theme.of(context).colorScheme.surface))
+        .animate(appBarStateController);
+    appBarColor.addListener(() {
+      setState(() {});
+    });
+    appBarForegroundColor = ColorTween(
+            begin: Colors.white,
+            end: Theme.of(context).appBarTheme.foregroundColor)
+        .animate(appBarStateController);
+    appBarForegroundColor.addListener(() {
       setState(() {});
     });
 
@@ -122,24 +136,6 @@ class _ArticlePageState extends State<ArticlePage>
         cardCornerRadius = 0;
       else
         cardCornerRadius = gutters / 4;
-
-      if (!isInitialized) {
-        appBarColor = ColorTween(
-                begin: Colors.transparent,
-                end: Color.alphaBlend(Colors.white.withOpacity(.09),
-                    Theme.of(context).colorScheme.surface))
-            .animate(appBarStateController);
-        appBarColor.addListener(() {
-          setState(() {});
-        });
-        appBarForegroundColor = ColorTween(
-                begin: Colors.white,
-                end: Theme.of(context).appBarTheme.foregroundColor)
-            .animate(appBarStateController);
-        appBarForegroundColor.addListener(() {
-          setState(() {});
-        });
-      }
 
       isInitialized = true;
     });
@@ -271,9 +267,9 @@ class _ArticlePageState extends State<ArticlePage>
                             VisibilityDetector(
                               key: ValueKey('detector'),
                               onVisibilityChanged: (info) {
-                                if (info.visibleFraction >= 0.01) {
+                                if (info.visibleFraction <= 0.01) {
                                   appBarStateController.fling();
-                                } else if (info.visibleFraction < 0.01) {
+                                } else if (info.visibleFraction > 0.01) {
                                   appBarStateController.fling(velocity: -1);
                                 }
                               },

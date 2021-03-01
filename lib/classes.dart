@@ -768,6 +768,7 @@ class _LinkTextWidgetState extends State<LinkTextWidget> {
           setState(() {
             decorationColor = widget.style.color
                 .withOpacity(widget.style.color.opacity * 0.5);
+            decorationColor = Colors.red;
             textOpacity = widget.style.color.opacity;
           });
         }

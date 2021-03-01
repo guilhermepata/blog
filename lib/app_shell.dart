@@ -136,6 +136,9 @@ class _AppShellState extends State<AppShell>
 
   bool isInitialized = false;
   bool isAppBarElevated = false;
+  AnimationController appBarStateController;
+  Animation<Color> appBarColor;
+
   //
   bool get displayMobileLayout {
     return isMobileLayout && standardDrawerState == StandardDrawerState.closed;
@@ -145,6 +148,8 @@ class _AppShellState extends State<AppShell>
   AnimationController standardDrawerController;
   Animation<double> standardDrawerWidth;
   Animation<double> appBarSpacing;
+
+  Brightness brightness;
 
   //for the delegate
   InnerRouterDelegate _routerDelegate;
@@ -162,6 +167,8 @@ class _AppShellState extends State<AppShell>
   @override
   void initState() {
     super.initState();
+
+    brightness = Theme.of(context).brightness;
 
     shellState = ShellState(context);
 
@@ -201,13 +208,27 @@ class _AppShellState extends State<AppShell>
       setState(() {});
     });
 
+    appBarStateController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 50));
+    appBarStateController.addStatusListener((status) {
+      if (status == AnimationStatus.completed)
+        setState(() {
+          isAppBarElevated = true;
+        });
+      else if (status == AnimationStatus.dismissed)
+        setState(() {
+          isAppBarElevated = false;
+        });
+    });
+    appBarStateController.addListener(() {
+      setState(() {});
+    });
+
     scrollController.addListener(() {
       if (scrollController.offset > 0) {
-        isAppBarElevated = true;
-        setState(() {});
-      } else if (isAppBarElevated) {
-        isAppBarElevated = false;
-        setState(() {});
+        appBarStateController.fling();
+      } else {
+        appBarStateController.fling(velocity: -1);
       }
     });
   }
@@ -259,6 +280,19 @@ class _AppShellState extends State<AppShell>
       }
     }
 
+    bool hasBrightnessChanged = brightness == Theme.of(context).brightness;
+
+    if (!isInitialized || hasBrightnessChanged) {
+      appBarColor = ColorTween(
+              begin: Theme.of(context).colorScheme.background,
+              end: Color.alphaBlend(Colors.white.withOpacity(.0),
+                  Theme.of(context).colorScheme.surface))
+          .animate(appBarStateController);
+      appBarColor.addListener(() {
+        setState(() {});
+      });
+    }
+
     isInitialized = true;
   }
 
@@ -272,7 +306,7 @@ class _AppShellState extends State<AppShell>
 
     return Scaffold(
       appBar: AppBar(
-        elevation: isAppBarElevated ? 4 : 0,
+        elevation: appBarStateController.value * 4,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -281,9 +315,7 @@ class _AppShellState extends State<AppShell>
                 onPressed: context.read<AppState>().flipTheme),
           )
         ],
-        backgroundColor: isAppBarElevated
-            ? Theme.of(context).appBarTheme.backgroundColor
-            : Theme.of(context).backgroundColor,
+        backgroundColor: appBarColor.value,
         leadingWidth: 56 + appBarMargins,
         title: Padding(
             padding: EdgeInsets.only(left: appBarSpacing.value),

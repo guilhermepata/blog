@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:guilhermepata_blog/widgets.dart';
+import 'widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 import 'classes.dart';
