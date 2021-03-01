@@ -1,5 +1,5 @@
-name: guilhermepata_blog
-description: A new Flutter project.
+name: the_duckling
+description: A personal blog, built with Flutter.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -34,11 +34,14 @@ dependencies:
   animations: ^1.1.2
   tuple: ^1.0.3
   visibility_detector: ^0.1.5
-
+  flutter_launcher_name: "^0.0.1"
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+
+flutter_launcher_name:
+  name: "The Duckling"
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,4 @@
-# guilhermepata_blog
+# The Duckling
 
 A new Flutter project.
 
