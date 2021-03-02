@@ -6,6 +6,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tuple/tuple.dart';
+import 'package:universal_platform/universal_platform.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'home_page.dart';
 
 class Article {
@@ -603,11 +606,13 @@ class BodyTextBuilder {
                 Theme.of(context).colorScheme.secondary;
 
             final textSpan = toSpan(
-                paragraphs[index],
-                effectiveNormalStyle,
-                effectiveHeadlineStyle,
-                effectiveQuoteStyle,
-                colorLinkDecorationColor);
+              paragraphs[index],
+              effectiveNormalStyle,
+              effectiveHeadlineStyle,
+              effectiveQuoteStyle,
+              colorLinkDecorationColor,
+              context,
+            );
 
             final isQuote = paragraphs[index]
                 .any((element) => element.style == TypeStyle.quote);
@@ -628,6 +633,7 @@ class BodyTextBuilder {
                 height: effectiveNormalStyle.height,
                 forceStrutHeight: true,
               ),
+              textAlign: textAlign,
               maxLines: maxLines,
               overflow: overflow,
             );
@@ -656,6 +662,7 @@ class BodyTextBuilder {
     TextStyle headlineStyle,
     TextStyle quoteStyle,
     Color linkDecorationColor,
+    BuildContext context,
   ) {
     TextStyle spanStyle = normalStyle;
     final isQuote = segments.any((element) => element.style == TypeStyle.quote);
@@ -681,14 +688,11 @@ class BodyTextBuilder {
       }
       switch (segments[i].style) {
         case TypeStyle.link:
-          spans.add(WidgetSpan(
-              style: spanStyle,
-              baseline: TextBaseline.alphabetic,
-              alignment: PlaceholderAlignment.baseline,
+          spans.add(LinkSpan(
               child: LinkTextWidget(segments[i].string,
                   style: normalStyle.merge(segmentStyle), onTap: () {
-                onTapLink(segments[i].url);
-              })));
+            return onLinkTapped(url: segments[i].url, context: context);
+          })));
           break;
         case TypeStyle.headline:
           spans.add(TextSpan(
@@ -703,8 +707,132 @@ class BodyTextBuilder {
     return (TextSpan(children: spans, style: spanStyle));
   }
 
-  static void onTapLink(String url) {
-    // TODO
+  static Future<bool> onLinkTapped(
+      {@required BuildContext context, @required String url, String label}) {
+    return showModalBottomSheet(
+        context: context,
+        isDismissible: true,
+        barrierColor: Colors.black26,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        builder: (context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                constraints: BoxConstraints(maxWidth: 600),
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  boxShadow: kElevationToShadow[24],
+                ),
+                child: Card(
+                  elevation: 24,
+                  shadowColor: Colors.transparent,
+                  shape:
+                      RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('This link will take you to an external website.',
+                            style: Theme.of(context).textTheme.subtitle1),
+                        Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Text(
+                            url,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                Theme.of(context).textTheme.bodyText2.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withOpacity(.6),
+                                    ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true);
+                                },
+                                child: Text('Cancel'),
+                              ),
+                            ),
+                            SizedBox(width: 24),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(true);
+                                    if (UniversalPlatform.isAndroid)
+                                      launchWebPage(context, url);
+                                    else
+                                      launch(url);
+                                  },
+                                  label: Text('Open website'),
+                                  icon: Icon(Icons.launch, size: 18)),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
+  }
+
+  static void launchWebPage(BuildContext context, String url) {
+    showModalBottomSheet<dynamic>(
+        context: context,
+        isScrollControlled: true,
+        enableDrag: false,
+        builder: (context) {
+          return Container(
+            height: MediaQuery.of(context).size.height * 7 / 8,
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text('Browser'),
+                automaticallyImplyLeading: false,
+                leading: IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                actions: [
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                      child: PopupMenuButton(
+                        onSelected: (MenuOptions result) {
+                          if (result == MenuOptions.externalBroswer) {
+                            launch(url);
+                          }
+                        },
+                        itemBuilder: (BuildContext context) =>
+                            <PopupMenuEntry<MenuOptions>>[
+                          PopupMenuItem<MenuOptions>(
+                            value: MenuOptions.externalBroswer,
+                            child: Text('Open in external browser',
+                                style: Theme.of(context).textTheme.bodyText2),
+                          ),
+                        ],
+                      ))
+                ],
+              ),
+              body: WebView(
+                initialUrl: url,
+              ),
+            ),
+          );
+        });
   }
 
   Widget parseImage(String url, {String altText = ''}) {
@@ -713,6 +841,8 @@ class BodyTextBuilder {
     );
   }
 }
+
+enum MenuOptions { externalBroswer }
 
 /// Creates a [Text] widget which can be tapped.
 ///
@@ -725,7 +855,7 @@ class LinkTextWidget extends StatefulWidget {
 
   /// Function to run when the text is tapped.
   /// Can trigger a navigator or hyperlink
-  final void Function() onTap;
+  final Function() onTap;
 
   /// The string to display.
   final String text;
@@ -734,8 +864,23 @@ class LinkTextWidget extends StatefulWidget {
   /// the parent [Text.rich] if placed inside a [WidgetSpan].
   final TextStyle style;
 
+  /// The distance, in fraction of line height, at which the underline should be
+  /// from the top of the text widget. If left null or unset, it will default to
+  /// `0.95`. If its greater than `1` and `forceStrutHeight` is set to true in a
+  /// parent [Text.rich]'s [StrutStyle], the underline will be clipped on the
+  /// last line of a body of text.
+  final double fraction;
+
+  /// Thickness of the underline.
+  final double thickness;
+
   const LinkTextWidget(this.text,
-      {Key key, this.decorationColor, this.onTap, this.style})
+      {Key key,
+      this.decorationColor,
+      this.onTap,
+      this.style,
+      this.fraction = .95,
+      this.thickness = 1})
       : super(key: key);
 
   @override
@@ -751,60 +896,115 @@ class _LinkTextWidgetState extends State<LinkTextWidget> {
   void initState() {
     super.initState();
     decorationColor =
-        widget.style.color.withOpacity(widget.style.color.opacity * 0.5);
+        widget.style.color.withOpacity(widget.style.color.opacity * 0.8);
     textOpacity = widget.style.color.opacity;
   }
 
-  void onHighlightChanged(bool isHovering) {
+  void changeHighlight(bool isHighlighted) {
+    setState(() {
+      decorationColor = isHighlighted
+          ? widget.decorationColor ?? Theme.of(context).colorScheme.secondary
+          : widget.style.color.withOpacity(widget.style.color.opacity * 0.8);
+      textOpacity = isHighlighted ? 1 : widget.style.color.opacity;
+    });
+  }
+
+  void onFocusChange(bool isFocused) {
+    changeHighlight(isFocused);
+  }
+
+  void onTap() {
+    changeHighlight(true);
+
+    if (widget.onTap is Future)
+      widget.onTap().then((_) => changeHighlight(false));
+    else {
+      widget.onTap();
+      changeHighlight(false);
+    }
+  }
+
+  void onTapCancel() {
+    changeHighlight(false);
+  }
+
+  void onTapDown(TapDownDetails details) {
+    changeHighlight(true);
+  }
+
+  void onLongPress() {
+    changeHighlight(true);
+  }
+
+  void onHover(bool isHovering) {
     if (wasHovering != isHovering) {
       {
         if (isHovering) {
-          setState(() {
-            decorationColor = widget.decorationColor ??
-                Theme.of(context).colorScheme.secondary;
-            textOpacity = 1;
-          });
+          changeHighlight(true);
         } else {
-          setState(() {
-            decorationColor = widget.style.color
-                .withOpacity(widget.style.color.opacity * 0.5);
-            decorationColor = Colors.red;
-            textOpacity = widget.style.color.opacity;
-          });
+          changeHighlight(false);
         }
       }
+      wasHovering = isHovering;
     }
-    wasHovering = isHovering;
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 100),
-      padding: EdgeInsets.only(bottom: 0),
-      decoration: BoxDecoration(
-          border: Border(
-              bottom: BorderSide(
-        color: decorationColor, // Text color here
-        width: 1.5, // Underline width
-      ))),
-      child: InkWell(
-        focusColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        onTap: widget.onTap,
-        onHover: onHighlightChanged,
-        child: AnimatedOpacity(
-          opacity: textOpacity,
-          duration: Duration(milliseconds: 100),
-          child: Text(
-            widget.text,
-            style:
-                widget.style.copyWith(color: widget.style.color.withOpacity(1)),
-            maxLines: 1,
+    return Stack(
+      children: [
+        InkWell(
+          focusColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: onTap,
+          onTapCancel: onTapCancel,
+          onTapDown: onTapDown,
+          onFocusChange: onFocusChange,
+          onHover: onHover,
+          child: AnimatedOpacity(
+            opacity: textOpacity,
+            duration: Duration(milliseconds: 100),
+            child: Text(
+              widget.text,
+              style: widget.style.copyWith(
+                color: widget.style.color.withOpacity(1),
+              ),
+              maxLines: 1,
+            ),
           ),
         ),
-      ),
+        Positioned(
+            top: widget.style.height * widget.style.fontSize * widget.fraction,
+            child: AnimatedContainer(
+              height: 0,
+              clipBehavior: Clip.hardEdge,
+              duration: Duration(milliseconds: 50),
+              padding: EdgeInsets.only(bottom: 0),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: decorationColor, // Text color here
+                    width: widget.thickness, // Underline width
+                  ),
+                ),
+              ),
+              child: Text(
+                widget.text,
+                style: widget.style,
+                maxLines: 1,
+              ),
+            )),
+      ],
     );
   }
+}
+
+class LinkSpan extends WidgetSpan {
+  final Widget child;
+  LinkSpan({this.child})
+      : super(
+            alignment: PlaceholderAlignment.baseline,
+            baseline: TextBaseline.alphabetic,
+            child: child);
 }

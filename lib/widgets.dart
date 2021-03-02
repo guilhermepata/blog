@@ -1,7 +1,8 @@
 import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:universal_platform/universal_platform.dart';
+// import 'package:flutter/foundation.dart' show kIsWeb;
 
 class MouseState extends ValueNotifier {
   MouseState._privateConstructor(value) : super(value);
@@ -52,32 +53,42 @@ class _SmoothScrollerState extends State<SmoothScroller> {
 
   bool hasTriedToDetect = false;
 
+  bool hasNewSchedule = false;
+
   void onPointerSignal(PointerSignalEvent pointerSignal) {
     if (hasTriedToDetect && !MouseState().isPresent) return;
 
-    if (pointerSignal is PointerScrollEvent) {
-      if (!hasTriedToDetect) {
+    if (!hasTriedToDetect) {
+      hasTriedToDetect = true;
+      if (pointerSignal.kind == PointerDeviceKind.mouse)
+        MouseState().isPresent = true;
+      else
         MouseState().isPresent = false;
-        hasTriedToDetect = true;
-      }
+    }
+
+    if (pointerSignal is PointerScrollEvent) {
       if (locked) {
-        hasAnimated
-            .then((value) => animate(pointerSignal, wasScheduled: true))
-            .then((value) {
-          if (isScrollWheel) locked = false;
+        hasNewSchedule = true;
+        hasAnimated.then((value) {
+          animate(pointerSignal, wasScheduled: true);
+          hasAnimated.then((value) {
+            if (!hasNewSchedule) locked = false;
+          });
         });
       } else {
         animate(pointerSignal);
-        // locked = true;
       }
     }
   }
 
   void animate(PointerScrollEvent pointerSignal, {bool wasScheduled = false}) {
+    hasNewSchedule = false;
     locked = true;
     scroll = widget.controller.position.pixels;
     int micros;
     double dy;
+
+    // print('Running scheduled: $wasScheduled');
 
     dy = pointerSignal.scrollDelta.dy;
     isScrollWheel = dy.abs() % 100 == 0;
@@ -85,18 +96,6 @@ class _SmoothScrollerState extends State<SmoothScroller> {
       delta = dy * scrollWheelExtentFactor;
     else
       delta = dy * touchPadExtentFactor;
-
-    // if (triedWhenLocked) {
-    //   if (isScrollWheel) {
-    //     increaseSpeedFactor = increaseSpeedFactor * _increaseSpeedFactor;
-    //     delta = delta * increaseSpeedFactor;
-    //   }
-    //   triedWhenLocked = false;
-    // } else {
-    //   increaseSpeedFactor = 1;
-    // }
-
-    // print('Speed factor is $increaseSpeedFactor');
 
     scroll = scroll + delta;
     if (scroll > widget.controller.position.maxScrollExtent) {
@@ -120,31 +119,22 @@ class _SmoothScrollerState extends State<SmoothScroller> {
     micros = (delta.abs() * 1000 / (scrollSpeed / 1000)).round();
     locked = true;
 
-    hasAnimated = widget.controller
+    this.hasAnimated = widget.controller
         .animateTo(
-      scroll,
-      duration: Duration(microseconds: micros + 1),
-      curve: isScrollWheel && !wasScheduled ? Curves.ease : Curves.linear,
-      // curve: SpeedCurve(speed: animationSpeed),
-    )
-        .then((value) {
-      // if (isScrollWheel) locked = false;
-      // locked = false;
-      return true;
-    });
-
-    // if (triedWhenLocked) triedWhenLocked = false;
+          scroll,
+          duration: Duration(microseconds: micros + 1),
+          curve: isScrollWheel && !wasScheduled ? Curves.ease : Curves.linear,
+        )
+        .then((value) => true);
   }
 
   @override
   Widget build(BuildContext context) {
-    return (hasTriedToDetect && MouseState().isPresent)
+    return (MouseState().isPresent || !hasTriedToDetect)
         ? Listener(
             onPointerSignal: onPointerSignal,
             child: widget.child,
           )
-        : Container(
-            child: widget.child,
-          );
+        : widget.child;
   }
 }

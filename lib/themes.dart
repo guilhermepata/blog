@@ -52,20 +52,23 @@ class AppTheme {
           color: finalScheme.onSurface.withOpacity(.87),
         ),
         subtitle2: GoogleFonts.ibmPlexSerif(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: finalScheme.onSurface.withOpacity(.87)),
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: finalScheme.onSurface.withOpacity(.87),
+        ),
         caption: GoogleFonts.rubik(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 0.4,
-            color: finalScheme.onSurface.withOpacity(.6)),
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          fontStyle: FontStyle.italic,
+          letterSpacing: 0.4,
+          color: finalScheme.onSurface.withOpacity(.6),
+        ),
         bodyText1: GoogleFonts.ibmPlexSerif(
-            color: finalScheme.onSurface.withOpacity(.87),
-            fontSize: 16,
-            height: 2,
-            fontWeight: FontWeight.w400),
+          color: finalScheme.onSurface.withOpacity(.87),
+          fontSize: 16,
+          height: 2,
+          fontWeight: FontWeight.w400,
+        ),
         bodyText2: GoogleFonts.rubik(
             color: finalScheme.onSurface.withOpacity(.87),
             fontSize: 14,
@@ -130,6 +133,6 @@ class AppTheme {
         secondary: secondaryLight,
         secondaryVariant: secondaryVariantLight,
         background:
-            Color.alphaBlend(Colors.black.withOpacity(0.015), Colors.white)));
+            Color.alphaBlend(Colors.black.withOpacity(0.05), Colors.white)));
   }
 }

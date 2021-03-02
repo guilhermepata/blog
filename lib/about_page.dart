@@ -1,11 +1,16 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'app_shell.dart';
 import 'classes.dart';
+import 'app_shell.dart';
+import 'app_state.dart';
 
 class AboutPage extends StatelessWidget {
-  const AboutPage({Key key}) : super(key: key);
+  final void Function(AppMenu) onMenuTapped;
+
+  const AboutPage({Key key, this.onMenuTapped}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +36,19 @@ class AboutPage extends StatelessWidget {
           ),
         );
       },
-      child: AboutCard(),
+      child: AboutCard(
+        onMenuTapped: onMenuTapped,
+      ),
     );
   }
 }
 
 class AboutCard extends StatelessWidget {
+  final void Function(AppMenu) onMenuTapped;
+
   const AboutCard({
     Key key,
+    @required this.onMenuTapped,
   }) : super(key: key);
 
   @override
@@ -61,7 +71,7 @@ class AboutCard extends StatelessWidget {
                   backgroundColor: Colors.transparent,
                   radius: 72,
                   foregroundImage:
-                      AssetImage('images/photo_cropped_small.jpg')),
+                      AssetImage('assets/images/photo_cropped_small.jpeg')),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -83,11 +93,114 @@ class AboutCard extends StatelessWidget {
               endIndent: 72,
             ),
             Text.rich(
-              TextSpan(children: [
-                TextSpan(
+              TextSpan(
+                children: [
+                  TextSpan(
                     text:
-                        'Welcome to place on the web! I built this website myself using Flutter. Here you can find my essays and my')
-              ]),
+                        'Welcome to my place on the web! I am a Biomedical Engineering student and aspiring neuroscientist, ',
+                  ),
+                  TextSpan(
+                    text: 'and I built this website using ',
+                  ),
+                  LinkSpan(
+                    child: LinkTextWidget(
+                      'Flutter',
+                      fraction: 1,
+                      style: Theme.of(context).textTheme.bodyText2.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(.6),
+                          ),
+                      onTap: () {
+                        launch('https://flutter.dev');
+                      },
+                    ),
+                  ),
+                  TextSpan(
+                    text: '. Here you can find my ',
+                  ),
+                  LinkSpan(
+                    child: LinkTextWidget(
+                      'essays',
+                      fraction: 1,
+                      style: Theme.of(context).textTheme.bodyText2.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(.6),
+                          ),
+                      onTap: () {
+                        onMenuTapped(AppMenu.essays);
+                      },
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' and my other little ',
+                  ),
+                  LinkSpan(
+                    child: LinkTextWidget(
+                      'projects',
+                      fraction: 1,
+                      style: Theme.of(context).textTheme.bodyText2.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(.6),
+                          ),
+                      onTap: () {
+                        onMenuTapped(AppMenu.projects);
+                      },
+                    ),
+                  ),
+                  TextSpan(
+                    text: '. You can check out my ',
+                  ),
+                  LinkSpan(
+                    child: LinkTextWidget(
+                      'Medium',
+                      fraction: 1,
+                      style: Theme.of(context).textTheme.bodyText2.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(.6),
+                          ),
+                      onTap: () {
+                        launch('https://guilhermepata.medium.com');
+                      },
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' page too, where I also publish my essays.',
+                  ),
+                  TextSpan(
+                    text: ' The code for all of this is freely available on ',
+                  ),
+                  LinkSpan(
+                    child: LinkTextWidget(
+                      'GitHub',
+                      fraction: 1,
+                      style: Theme.of(context).textTheme.bodyText2.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(.6),
+                          ),
+                      onTap: () {
+                        launch('https://github.com/guilhermepata/blog');
+                      },
+                    ),
+                  ),
+                  TextSpan(
+                    text: '. Enjoy!',
+                  ),
+                ],
+              ),
+              style: Theme.of(context).textTheme.bodyText2.copyWith(
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withOpacity(.6),
+                  ),
               strutStyle: StrutStyle(
                 height: Theme.of(context).textTheme.bodyText2.height,
                 forceStrutHeight: true,

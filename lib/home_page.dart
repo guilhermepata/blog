@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class ArticleCard extends StatefulWidget {
+class ArticleCard extends StatelessWidget {
   const ArticleCard(
     this.article, {
     Key key,
@@ -93,22 +93,9 @@ class ArticleCard extends StatefulWidget {
   final void Function(Article) onArticleTapped;
 
   @override
-  _ArticleCardState createState() => _ArticleCardState();
-}
-
-class _ArticleCardState extends State<ArticleCard> {
-  @override
   Widget build(BuildContext context) {
-    // return Consumer<ShellState>(
-    //   builder: (context, state, _) {
-    //     // final cardCornerRadius = state.cardCornerRadius;
-    //     // final gutters = state.gutters;
-
-    //   },
-    // );
-
     return FutureBuilder(
-        future: widget.article.load(),
+        future: article.load(),
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
           return Center(
             child: ConstrainedBox(
@@ -127,10 +114,10 @@ class _ArticleCardState extends State<ArticleCard> {
                 child: Column(
                   children: [
                     CrossFadeWidgets(
-                        showFirst: widget.article.isLoaded,
-                        firstChild: widget.article.isLoaded
+                        showFirst: article.isLoaded,
+                        firstChild: article.isLoaded
                             ? Image.network(
-                                widget.article.imageUrl,
+                                article.imageUrl,
                                 frameBuilder: (BuildContext context,
                                     Widget child,
                                     int frame,
@@ -167,7 +154,7 @@ class _ArticleCardState extends State<ArticleCard> {
                                     ],
                                   );
                                 },
-                                semanticLabel: widget.article.altText,
+                                semanticLabel: article.altText,
                                 width: 600,
                                 height: 600 / 21 * 9,
                                 fit: BoxFit.cover,
@@ -191,10 +178,8 @@ class _ArticleCardState extends State<ArticleCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CrossFadeText(
-                            widget.article.isLoaded
-                                ? widget.article.title
-                                : null,
-                            showText: widget.article.isLoaded,
+                            article.isLoaded ? article.title : null,
+                            showText: article.isLoaded,
                             style: Theme.of(context).textTheme.headline5,
                             // width: 200,
                           ),
@@ -202,10 +187,8 @@ class _ArticleCardState extends State<ArticleCard> {
                             height: 6,
                           ),
                           CrossFadeText(
-                            widget.article.isLoaded
-                                ? widget.article.subtitle
-                                : null,
-                            showText: widget.article.isLoaded,
+                            article.isLoaded ? article.subtitle : null,
+                            showText: article.isLoaded,
                             style: Theme.of(context)
                                 .textTheme
                                 .subtitle1
@@ -218,8 +201,8 @@ class _ArticleCardState extends State<ArticleCard> {
                           ),
                           SizedBox(height: 12),
                           CrossFadeTextWidgetBlock(
-                              widget.article.isLoaded
-                                  ? widget.article.buildParagraph(context, 0,
+                              article.isLoaded
+                                  ? article.buildParagraph(context, 0,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyText2
@@ -232,7 +215,7 @@ class _ArticleCardState extends State<ArticleCard> {
                                       maxLines: 4,
                                       textAlign: TextAlign.justify)
                                   : null,
-                              showText: widget.article.isLoaded,
+                              showText: article.isLoaded,
                               numLines: 4,
                               style: Theme.of(context)
                                   .textTheme
@@ -248,14 +231,14 @@ class _ArticleCardState extends State<ArticleCard> {
                       ),
                     ),
                     CrossFadeWidgets(
-                      showFirst: widget.article.isLoaded,
+                      showFirst: article.isLoaded,
                       firstChild: ButtonBar(
                         buttonPadding:
                             EdgeInsets.all(context.read<ShellState>().gutters),
                         children: [
-                          ElevatedButton(
+                          OutlinedButton(
                               onPressed: () {
-                                widget.onArticleTapped(widget.article);
+                                onArticleTapped(article);
                               },
                               child: Text('Read more')),
                         ],
@@ -264,7 +247,7 @@ class _ArticleCardState extends State<ArticleCard> {
                         buttonPadding:
                             EdgeInsets.all(context.read<ShellState>().gutters),
                         children: [
-                          ElevatedButton(
+                          OutlinedButton(
                               onPressed: null, child: Text('Read more')),
                         ],
                       ),
@@ -345,6 +328,7 @@ class CrossFadeText extends StatelessWidget {
   final String text;
   final TextStyle style;
   final double width;
+  final int maxLines;
 
   const CrossFadeText(
     this.text, {
@@ -352,6 +336,7 @@ class CrossFadeText extends StatelessWidget {
     @required this.showText,
     this.style,
     this.width,
+    this.maxLines,
   }) : super(key: key);
 
   @override
@@ -406,28 +391,6 @@ class CrossFadeWidgets extends StatelessWidget {
           showFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       duration: Duration(milliseconds: 300),
     );
-  }
-}
-
-class BodyCard extends StatelessWidget {
-  const BodyCard({
-    Key key,
-    @required this.gutters,
-    @required this.article,
-  }) : super(key: key);
-
-  final double gutters;
-  final Article article;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-        child: Padding(
-      padding: EdgeInsets.all(gutters),
-      child: Column(
-        children: article.buildContents(context),
-      ),
-    ));
   }
 }
 

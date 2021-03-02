@@ -3,13 +3,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:icon_shadow/icon_shadow.dart';
 import 'package:provider/provider.dart';
-import 'package:visibility_detector/visibility_detector.dart';
+// import 'package:visibility_detector/visibility_detector.dart';
 import 'classes.dart';
 import 'widgets.dart';
+import 'app_shell.dart';
+import 'app_state.dart';
 
 class ImagePositionNotifier extends ValueNotifier {
   ImagePositionNotifier(value) : super(value);
@@ -56,7 +59,15 @@ class _ArticlePageState extends State<ArticlePage>
 
   @override
   void initState() {
-    VisibilityDetectorController.instance.updateInterval = Duration.zero;
+    // VisibilityDetectorController.instance.updateInterval = Duration.zero;
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels > height / 3) {
+        appBarStateController.fling();
+      } else {
+        appBarStateController.fling(velocity: -1);
+      }
+    });
 
     appBarStateController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 100));
@@ -74,6 +85,16 @@ class _ArticlePageState extends State<ArticlePage>
       setState(() {});
     });
 
+    MouseState().addListener(() {
+      setState(() {});
+    });
+
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     appBarColor = ColorTween(
             begin: Colors.transparent,
             end: Color.alphaBlend(Colors.white.withOpacity(.09),
@@ -89,12 +110,6 @@ class _ArticlePageState extends State<ArticlePage>
     appBarForegroundColor.addListener(() {
       setState(() {});
     });
-
-    MouseState().addListener(() {
-      setState(() {});
-    });
-
-    super.initState();
   }
 
   @override
@@ -130,7 +145,9 @@ class _ArticlePageState extends State<ArticlePage>
 
       webLayoutMinWidth = maxContentWidth + gutters * 2;
 
-      isMobileLayout = width < webLayoutMinWidth;
+      isMobileLayout = width < 1023;
+
+      if (!isMobileLayout && width < webLayoutMinWidth) isMobileLayout = true;
 
       if (usefulWidth < maxContentWidth)
         cardCornerRadius = 0;
@@ -151,6 +168,17 @@ class _ArticlePageState extends State<ArticlePage>
           if (!widget.article.isLoaded)
             return Scaffold(
                 appBar: AppBar(
+                  // THIS IS THE LOADING ONE
+                  brightness: isAppBarElevated
+                      ? Theme.of(context).brightness == Brightness.light
+                          ? Brightness.light
+                          : Brightness.dark
+                      : Brightness.dark,
+                  systemOverlayStyle: isAppBarElevated
+                      ? Theme.of(context).brightness == Brightness.light
+                          ? SystemUiOverlayStyle.dark
+                          : SystemUiOverlayStyle.light
+                      : SystemUiOverlayStyle.light,
                   shadowColor: Colors.black.withOpacity(
                       appBarStateController.value *
                           appBarStateController.value),
@@ -186,6 +214,11 @@ class _ArticlePageState extends State<ArticlePage>
                     appBarStateController.value * appBarStateController.value),
                 backgroundColor: appBarColor.value,
                 backwardsCompatibility: false,
+                systemOverlayStyle: isAppBarElevated
+                    ? Theme.of(context).brightness == Brightness.light
+                        ? SystemUiOverlayStyle.dark
+                        : SystemUiOverlayStyle.light
+                    : SystemUiOverlayStyle.light,
                 foregroundColor: appBarForegroundColor.value,
                 leadingWidth: 56 + appBarMargins,
                 leading: IconButton(
@@ -202,11 +235,51 @@ class _ArticlePageState extends State<ArticlePage>
                   'Essay: ' + widget.article.title,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.headline6.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(appBarStateController.value * .87)),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(appBarStateController.value * .87),
+                      ),
                 ),
+                actions: [
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                      child: PopupMenuButton<AppBarMenuOptions>(
+                        onSelected: (AppBarMenuOptions result) {
+                          if (result == AppBarMenuOptions.changeTheme) {
+                            context.read<AppState>().flipTheme();
+                          }
+                        },
+                        itemBuilder: (BuildContext context) =>
+                            <PopupMenuEntry<AppBarMenuOptions>>[
+                          PopupMenuItem<AppBarMenuOptions>(
+                            value: AppBarMenuOptions.changeTheme,
+                            child: ListTile(
+                              dense: true,
+                              // visualDensity:
+                              //     VisualDensity(horizontal: -4, vertical: -4),
+                              minLeadingWidth: 18,
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 0),
+                              horizontalTitleGap: 8,
+                              leading: Icon(
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Icons.brightness_7
+                                    : Icons.brightness_4,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(.87),
+                              ),
+                              title: Text(
+                                'Change theme',
+                                // style: Theme.of(context).textTheme.bodyText2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ))
+                ],
               ),
               body: NotificationListener(
                 onNotification: (notification) {
@@ -264,18 +337,8 @@ class _ArticlePageState extends State<ArticlePage>
                               ? NeverScrollableScrollPhysics()
                               : null,
                           children: [
-                            VisibilityDetector(
-                              key: ValueKey('detector'),
-                              onVisibilityChanged: (info) {
-                                if (info.visibleFraction <= 0.01) {
-                                  appBarStateController.fling();
-                                } else if (info.visibleFraction > 0.01) {
-                                  appBarStateController.fling(velocity: -1);
-                                }
-                              },
-                              child: SizedBox(
-                                height: height / 3 - 56,
-                              ),
+                            SizedBox(
+                              height: height / 3 - 56,
                             ),
                             Center(
                               child: Container(
@@ -374,26 +437,46 @@ class _ArticlePageState extends State<ArticlePage>
           buttonPadding: EdgeInsets.zero,
           alignment: MainAxisAlignment.center,
           children: [
-            TextButton.icon(
-                onPressed: () {},
-                label: Text('Share'),
-                icon: Icon(
-                  Icons.share,
-                  size: 18,
-                ))
+            Tooltip(
+              message: 'Share',
+              child: TextButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: Uri.base.toString()));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        width: width < maxContentWidth
+                            ? width - 32
+                            : maxContentWidth - 32,
+                        behavior: SnackBarBehavior.floating,
+                        content: Text(
+                          'URL copied to clipboard. Share it an app!',
+                        ),
+                      ),
+                    );
+                  },
+                  label: Text('Share'),
+                  icon: Icon(
+                    Icons.share,
+                    size: 18,
+                  )),
+            )
           ],
         ),
       );
     else if (index > 2)
       result = Padding(
-          padding: EdgeInsets.symmetric(horizontal: gutters),
-          child: widget.article.buildParagraph(context, index - 3,
-              style: Theme.of(context).textTheme.bodyText1.copyWith(
-                  fontSize: 16,
-                  height: 2,
-                  color:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(.6)),
-              textAlign: TextAlign.left));
+        padding: EdgeInsets.symmetric(horizontal: gutters),
+        child: widget.article.buildParagraph(
+          context,
+          index - 3,
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+              fontSize: 16,
+              height: 2,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(.7)),
+          textAlign: TextAlign.left,
+          overflow: TextOverflow.visible,
+        ),
+      );
     else
       result = SizedBox(height: 0);
     return result;

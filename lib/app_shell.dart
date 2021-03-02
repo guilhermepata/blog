@@ -5,12 +5,13 @@ import 'app_state.dart';
 import 'home_page.dart';
 import 'classes.dart';
 import 'about_page.dart';
+import 'essays_page.dart';
 
 class ShellState extends ChangeNotifier {
   final BuildContext context;
 
   bool _isMobileLayout = false;
-  double _margins = 0;
+  // double _margins = 0;
   double _gutters = 24;
   double _cardCornerRadius = 8;
   StandardDrawerState _standardDrawerState = StandardDrawerState.closed;
@@ -29,7 +30,7 @@ class ShellState extends ChangeNotifier {
   }
 
   bool get isMobileLayout => _isMobileLayout;
-  double get margins => _margins;
+  // double get margins => _margins;
   double get gutters => _gutters;
   double get cardCornerRadius => _cardCornerRadius;
   StandardDrawerState get standardDrawerState => _standardDrawerState;
@@ -46,11 +47,11 @@ class ShellState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set margins(double value) {
-    _margins = value;
-    // print('Margins changed');
-    notifyListeners();
-  }
+  // set margins(double value) {
+  //   _margins = value;
+  //   // print('Margins changed');
+  //   notifyListeners();
+  // }
 
   set gutters(double value) {
     _gutters = value;
@@ -78,8 +79,7 @@ class AppShell extends StatefulWidget {
   _AppShellState createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell>
-    with SingleTickerProviderStateMixin {
+class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   //
   ShellState shellState;
 
@@ -104,12 +104,12 @@ class _AppShellState extends State<AppShell>
     shellState.isMobileLayout = value;
   }
 
-  set margins(double value) {
-    // setState(() {
-    _margins = value;
-    shellState.margins = value;
-    // });
-  }
+  // set margins(double value) {
+  //   // setState(() {
+  //   _margins = value;
+  //   // shellState.margins = value;
+  //   // });
+  // }
 
   set gutters(double value) {
     _gutters = value;
@@ -130,7 +130,7 @@ class _AppShellState extends State<AppShell>
   double width, height, usefulWidth, usefulHeight;
   double appBarMargins;
   double maxContentWidth = 600;
-  double contentWidth;
+  // double contentWidth;
   double webLayoutMinWidth;
   double standardDrawerMaxWidth = 144 + 8.0;
 
@@ -162,18 +162,29 @@ class _AppShellState extends State<AppShell>
     _backButtonDispatcher = Router.of(context)
         .backButtonDispatcher
         .createChildBackButtonDispatcher();
+    brightness = Theme.of(context).brightness;
+    setState(() {
+      appBarColor = ColorTween(
+              begin: Theme.of(context).colorScheme.background,
+              end: Color.alphaBlend(Colors.white.withOpacity(.0),
+                  Theme.of(context).colorScheme.surface))
+          .animate(appBarStateController);
+      appBarColor.addListener(() {
+        setState(() {});
+      });
+    });
   }
 
   @override
   void initState() {
     super.initState();
 
-    brightness = Theme.of(context).brightness;
-
     shellState = ShellState(context);
 
     _routerDelegate = InnerRouterDelegate(
-        onArticleTapped: widget.onArticleTapped, shellState: shellState);
+        onMenuTapped: widget.onMenuTapped,
+        onArticleTapped: widget.onArticleTapped,
+        shellState: shellState);
 
     shellState.scrollController = scrollController;
 
@@ -249,20 +260,22 @@ class _AppShellState extends State<AppShell>
 
     webLayoutMinWidth = maxContentWidth + standardDrawerMaxWidth + gutters * 2;
 
-    isMobileLayout = width < webLayoutMinWidth;
+    isMobileLayout = width < 1023;
 
-    if (usefulWidth < maxContentWidth + gutters * 2) {
-      if (usefulWidth < maxContentWidth)
-        margins = 0;
-      else
-        margins = gutters;
-    } else {
-      margins = (usefulWidth - maxContentWidth) / 2;
-    }
+    if (!isMobileLayout && width < webLayoutMinWidth) isMobileLayout = true;
 
-    contentWidth = usefulWidth - margins * 2;
+    // if (usefulWidth < maxContentWidth + gutters * 2) {
+    //   if (usefulWidth < maxContentWidth)
+    //     margins = 0;
+    //   else
+    //     margins = gutters;
+    // } else {
+    //   margins = (usefulWidth - maxContentWidth) / 2;
+    // }
 
-    if (margins == 0)
+    // contentWidth = usefulWidth;
+
+    if (usefulWidth < maxContentWidth)
       cardCornerRadius = 0;
     else
       cardCornerRadius = gutters / 4;
@@ -278,19 +291,6 @@ class _AppShellState extends State<AppShell>
         standardDrawerController.value = 0;
         standardDrawerState = StandardDrawerState.closed;
       }
-    }
-
-    bool hasBrightnessChanged = brightness == Theme.of(context).brightness;
-
-    if (!isInitialized || hasBrightnessChanged) {
-      appBarColor = ColorTween(
-              begin: Theme.of(context).colorScheme.background,
-              end: Color.alphaBlend(Colors.white.withOpacity(.0),
-                  Theme.of(context).colorScheme.surface))
-          .animate(appBarStateController);
-      appBarColor.addListener(() {
-        setState(() {});
-      });
     }
 
     isInitialized = true;
@@ -309,11 +309,42 @@ class _AppShellState extends State<AppShell>
         elevation: appBarStateController.value * 4,
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0),
-            child: IconButton(
-                icon: Icon(Icons.more_vert),
-                onPressed: context.read<AppState>().flipTheme),
-          )
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              child: PopupMenuButton<AppBarMenuOptions>(
+                onSelected: (AppBarMenuOptions result) {
+                  if (result == AppBarMenuOptions.changeTheme) {
+                    context.read<AppState>().flipTheme();
+                  }
+                },
+                itemBuilder: (BuildContext context) =>
+                    <PopupMenuEntry<AppBarMenuOptions>>[
+                  PopupMenuItem<AppBarMenuOptions>(
+                    value: AppBarMenuOptions.changeTheme,
+                    child: ListTile(
+                      dense: true,
+                      // visualDensity:
+                      //     VisualDensity(horizontal: -4, vertical: -4),
+                      minLeadingWidth: 18,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                      horizontalTitleGap: 8,
+                      leading: Icon(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Icons.brightness_7
+                            : Icons.brightness_4,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(.87),
+                      ),
+                      title: Text(
+                        'Change theme',
+
+                        // style: Theme.of(context).textTheme.bodyText2,
+                      ),
+                    ),
+                  ),
+                ],
+              ))
         ],
         backgroundColor: appBarColor.value,
         leadingWidth: 56 + appBarMargins,
@@ -441,6 +472,7 @@ class _AppShellState extends State<AppShell>
             onTap: () {
               widget.onMenuTapped(menu);
               if (displayMobileLayout) Navigator.of(context).pop();
+              appBarStateController.fling(velocity: -1);
             },
           ),
         ),
@@ -451,6 +483,8 @@ class _AppShellState extends State<AppShell>
     return result;
   }
 }
+
+enum AppBarMenuOptions { changeTheme }
 
 enum StandardDrawerState { closed, closing, open, opening }
 
@@ -465,7 +499,7 @@ class FadeAnimationPage extends Page {
       pageBuilder: (context, animation, secondaryAnimation) {
         var curveTween = CurveTween(curve: Curves.easeIn);
         return FadeThroughTransition(
-          fillColor: Theme.of(context).backgroundColor,
+          // fillColor: Theme.of(context).backgroundColor,
           // key: key,
           // opacity: animation.drive(curveTween),
           animation: animation,
@@ -482,11 +516,14 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<BlogPath> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+  final void Function(AppMenu) onMenuTapped;
   final void Function(Article) onArticleTapped;
   final ShellState shellState;
 
   InnerRouterDelegate(
-      {@required this.onArticleTapped, @required this.shellState});
+      {@required this.onMenuTapped,
+      @required this.onArticleTapped,
+      @required this.shellState});
 
   @override
   Widget build(BuildContext context) {
@@ -498,22 +535,39 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
           pages: (appState.selectedMenu == AppMenu.home)
               ? [
                   FadeAnimationPage(
-                      key: ValueKey('HomeScreen1'),
-                      child: HomeScreen(
-                        key: ValueKey('HomeScreen'),
-                        onArticleTapped: onArticleTapped,
-                      )),
+                    key: ValueKey('HomeScreen1'),
+                    child: HomeScreen(
+                      key: ValueKey('HomeScreen'),
+                      onArticleTapped: onArticleTapped,
+                    ),
+                  ),
                 ]
               : (appState.selectedMenu == AppMenu.about)
                   ? [
                       FadeAnimationPage(
-                          key: ValueKey('About1'),
-                          child: AboutPage(key: ValueKey('About')))
+                        key: ValueKey('About1'),
+                        child: AboutPage(
+                          key: ValueKey('About'),
+                          onMenuTapped: onMenuTapped,
+                        ),
+                      ),
                     ]
-                  : [
-                      FadeAnimationPage(
-                          key: ValueKey('Else'), child: Container())
-                    ],
+                  : (appState.selectedMenu == AppMenu.essays)
+                      ? [
+                          FadeAnimationPage(
+                            key: ValueKey('EssaysScreen1'),
+                            child: EssaysScreen(
+                              key: ValueKey('EssaysScreen'),
+                              onArticleTapped: onArticleTapped,
+                            ),
+                          ),
+                        ]
+                      : [
+                          FadeAnimationPage(
+                            key: ValueKey('Else'),
+                            child: Container(),
+                          ),
+                        ],
           onPopPage: (route, value) {
             return true;
           }, // doesn't need to handle pops
