@@ -44,3 +44,14 @@ If the traits implicated in sexual dimorphism, like all others, can vary continu
 ¹The genome is an organism’s set of genes.
 ²The phenotype is an organism’s set of observable traits.
 ³Transmedicalism refers to the notion that suffering from gender dysphoria or going through gender transition are necessary factors for being trans, but it is also otherwise associated with the idea of treating being trans as a medical (and sometimes specifically neurological) diagnosis. The DSM, cited here, defines the diagnosis of gender dysphoria uniquely in terms of a person’s experience, and also states that experiencing gender dysphoria is not necessary for a person to be trans.
+
+# References
+[1] A. Griffiths, W. Gelbart, and J. Miller, "Genetics begins with Variation," in Modern Genetic Analysis, New York, W. H. Freeman, 1999.
+[2] R. Singh, Elements of Entomology, Rastogi Publications, 2006, p. 284.
+[3] K. Anderson, T. Linksvayer, and C. Smith, "The causes and consequences of genetic caste determination in ants (Hymenoptera: Formicidae)," 2008.
+[4] B. Johnson, M. Borowiec, J. Chiu, E. Lee, J. Atallah, and P. Ward, "Phylogenomics resolves evolutionary relationships among ants, bees, and wasps," Current Biology, vol. 23, 2013.
+[5] P. Berta, J. Hawkins, A. Sinclair, A. Taylor, B. Griffiths, P. Goodfellow, and M. Fellous, "Genetic evidence equating SRY and the testis-determining factor," 1990.
+[6] A. Galani, S. Kitsiou-Tzeli, C. Sofokleous, E. Kanavakis, and A. Kalpini-Mavrou, "Androgen insensitivity syndrome: clinical features and molecular defects," 2008.
+[7] United Nations Office of the High Commissioner for Human Rights, "Free & Equal Campaign Fact Sheet: Intersex," 2015.
+[8] D. Swaab et al., "A sex difference in the human brain and its relation to transsexuality," 1995.
+[9] American Psychiatry Association, Diagnostic and Statistical Manual of Mental Disorders (DSM-5), 5 ed., American Psychiatric Publishing.

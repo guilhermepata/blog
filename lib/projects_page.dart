@@ -81,7 +81,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                   itemBuilder: (context, int i) {
                     if (i == 0)
                       return ContentTile(
-                        title: 'Rhythym App',
+                        title: 'Rhythm App',
                         subtitle:
                             'A timer and metronome to use at the gym. WIP, and built for small screen sizes oriented in portrait mode.',
                         onTap: () {
