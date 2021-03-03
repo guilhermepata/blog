@@ -211,20 +211,100 @@ class ArticleTile extends StatelessWidget {
 
   final Article article;
   final void Function(Article) onArticleTapped;
+  final double imageSide = 72 + 48.0 + 8;
 
   @override
   Widget build(BuildContext context) {
-    return ContentTile(
-      title: article.isLoaded ? article.title : null,
-      subtitle: article.isLoaded && article.subtitle != null
-          ? article.subtitle
-          : null,
-      imageUrl: article.imageUrl,
-      onTap: () {
-        onArticleTapped(article);
-      },
-      future: article.load(),
-      condition: article.isLoaded,
-    );
+    return FutureBuilder(
+        future: article.load(),
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 600),
+              child: Selector<ShellState, double>(
+                selector: (_, state) => state.cardCornerRadius,
+                builder: (contex, cardCornerRadius, child) {
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(cardCornerRadius)),
+                    margin: EdgeInsets.zero,
+                    clipBehavior: Clip.hardEdge,
+                    child: child,
+                  );
+                },
+                child: InkWell(
+                  onTap: () => onArticleTapped(article),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Selector<ShellState, double>(
+                          selector: (_, state) => state.gutters,
+                          builder: (context, gutters, child) {
+                            return Padding(
+                              padding: EdgeInsets.all(gutters),
+                              child: child,
+                            );
+                          },
+                          child: ListTile(
+                            // isThreeLine: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: CrossFadeText(
+                              article.isLoaded ? article.title : null,
+                              showText: article.isLoaded,
+                              // style: Theme.of(context).textTheme.headline5,
+                              // width: 200,
+                            ),
+                            subtitle: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 4.0),
+                              child: CrossFadeTextWidgetBlock(
+                                Text(
+                                  article.isLoaded ? article.subtitle : '',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                showText: article.isLoaded,
+                                numLines: 2,
+                                // style: Theme.of(context)
+                                //     .textTheme
+                                //     .subtitle1
+                                //     .copyWith(
+                                //         color: Theme.of(context)
+                                //             .colorScheme
+                                //             .onSurface
+                                //             .withOpacity(.60)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: imageSide,
+                        width: imageSide,
+                        child: CrossFadeWidgets(
+                          showFirst: article.isLoaded,
+                          firstChild: article.isLoaded
+                              ? Ink.image(
+                                  width: imageSide,
+                                  height: imageSide,
+                                  fit: BoxFit.cover,
+                                  image: NetworkImage(
+                                    article.imageUrl,
+                                  ),
+                                )
+                              : null,
+                          secondChild: Skeleton(
+                            width: imageSide,
+                            height: imageSide,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
   }
 }

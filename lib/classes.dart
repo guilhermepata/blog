@@ -491,6 +491,12 @@ class BodyTextParser {
     paragraph = paragraph.replaceAll(imageExp, '');
     if (paragraph.isEmpty) return segments;
 
+    // replace all empty spaces
+    final spaceMatches = RegExp(r'([\s]+)\n').allMatches(paragraph);
+    for (var match in spaceMatches) {
+      paragraph = paragraph.replaceRange(match.start, match.end, '\n');
+    }
+
     var isQuote = false;
 
     if (paragraph.substring(0, 2) == '> ') {
@@ -499,7 +505,7 @@ class BodyTextParser {
     }
 
     if (!isQuote) {
-      final headlineExp = RegExp(r'#+ +(.+?\s\n)');
+      final headlineExp = RegExp(r'#+ +(.+?\n)');
       final matches = headlineExp.allMatches(paragraph).toList();
 
       if (matches.length > 0 && matches.first.start == 0) {
