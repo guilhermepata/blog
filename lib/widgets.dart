@@ -7,15 +7,23 @@ import 'package:universal_platform/universal_platform.dart';
 class MouseState extends ValueNotifier {
   MouseState._privateConstructor(value) : super(value);
 
-  bool get isPresent => value;
-  set isPresent(bool newValue) {
-    this.value = newValue;
-  }
+  // bool get isPresent => value;
+  // set isPresent(bool newValue) {
+  //   this.value = newValue;
+  // }
 
   static final MouseState _instance = MouseState._privateConstructor(false);
 
   factory MouseState() {
     return _instance;
+  }
+
+  static bool get isPresent {
+    return MouseState().value;
+  }
+
+  static set isPresent(bool value) {
+    MouseState().value = value;
   }
 }
 
@@ -56,14 +64,14 @@ class _SmoothScrollerState extends State<SmoothScroller> {
   bool hasNewSchedule = false;
 
   void onPointerSignal(PointerSignalEvent pointerSignal) {
-    if (hasTriedToDetect && !MouseState().isPresent) return;
+    if (hasTriedToDetect && !MouseState.isPresent) return;
 
     if (!hasTriedToDetect) {
       hasTriedToDetect = true;
       if (pointerSignal.kind == PointerDeviceKind.mouse)
-        MouseState().isPresent = true;
+        MouseState.isPresent = true;
       else
-        MouseState().isPresent = false;
+        MouseState.isPresent = false;
     }
 
     if (pointerSignal is PointerScrollEvent) {
@@ -130,7 +138,7 @@ class _SmoothScrollerState extends State<SmoothScroller> {
 
   @override
   Widget build(BuildContext context) {
-    return (MouseState().isPresent || !hasTriedToDetect)
+    return (MouseState.isPresent || !hasTriedToDetect)
         ? Listener(
             onPointerSignal: onPointerSignal,
             child: widget.child,

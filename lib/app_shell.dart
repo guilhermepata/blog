@@ -6,6 +6,7 @@ import 'home_page.dart';
 import 'classes.dart';
 import 'about_page.dart';
 import 'essays_page.dart';
+import 'projects_page.dart';
 
 class ShellState extends ChangeNotifier {
   final BuildContext context;
@@ -16,7 +17,8 @@ class ShellState extends ChangeNotifier {
   double _cardCornerRadius = 8;
   StandardDrawerState _standardDrawerState = StandardDrawerState.closed;
   List<Article> articles = <Article>[];
-  ScrollController scrollController = ScrollController();
+  // ScrollController scrollController = ScrollController();
+  Fling _appBarFlinger;
 
   bool _areArticlesLoaded = false;
 
@@ -36,6 +38,8 @@ class ShellState extends ChangeNotifier {
   StandardDrawerState get standardDrawerState => _standardDrawerState;
 
   bool get areArticlesLoaded => _areArticlesLoaded;
+
+  Fling get appBarFlinger => _appBarFlinger;
 
   bool get displayMobileLayout {
     return (isMobileLayout ?? false) &&
@@ -67,7 +71,14 @@ class ShellState extends ChangeNotifier {
     _standardDrawerState = value;
     notifyListeners();
   }
+
+  set appBarFlinger(Fling value) {
+    _appBarFlinger = value;
+    notifyListeners();
+  }
 }
+
+enum Fling { forward, backward, none }
 
 class AppShell extends StatefulWidget {
   final void Function(AppMenu) onMenuTapped;
@@ -91,7 +102,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   double _cardCornerRadius;
   StandardDrawerState _standardDrawerState;
   // List<Article> articles = <Article>[];
-  ScrollController scrollController = ScrollController();
+  // ScrollController scrollController = ScrollController();
 
   bool get isMobileLayout => _isMobileLayout;
   double get margins => _margins;
@@ -181,12 +192,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
 
     shellState = ShellState(context);
 
-    _routerDelegate = InnerRouterDelegate(
-        onMenuTapped: widget.onMenuTapped,
-        onArticleTapped: widget.onArticleTapped,
-        shellState: shellState);
-
-    shellState.scrollController = scrollController;
+    // shellState.scrollController = scrollController;
 
     standardDrawerController = AnimationController(
         value: 1.0, vsync: this, duration: Duration(milliseconds: 500));
@@ -235,13 +241,20 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
       setState(() {});
     });
 
-    scrollController.addListener(() {
-      if (scrollController.offset > 0) {
+    shellState.addListener(() {
+      if (shellState.appBarFlinger == Fling.forward) {
         appBarStateController.fling();
-      } else {
+        shellState.appBarFlinger = Fling.none;
+      } else if (shellState.appBarFlinger == Fling.backward) {
         appBarStateController.fling(velocity: -1);
+        shellState.appBarFlinger = Fling.none;
       }
     });
+
+    _routerDelegate = InnerRouterDelegate(
+        onMenuTapped: widget.onMenuTapped,
+        onArticleTapped: widget.onArticleTapped,
+        shellState: shellState);
   }
 
   void buildState(BuildContext context) {
@@ -562,12 +575,21 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
                             ),
                           ),
                         ]
-                      : [
-                          FadeAnimationPage(
-                            key: ValueKey('Else'),
-                            child: Container(),
-                          ),
-                        ],
+                      : (appState.selectedMenu == AppMenu.projects)
+                          ? [
+                              FadeAnimationPage(
+                                key: ValueKey('ProjectsScreen1'),
+                                child: ProjectsScreen(
+                                  key: ValueKey('ProjectsScreen'),
+                                ),
+                              ),
+                            ]
+                          : [
+                              FadeAnimationPage(
+                                key: ValueKey('Else'),
+                                child: Container(),
+                              ),
+                            ],
           onPopPage: (route, value) {
             return true;
           }, // doesn't need to handle pops

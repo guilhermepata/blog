@@ -25,17 +25,33 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    scrollController = context.read<ShellState>().scrollController;
+    scrollController = ScrollController();
+    scrollController.addListener(() {
+      if (scrollController.offset > 0) {
+        context.read<ShellState>().appBarFlinger = Fling.forward;
+      } else {
+        context.read<ShellState>().appBarFlinger = Fling.backward;
+      }
+    });
+    // context.read<AppState>().addListener(scrollControllerListener);
     MouseState().addListener(() {
       setState(() {});
     });
   }
+
+  // void scrollControllerListener() {
+  //   if (context.read<AppState>().selectedMenu != AppMenu.home && mounted)
+  //     setState(() {
+  //       scrollController = null;
+  //     });
+  // }
 
   @override
   void dispose() {
     MouseState().removeListener(() {
       setState(() {});
     });
+    // context.read<AppState>().removeListener(scrollControllerListener);
     super.dispose();
   }
 
@@ -45,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
         selector: (_, state) => Tuple4(state.displayMobileLayout, state.gutters,
             state.articles, state.areArticlesLoaded),
         builder: (context, state, _) {
-          final articles = state.item3;
           // final articleCards = <Widget>[];
 
           // for (var article in articles) {
@@ -55,13 +70,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return Scaffold(
             body: Scrollbar(
-              thickness: MouseState().isPresent ? null : 0,
-              isAlwaysShown: MouseState().isPresent,
+              thickness: MouseState.isPresent ? null : 0,
+              isAlwaysShown: MouseState.isPresent,
               controller: scrollController,
               child: SmoothScroller(
                 controller: scrollController,
                 child: ListView.separated(
-                  physics: MouseState().isPresent
+                  physics: MouseState.isPresent
                       ? NeverScrollableScrollPhysics()
                       : null,
                   controller: scrollController,
@@ -70,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   separatorBuilder: (context, int i) =>
                       SizedBox(height: state.item2),
                   itemBuilder: (context, int i) {
-                    return ArticleCard(state.item3[i],
+                    return ArticleCard2(state.item3[i],
                         onArticleTapped: widget.onArticleTapped);
                   },
                 ),
@@ -181,6 +196,7 @@ class ArticleCard extends StatelessWidget {
                             article.isLoaded ? article.title : null,
                             showText: article.isLoaded,
                             style: Theme.of(context).textTheme.headline5,
+                            maxLines: 200,
                             // width: 200,
                           ),
                           SizedBox(
@@ -197,6 +213,7 @@ class ArticleCard extends StatelessWidget {
                                         .colorScheme
                                         .onSurface
                                         .withOpacity(.60)),
+                            maxLines: 1000,
                             // width: 300,
                           ),
                           SizedBox(height: 12),
@@ -226,6 +243,234 @@ class ArticleCard extends StatelessWidget {
                                           .onSurface
                                           .withOpacity(.60)),
                               overflow: TextOverflow.fade,
+                              textAlign: TextAlign.justify),
+                        ],
+                      ),
+                    ),
+                    CrossFadeWidgets(
+                      showFirst: article.isLoaded,
+                      firstChild: ButtonBar(
+                        buttonPadding:
+                            EdgeInsets.all(context.read<ShellState>().gutters),
+                        children: [
+                          OutlinedButton(
+                              onPressed: () {
+                                onArticleTapped(article);
+                              },
+                              child: Text('Read more')),
+                        ],
+                      ),
+                      secondChild: ButtonBar(
+                        buttonPadding:
+                            EdgeInsets.all(context.read<ShellState>().gutters),
+                        children: [
+                          OutlinedButton(
+                              onPressed: null, child: Text('Read more')),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
+  }
+}
+
+class ArticleCard2 extends StatelessWidget {
+  const ArticleCard2(
+    this.article, {
+    Key key,
+    @required this.onArticleTapped,
+  }) : super(key: key);
+
+  // final AsyncSnapshot<String> snapshot;
+  final Article article;
+  final void Function(Article) onArticleTapped;
+
+  final double imageAspectRatio = 16 / 9;
+  final double maxContentWidth = 600;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: article.load(),
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxContentWidth),
+              child: Selector<ShellState, double>(
+                selector: (_, state) => state.cardCornerRadius,
+                builder: (contex, cardCornerRadius, child) {
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(cardCornerRadius)),
+                    margin: EdgeInsets.zero,
+                    clipBehavior: Clip.hardEdge,
+                    child: child,
+                  );
+                },
+                child: Column(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: imageAspectRatio,
+                      child: Stack(
+                        alignment: AlignmentDirectional.bottomStart,
+                        children: [
+                          CrossFadeWidgets(
+                              showFirst: article.isLoaded,
+                              firstChild: article.isLoaded
+                                  ? Image.network(
+                                      article.imageUrl,
+                                      frameBuilder: (BuildContext context,
+                                          Widget child,
+                                          int frame,
+                                          bool wasSynchronouslyLoaded) {
+                                        if (wasSynchronouslyLoaded ?? false) {
+                                          return child;
+                                        }
+                                        return Stack(
+                                          children: [
+                                            Skeleton(
+                                              width: maxContentWidth,
+                                              height: maxContentWidth /
+                                                  imageAspectRatio,
+                                            ),
+                                            AnimatedOpacity(
+                                              child: child,
+                                              opacity: frame == null ? 0 : 1,
+                                              duration: const Duration(
+                                                  milliseconds: 200),
+                                              curve: Curves.easeIn,
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                      loadingBuilder: (BuildContext context,
+                                          Widget child,
+                                          ImageChunkEvent progress) {
+                                        return Stack(
+                                          children: [
+                                            if (progress != null)
+                                              Skeleton(
+                                                width: maxContentWidth,
+                                                height: maxContentWidth /
+                                                    imageAspectRatio,
+                                              ),
+                                            child
+                                          ],
+                                        );
+                                      },
+                                      semanticLabel: article.altText,
+                                      width: maxContentWidth,
+                                      height:
+                                          maxContentWidth / imageAspectRatio,
+                                      fit: BoxFit.cover,
+                                      // width: 300,
+                                    )
+                                  : null,
+                              secondChild: Skeleton(
+                                width: maxContentWidth,
+                                height: maxContentWidth / imageAspectRatio,
+                              )),
+                          Container(
+                            height: maxContentWidth / imageAspectRatio,
+                            alignment: Alignment.bottomLeft,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black,
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                            child: Selector<ShellState, double>(
+                              selector: (_, state) => state.gutters,
+                              builder: (context, gutters, child) {
+                                return Padding(
+                                  padding: EdgeInsets.all(gutters),
+                                  child: child,
+                                );
+                              },
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CrossFadeText(
+                                    article.isLoaded ? article.title : null,
+                                    showText: article.isLoaded,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline5
+                                        .copyWith(
+                                            color:
+                                                Colors.white.withOpacity(.87)),
+                                    maxLines: 200,
+                                    // width: 200,
+                                  ),
+                                  SizedBox(
+                                    height: 6,
+                                  ),
+                                  CrossFadeText(
+                                    article.isLoaded ? article.subtitle : null,
+                                    showText: article.isLoaded,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .subtitle1
+                                        .copyWith(
+                                            color:
+                                                Colors.white.withOpacity(.60)),
+                                    maxLines: 1000,
+                                    // width: 300,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Selector<ShellState, double>(
+                      selector: (_, state) => state.gutters,
+                      builder: (context, gutters, child) {
+                        return Padding(
+                          padding: EdgeInsets.only(
+                              top: gutters, left: gutters, right: gutters),
+                          child: child,
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CrossFadeTextWidgetBlock(
+                              article.isLoaded
+                                  ? article.buildParagraph(context, 0,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText2
+                                          .copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(.60)),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 4,
+                                      paragraphSpacing: 0,
+                                      textAlign: TextAlign.justify)
+                                  : null,
+                              showText: article.isLoaded,
+                              numLines: 4,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText2
+                                  .copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withOpacity(.60)),
                               textAlign: TextAlign.justify),
                         ],
                       ),
@@ -344,10 +589,12 @@ class CrossFadeText extends StatelessWidget {
     return CrossFadeWidgets(
         showFirst: showText,
         firstChild: Text(
-          text ?? '',
+          text ?? ' ',
           style: style,
           textAlign: TextAlign.left,
-          overflow: TextOverflow.fade,
+          softWrap: true,
+          overflow: TextOverflow.ellipsis,
+          maxLines: maxLines,
         ),
         secondChild: Stack(
           alignment: AlignmentDirectional.centerStart,
@@ -356,6 +603,8 @@ class CrossFadeText extends StatelessWidget {
               ' ',
               style: style,
               textAlign: TextAlign.left,
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
             ),
             Skeleton(
               width: width,

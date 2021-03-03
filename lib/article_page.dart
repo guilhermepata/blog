@@ -327,13 +327,13 @@ class _ArticlePageState extends State<ArticlePage>
                       ),
                     ),
                     Scrollbar(
-                      isAlwaysShown: MouseState().isPresent,
+                      isAlwaysShown: MouseState.isPresent,
                       controller: scrollController,
                       child: SmoothScroller(
                         controller: scrollController,
                         child: ListView(
                           controller: scrollController,
-                          physics: MouseState().isPresent
+                          physics: MouseState.isPresent
                               ? NeverScrollableScrollPhysics()
                               : null,
                           children: [
@@ -393,7 +393,7 @@ class _ArticlePageState extends State<ArticlePage>
                   widget.article.title,
                   overflow: TextOverflow.ellipsis,
                   maxLines:
-                      (widget.article.title.split(RegExp(r'[ ]')).length / 5)
+                      (widget.article.title.split(RegExp(r'[ ]')).length / 4)
                           .ceil(),
                   presetFontSizes: [93, 58, 46, 33],
                   style: Theme.of(context).textTheme.headline1.copyWith(
@@ -414,7 +414,7 @@ class _ArticlePageState extends State<ArticlePage>
                     minFontSize: 18,
                     maxLines:
                         (widget.article.subtitle.split(RegExp(r'[ ]')).length /
-                                10)
+                                9)
                             .ceil(),
                     style: Theme.of(context).textTheme.subtitle2.copyWith(
                           fontWeight: FontWeight.w400,

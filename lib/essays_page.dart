@@ -22,7 +22,14 @@ class _EssaysScreenState extends State<EssaysScreen> {
   @override
   void initState() {
     super.initState();
-    scrollController = context.read<ShellState>().scrollController;
+    scrollController = ScrollController();
+    scrollController.addListener(() {
+      if (scrollController.offset > 0) {
+        context.read<ShellState>().appBarFlinger = Fling.forward;
+      } else {
+        context.read<ShellState>().appBarFlinger = Fling.backward;
+      }
+    });
     MouseState().addListener(() {
       setState(() {});
     });
@@ -42,30 +49,33 @@ class _EssaysScreenState extends State<EssaysScreen> {
         selector: (_, state) => Tuple4(state.displayMobileLayout, state.gutters,
             state.articles, state.areArticlesLoaded),
         builder: (context, state, _) {
-          final articles = state.item3;
-          // final articleCards = <Widget>[];
-
-          // for (var article in articles) {
-          //   articleCards.add(
-          //       ArticleCard(article, onArticleTapped: widget.onArticleTapped));
-          // }
-
           return Scaffold(
             body: Scrollbar(
-              thickness: MouseState().isPresent ? null : 0,
-              isAlwaysShown: MouseState().isPresent,
+              thickness: MouseState.isPresent ? null : 0,
+              isAlwaysShown: MouseState.isPresent,
               controller: scrollController,
               child: SmoothScroller(
                 controller: scrollController,
                 child: ListView.separated(
-                  physics: MouseState().isPresent
+                  physics: MouseState.isPresent
                       ? NeverScrollableScrollPhysics()
                       : null,
                   controller: scrollController,
                   padding: EdgeInsets.symmetric(vertical: state.item2),
                   itemCount: state.item3.length,
-                  separatorBuilder: (context, int i) =>
-                      SizedBox(height: state.item2),
+                  separatorBuilder: (context, int i) {
+                    if (MediaQuery.of(context).size.width > 600)
+                      return SizedBox(
+                        height: state.item2,
+                      );
+                    else
+                      return Material(
+                        // color: Colors.white,
+                        child: Divider(
+                          height: 0.5,
+                        ),
+                      );
+                  },
                   itemBuilder: (context, int i) {
                     return ArticleTile(state.item3[i],
                         onArticleTapped: widget.onArticleTapped);
@@ -78,18 +88,30 @@ class _EssaysScreenState extends State<EssaysScreen> {
   }
 }
 
-class ArticleTile extends StatelessWidget {
-  const ArticleTile(this.article, {Key key, @required this.onArticleTapped})
-      : super(key: key);
+class ContentTile extends StatelessWidget {
+  const ContentTile({
+    Key key,
+    this.title,
+    this.subtitle,
+    this.imageUrl,
+    this.onTap,
+    this.future,
+    this.condition = true,
+  }) : super(key: key);
 
-  final Article article;
-  final void Function(Article) onArticleTapped;
+  final Future<dynamic> future;
+  final bool condition;
+  final String title;
+  final String subtitle;
+  final String imageUrl;
+  final void Function() onTap;
+
   final double imageSide = 72 + 48.0 + 8;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: article.load(),
+        future: future ?? Future(() {}),
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
           return Center(
             child: ConstrainedBox(
@@ -106,7 +128,7 @@ class ArticleTile extends StatelessWidget {
                   );
                 },
                 child: InkWell(
-                  onTap: () => onArticleTapped(article),
+                  onTap: onTap,
                   child: Row(
                     children: [
                       Expanded(
@@ -122,8 +144,9 @@ class ArticleTile extends StatelessWidget {
                             // isThreeLine: true,
                             contentPadding: EdgeInsets.zero,
                             title: CrossFadeText(
-                              article.isLoaded ? article.title : null,
-                              showText: article.isLoaded,
+                              condition ? title : null,
+                              showText: condition,
+                              maxLines: 1,
                               // style: Theme.of(context).textTheme.headline5,
                               // width: 200,
                             ),
@@ -132,11 +155,11 @@ class ArticleTile extends StatelessWidget {
                                   const EdgeInsets.symmetric(vertical: 4.0),
                               child: CrossFadeTextWidgetBlock(
                                 Text(
-                                  article.isLoaded ? article.subtitle : '',
+                                  condition ? subtitle : '',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                showText: article.isLoaded,
+                                showText: condition,
                                 numLines: 2,
                                 // style: Theme.of(context)
                                 //     .textTheme
@@ -155,14 +178,14 @@ class ArticleTile extends StatelessWidget {
                         height: imageSide,
                         width: imageSide,
                         child: CrossFadeWidgets(
-                          showFirst: article.isLoaded,
-                          firstChild: article.isLoaded
+                          showFirst: condition,
+                          firstChild: condition
                               ? Ink.image(
                                   width: imageSide,
                                   height: imageSide,
                                   fit: BoxFit.cover,
                                   image: NetworkImage(
-                                    article.imageUrl,
+                                    imageUrl,
                                   ),
                                 )
                               : null,
@@ -179,5 +202,29 @@ class ArticleTile extends StatelessWidget {
             ),
           );
         });
+  }
+}
+
+class ArticleTile extends StatelessWidget {
+  const ArticleTile(this.article, {Key key, @required this.onArticleTapped})
+      : super(key: key);
+
+  final Article article;
+  final void Function(Article) onArticleTapped;
+
+  @override
+  Widget build(BuildContext context) {
+    return ContentTile(
+      title: article.isLoaded ? article.title : null,
+      subtitle: article.isLoaded && article.subtitle != null
+          ? article.subtitle
+          : null,
+      imageUrl: article.imageUrl,
+      onTap: () {
+        onArticleTapped(article);
+      },
+      future: article.load(),
+      condition: article.isLoaded,
+    );
   }
 }
