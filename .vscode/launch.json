@@ -10,12 +10,19 @@
             "request": "launch",
             "program": "lib/main.dart"
         },
-        {
-            "type": "pwa-chrome",
-            "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}"
-        }
+        // {
+        //     "name": "Flutter",
+        //     "request": "launch",
+        //     "type": "dart",
+        //     "flutterMode": "profile",
+        //     "program": "lib/main.dart"
+        //   },
+        // {
+        //     "type": "pwa-chrome",
+        //     "request": "launch",
+        //     "name": "Launch Chrome against localhost",
+        //     "url": "http://localhost:8080",
+        //     "webRoot": "${workspaceFolder}"
+        // }
     ]
 }

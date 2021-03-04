@@ -49,6 +49,8 @@ class _ArticlePageState extends State<ArticlePage>
   bool isAppBarElevated = false;
 
   ScrollController scrollController = ScrollController();
+  ScrollController imageScrollController = ScrollController();
+
   AnimationController appBarStateController;
   Animation<Color> appBarColor;
   Animation<Color> appBarForegroundColor;
@@ -62,10 +64,13 @@ class _ArticlePageState extends State<ArticlePage>
     // VisibilityDetectorController.instance.updateInterval = Duration.zero;
 
     scrollController.addListener(() {
-      if (scrollController.position.pixels > height / 3) {
+      if (scrollController.position.pixels > height / 3 - 56) {
         appBarStateController.fling();
       } else {
         appBarStateController.fling(velocity: -1);
+      }
+      if (scrollController.offset < height * 4) {
+        imageScrollController.jumpTo(scrollController.offset / 4);
       }
     });
 
@@ -281,97 +286,96 @@ class _ArticlePageState extends State<ArticlePage>
                       ))
                 ],
               ),
-              body: NotificationListener(
-                onNotification: (notification) {
-                  if (notification is ScrollUpdateNotification)
-                    imagePositionNotifier.value -= notification.scrollDelta / 4;
-                },
-                child: Stack(
-                  children: [
-                    ChangeNotifierProvider.value(
-                      value: imagePositionNotifier,
-                      child: Consumer<ImagePositionNotifier>(
-                        builder: (context, imageScrollPosition, child) =>
-                            Positioned(
-                          top: imageScrollPosition.value,
+              body: Stack(
+                children: [
+                  SingleChildScrollView(
+                    controller: imageScrollController,
+                    physics: NeverScrollableScrollPhysics(),
+                    child: Column(
+                      children: [
+                        Material(
+                          elevation: 2,
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
                                 maxWidth: usefulWidth,
                                 minWidth: usefulWidth,
                                 minHeight: height * 1 / 3,
                                 maxHeight: height),
-                            child: child,
-                          ),
-                        ),
-                        child: Material(
-                          elevation: 4,
-                          child: Image.network(
-                            widget.article.imageUrl,
-                            fit: BoxFit.cover,
-                            alignment: Alignment.center,
-                            semanticLabel: widget.article.altText,
-                            frameBuilder: (BuildContext context, Widget child,
-                                int frame, bool wasSynchronouslyLoaded) {
-                              if (wasSynchronouslyLoaded ?? false) {
-                                return child;
-                              }
-                              return AnimatedOpacity(
-                                child: child,
-                                opacity: frame == null ? 0 : 1,
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.easeIn,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                    Scrollbar(
-                      isAlwaysShown: MouseState.isPresent,
-                      controller: scrollController,
-                      child: SmoothScroller(
-                        controller: scrollController,
-                        child: ListView(
-                          controller: scrollController,
-                          physics: MouseState.isPresent
-                              ? NeverScrollableScrollPhysics()
-                              : null,
-                          children: [
-                            SizedBox(
-                              height: height / 3 - 56,
+                            child: Image.network(
+                              widget.article.imageUrl,
+                              fit: BoxFit.cover,
+                              alignment: Alignment.center,
+                              semanticLabel: widget.article.altText,
+                              frameBuilder: (BuildContext context, Widget child,
+                                  int frame, bool wasSynchronouslyLoaded) {
+                                if (wasSynchronouslyLoaded ?? false) {
+                                  return child;
+                                }
+                                return AnimatedOpacity(
+                                  child: child,
+                                  opacity: frame == null ? 0 : 1,
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeIn,
+                                );
+                              },
                             ),
-                            Center(
-                              child: Container(
-                                constraints:
-                                    BoxConstraints(maxWidth: maxContentWidth),
-                                child: Card(
-                                  margin: EdgeInsets.only(bottom: gutters),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          cardCornerRadius)),
-                                  child: CustomScrollView(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    // controller: scrollController,
-                                    slivers: [
-                                      SliverList(
-                                        delegate: SliverChildBuilderDelegate(
-                                          buildContentCard,
-                                          childCount:
-                                              3 + widget.article.numParagraphs,
-                                        ),
-                                      )
-                                    ],
-                                  ),
+                          ),
+                        ),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                              maxWidth: usefulWidth,
+                              minWidth: usefulWidth,
+                              minHeight: height,
+                              maxHeight: height),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Scrollbar(
+                    isAlwaysShown: MouseState.isPresent,
+                    controller: scrollController,
+                    child: SmoothScroller(
+                      controller: scrollController,
+                      child: ListView(
+                        controller: scrollController,
+                        physics: MouseState.isPresent
+                            ? NeverScrollableScrollPhysics()
+                            : null,
+                        children: [
+                          SizedBox(
+                            height: height / 3 - 56,
+                          ),
+                          Center(
+                            child: Container(
+                              constraints:
+                                  BoxConstraints(maxWidth: maxContentWidth),
+                              child: Card(
+                                margin: EdgeInsets.only(bottom: gutters),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        cardCornerRadius)),
+                                child: CustomScrollView(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  // controller: scrollController,
+                                  slivers: [
+                                    SliverList(
+                                      delegate: SliverChildBuilderDelegate(
+                                        buildContentCard,
+                                        childCount:
+                                            3 + widget.article.numParagraphs,
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
         });
