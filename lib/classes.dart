@@ -528,7 +528,7 @@ class BodyTextParser {
     var i = 0;
     while (i < segments.length) {
       var segment = segments[i];
-      final linkExp = RegExp(r'\[(.+?)\]\((.+?)\)');
+      final linkExp = RegExp(r'\[([^\[\]\n\(\)]+?)\]\(([^\(\)\[\]\n]+?)\)');
       var string = segment.string;
       var match = linkExp.firstMatch(string);
 

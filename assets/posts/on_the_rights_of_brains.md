@@ -28,7 +28,7 @@ Finally, our concerns ought not to end with animals and simulations thereof. Som
 [4] Daniel Dennett. *Consciousness explained*. London: Penguin, 1993. ISBN: 978–0–7139–9037–9.
 [5] D. F. Swaab. *We are our brains: a neurobiography of the brain, from the womb to Alzheimer’s*. New York: Spiegel & Grau, 2014. ISBN: 978–0812992960.
 [6] Philip Low et al. *[The Cambridge Declaration On Consciousness](http://fcmconference.org/img/CambridgeDeclarationOnConsciousness.pdf)*. University of Cambridge, 2012.
-[7] The [Nonhuman Rights Project](https://www.nonhumanrights.org/).
+[7] [Nonhuman Rights Project](https://www.nonhumanrights.org/).
 [8] Jeremy Bentham. [“Of Circumstances Influencing Sensibility”](http://www.koeblergerhard.de/Fontes/BenthamJeremyMoralsandLegislation1789.pdf#page=90). In: *An Introduction to the Principles of Morals and Legislation*. London: T. Payne and Sons, 1780.
 [9] Jeff Sebo. *[Reconsider The Lobster](https://jeffsebodotnet.files.wordpress.com/2015/07/reconsider-the-lobster.pdf)*. UNC-Chapel Hill, 2015.
 [10] Simon Knutsson. [“Reducing Suffering Amongst Invertebrates Such As Insects”](https://was-research.org/writing-by-others/reducingsuffering-amongst-invertebrates-insects/). In: *Wild-Animal Suffering Research* (2016).
