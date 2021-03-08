@@ -1,8 +1,8 @@
-This project is licensed under the MIT License, except for all content in the `assets` directory.
+This project is licensed under the MIT License, except for the `assets` directory, whose contents cannot be copied, redistributed, or modified without express permission, outside of Fair Use.
 
 MIT License
 
-Copyright (c) 2021 guilhermepata
+Copyright (c) 2021 Guilherme Pata
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
