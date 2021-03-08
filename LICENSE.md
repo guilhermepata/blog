@@ -1,4 +1,4 @@
-This project is licensed under the MIT License, except for all contents under the `assets` directory.
+This project is licensed under the MIT License, except for all content in the `assets` directory.
 
 MIT License
 
