@@ -24,27 +24,37 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^2.0.0-nullsafety.0
-  flutter_markdown: ^0.5.2
-  palette_generator: ^0.2.3
+  flutter_markdown: ^0.6.0
+  palette_generator: ^0.3.0
   icon_shadow: ^1.0.1
   auto_size_text: ^2.1.0
-  url_strategy: ^0.1.1
-  flutter_svg: ^0.20.0-nullsafety.3
-  provider: ^4.3.3
-  animations: ^1.1.2
+  url_strategy: ^0.2.0
+  flutter_svg: ^0.21.0-nullsafety.0
+  provider: ^5.0.0
+  animations: ^2.0.0
   tuple: ^1.0.3
   visibility_detector: ^0.1.5
-  flutter_launcher_name: "^0.0.1"
+  # flutter_launcher_name: "^0.0.1"
   universal_platform: ^0.1.3
-  url_launcher: ^5.7.10
-  webview_flutter: ^1.0.7
+  url_launcher: ^6.0.2
+  webview_flutter: ^2.0.2
+  xml: ^5.0.2
+  flutter_launcher_icons: ^0.9.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 
-flutter_launcher_name:
-  name: "The Duckling"
+# flutter_launcher_name:
+#   name: "The Duckling"
+
+flutter_icons:
+  ios: true
+  android: true
+  image_path_ios: "assets/launcher/icon.png"
+  image_path_android: "assets/launcher/icon.png"
+  adaptive_icon_background: "assets/launcher/background.png"
+  adaptive_icon_foreground: "assets/launcher/foreground.png"
 
 dev_dependencies:
   flutter_test:
