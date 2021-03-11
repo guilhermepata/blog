@@ -49,11 +49,12 @@ class _ArticlePageState extends State<ArticlePage>
   bool isAppBarElevated = false;
 
   ScrollController scrollController = ScrollController();
-  ScrollController imageScrollController = ScrollController();
+  // ScrollController imageScrollController = ScrollController();
 
   AnimationController appBarStateController;
   Animation<Color> appBarColor;
   Animation<Color> appBarForegroundColor;
+  AppBarState appBarState = AppBarState.lowered;
 
   bool get displayMobileLayout {
     return isMobileLayout;
@@ -64,14 +65,18 @@ class _ArticlePageState extends State<ArticlePage>
     // VisibilityDetectorController.instance.updateInterval = Duration.zero;
 
     scrollController.addListener(() {
-      if (scrollController.position.pixels > height / 3 - 56) {
+      if (scrollController.position.pixels > height / 3 - 56 &&
+          appBarState != AppBarState.raised &&
+          appBarState != AppBarState.raising) {
         appBarStateController.fling();
-      } else {
+      } else if (scrollController.position.pixels < height / 3 - 56 &&
+          appBarState != AppBarState.lowered &&
+          appBarState != AppBarState.lowering) {
         appBarStateController.fling(velocity: -1);
       }
-      if (scrollController.offset < height * 4) {
-        imageScrollController.jumpTo(scrollController.offset / 4);
-      }
+      // if (scrollController.offset < height * 4) {
+      //   imageScrollController.jumpTo(scrollController.offset / 4);
+      // }
     });
 
     appBarStateController =
@@ -79,11 +84,21 @@ class _ArticlePageState extends State<ArticlePage>
     appBarStateController.addStatusListener((status) {
       if (status == AnimationStatus.completed)
         setState(() {
+          appBarState = AppBarState.raised;
           isAppBarElevated = true;
         });
       else if (status == AnimationStatus.dismissed)
         setState(() {
+          appBarState = AppBarState.lowered;
           isAppBarElevated = false;
+        });
+      else if (status == AnimationStatus.forward)
+        setState(() {
+          appBarState = AppBarState.raising;
+        });
+      else if (status == AnimationStatus.reverse)
+        setState(() {
+          appBarState = AppBarState.lowering;
         });
     });
     appBarStateController.addListener(() {
@@ -286,14 +301,22 @@ class _ArticlePageState extends State<ArticlePage>
                       ))
                 ],
               ),
-              body: Stack(
-                children: [
-                  SingleChildScrollView(
-                    controller: imageScrollController,
-                    physics: NeverScrollableScrollPhysics(),
-                    child: Column(
-                      children: [
-                        Material(
+              body: NotificationListener(
+                onNotification: (notification) {
+                  if (notification is ScrollUpdateNotification)
+                    imagePositionNotifier.value -= notification.scrollDelta / 4;
+                },
+                child: Stack(
+                  children: [
+                    ChangeNotifierProvider.value(
+                      value: imagePositionNotifier,
+                      child: Consumer<ImagePositionNotifier>(
+                        builder: (context, imageScrollPosition, child) =>
+                            Positioned(
+                          top: imageScrollPosition.value,
+                          child: child,
+                        ),
+                        child: Material(
                           elevation: 2,
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
@@ -321,25 +344,15 @@ class _ArticlePageState extends State<ArticlePage>
                             ),
                           ),
                         ),
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                              maxWidth: usefulWidth,
-                              minWidth: usefulWidth,
-                              minHeight: height,
-                              maxHeight: height),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  Scrollbar(
-                    isAlwaysShown: MouseState.isPresent,
-                    controller: scrollController,
-                    child: SmoothScroller(
+                    Scrollbar(
+                      isAlwaysShown: MouseState.isPresent,
                       controller: scrollController,
                       child: ListView(
                         controller: scrollController,
                         physics: MouseState.isPresent
-                            ? NeverScrollableScrollPhysics()
+                            ? null //NeverScrollableScrollPhysics()
                             : null,
                         children: [
                           SizedBox(
@@ -374,8 +387,8 @@ class _ArticlePageState extends State<ArticlePage>
                         ],
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
         });

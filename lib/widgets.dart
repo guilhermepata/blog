@@ -48,10 +48,10 @@ class _SmoothScrollerState extends State<SmoothScroller> {
 
   final double scrollWheelSpeed = 710;
   final double scrollWheelExtentFactor = 1.5;
-  final double _increaseSpeedFactor = 1.2;
+  final double _increaseSpeedFactor = 3;
   double increaseSpeedFactor = 1;
 
-  double scroll = 0;
+  double scrollPosition = 0;
   double delta = 0;
   bool locked = false;
   // bool triedWhenLocked = false;
@@ -91,8 +91,8 @@ class _SmoothScrollerState extends State<SmoothScroller> {
 
   void animate(PointerScrollEvent pointerSignal, {bool wasScheduled = false}) {
     hasNewSchedule = false;
-    locked = true;
-    scroll = widget.controller.position.pixels;
+    // locked = true;
+    scrollPosition = widget.controller.position.pixels;
     int micros;
     double dy;
 
@@ -105,35 +105,43 @@ class _SmoothScrollerState extends State<SmoothScroller> {
     else
       delta = dy * touchPadExtentFactor;
 
-    scroll = scroll + delta;
-    if (scroll > widget.controller.position.maxScrollExtent) {
-      delta = delta - (scroll - widget.controller.position.maxScrollExtent);
-      scroll = widget.controller.position.maxScrollExtent;
-    } else if (scroll < 0) {
-      delta = delta + scroll;
-      scroll = 0;
+    scrollPosition = scrollPosition + delta;
+    if (scrollPosition > widget.controller.position.maxScrollExtent) {
+      delta =
+          delta - (scrollPosition - widget.controller.position.maxScrollExtent);
+      scrollPosition = widget.controller.position.maxScrollExtent;
+    } else if (scrollPosition < 0) {
+      delta = delta + scrollPosition;
+      scrollPosition = 0;
     }
     var scrollSpeed = isScrollWheel ? scrollWheelSpeed : touchPadSpeed;
 
     if (wasScheduled) {
       if (isScrollWheel) {
         increaseSpeedFactor = increaseSpeedFactor * _increaseSpeedFactor;
+        scrollPosition += delta * (increaseSpeedFactor - 1);
         scrollSpeed = scrollSpeed * increaseSpeedFactor;
+        // locked = true;
       }
     } else {
       increaseSpeedFactor = 1;
     }
 
     micros = (delta.abs() * 1000 / (scrollSpeed / 1000)).round();
-    locked = true;
-
-    this.hasAnimated = widget.controller
-        .animateTo(
-          scroll,
-          duration: Duration(microseconds: micros + 1),
-          curve: isScrollWheel && !wasScheduled ? Curves.ease : Curves.linear,
-        )
-        .then((value) => true);
+    // locked = true;
+    if (isScrollWheel)
+      this.hasAnimated = widget.controller
+          .animateTo(
+            scrollPosition,
+            duration: Duration(microseconds: micros + 1),
+            curve: isScrollWheel && !wasScheduled ? Curves.ease : Curves.linear,
+          )
+          .then((value) => true);
+    else
+      this.hasAnimated = Future(() {
+        widget.controller.jumpTo(scrollPosition);
+        return true;
+      });
   }
 
   @override

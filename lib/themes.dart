@@ -16,68 +16,75 @@ class AppTheme {
   static TextTheme appTextTheme({ColorScheme finalScheme}) {
     final data = ThemeData.from(colorScheme: finalScheme);
     return data.textTheme.copyWith(
-        headline1: GoogleFonts.lora(
-            color: finalScheme.onSurface.withOpacity(.87),
-            fontSize: 93,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.3,
-            wordSpacing: -1.5),
-        headline2: GoogleFonts.workSans(
-            color: finalScheme.onSurface.withOpacity(.87),
-            fontSize: 58,
-            fontWeight: FontWeight.w300,
-            letterSpacing: -0.5),
-        headline3: GoogleFonts.lora(
-            color: finalScheme.onSurface.withOpacity(.87),
-            fontSize: 46,
-            fontWeight: FontWeight.bold),
-        headline4: GoogleFonts.workSans(
-            color: finalScheme.onSurface.withOpacity(.87),
-            fontSize: 33,
-            fontWeight: FontWeight.w400,
-            letterSpacing: 0.25),
-        headline5: GoogleFonts.workSans(
-          color: finalScheme.onSurface.withOpacity(.87),
-          fontSize: 23,
-          fontWeight: FontWeight.bold,
-        ),
-        headline6: GoogleFonts.lora(
-            color: finalScheme.onSurface.withOpacity(.87),
-            fontSize: 19,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.15),
-        subtitle1: GoogleFonts.rubik(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: finalScheme.onSurface.withOpacity(.87),
-        ),
-        subtitle2: GoogleFonts.ibmPlexSerif(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: finalScheme.onSurface.withOpacity(.87),
-        ),
-        caption: GoogleFonts.rubik(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          fontStyle: FontStyle.italic,
-          letterSpacing: 0.4,
-          color: finalScheme.onSurface.withOpacity(.6),
-        ),
-        bodyText1: GoogleFonts.ibmPlexSerif(
-          color: finalScheme.onSurface.withOpacity(.87),
-          fontSize: 16,
-          height: 2,
-          fontWeight: FontWeight.w400,
-        ),
-        bodyText2: GoogleFonts.rubik(
-            color: finalScheme.onSurface.withOpacity(.87),
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            height: 1.5),
-        button: GoogleFonts.rubik(
-          color: finalScheme.onSurface.withOpacity(.87),
-          fontWeight: FontWeight.w500,
-        ));
+      headline1: GoogleFonts.lora(
+        color: finalScheme.onSurface.withOpacity(.87),
+        fontSize: 93,
+        fontWeight: FontWeight.bold,
+        letterSpacing: -0.3,
+        wordSpacing: -1.5,
+      ),
+      headline2: GoogleFonts.workSans(
+        color: finalScheme.onSurface.withOpacity(.87),
+        fontSize: 58,
+        fontWeight: FontWeight.w300,
+        letterSpacing: -0.5,
+      ),
+      headline3: GoogleFonts.lora(
+        color: finalScheme.onSurface.withOpacity(.87),
+        fontSize: 46,
+        fontWeight: FontWeight.bold,
+      ),
+      headline4: GoogleFonts.workSans(
+        color: finalScheme.onSurface.withOpacity(.87),
+        fontSize: 33,
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0.25,
+      ),
+      headline5: GoogleFonts.workSans(
+        color: finalScheme.onSurface.withOpacity(.87),
+        fontSize: 23,
+        fontWeight: FontWeight.bold,
+      ),
+      headline6: GoogleFonts.lora(
+        color: finalScheme.onSurface.withOpacity(.87),
+        fontSize: 19,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.15,
+      ),
+      subtitle1: GoogleFonts.rubik(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: finalScheme.onSurface.withOpacity(.87),
+      ),
+      subtitle2: GoogleFonts.ibmPlexSerif(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: finalScheme.onSurface.withOpacity(.87),
+      ),
+      caption: GoogleFonts.rubik(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        fontStyle: FontStyle.italic,
+        letterSpacing: 0.4,
+        color: finalScheme.onSurface.withOpacity(.6),
+      ),
+      bodyText1: GoogleFonts.ibmPlexSerif(
+        color: finalScheme.onSurface.withOpacity(.87),
+        fontSize: 16,
+        height: 2,
+        fontWeight: FontWeight.w400,
+      ),
+      bodyText2: GoogleFonts.rubik(
+        color: finalScheme.onSurface.withOpacity(.87),
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        height: 1.5,
+      ),
+      button: GoogleFonts.rubik(
+        color: finalScheme.onSurface.withOpacity(.87),
+        fontWeight: FontWeight.w500,
+      ),
+    );
   }
 
   static ThemeData fromScheme(ColorScheme initialScheme) {

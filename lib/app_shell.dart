@@ -80,6 +80,8 @@ class ShellState extends ChangeNotifier {
 
 enum Fling { forward, backward, none }
 
+enum AppBarState { raised, raising, lowered, lowering }
+
 class AppShell extends StatefulWidget {
   final void Function(AppMenu) onMenuTapped;
   final void Function(Article) onArticleTapped;
@@ -149,6 +151,8 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   bool isAppBarElevated = false;
   AnimationController appBarStateController;
   Animation<Color> appBarColor;
+
+  AppBarState appBarState = AppBarState.lowered;
 
   //
   bool get displayMobileLayout {
@@ -231,10 +235,20 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
       if (status == AnimationStatus.completed)
         setState(() {
           isAppBarElevated = true;
+          appBarState = AppBarState.raised;
         });
       else if (status == AnimationStatus.dismissed)
         setState(() {
           isAppBarElevated = false;
+          appBarState = AppBarState.lowered;
+        });
+      else if (status == AnimationStatus.forward)
+        setState(() {
+          appBarState = AppBarState.raising;
+        });
+      else if (status == AnimationStatus.reverse)
+        setState(() {
+          appBarState = AppBarState.lowering;
         });
     });
     appBarStateController.addListener(() {
@@ -242,10 +256,14 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
     });
 
     shellState.addListener(() {
-      if (shellState.appBarFlinger == Fling.forward) {
+      if (shellState.appBarFlinger == Fling.forward &&
+          appBarState != AppBarState.raising &&
+          appBarState != AppBarState.raised) {
         appBarStateController.fling();
         shellState.appBarFlinger = Fling.none;
-      } else if (shellState.appBarFlinger == Fling.backward) {
+      } else if (shellState.appBarFlinger == Fling.backward &&
+          appBarState != AppBarState.lowering &&
+          appBarState != AppBarState.lowered) {
         appBarStateController.fling(velocity: -1);
         shellState.appBarFlinger = Fling.none;
       }
