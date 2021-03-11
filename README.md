@@ -1,16 +1,15 @@
 # The Duckling
 
-A new Flutter project.
+A personal blog, built using Flutter as a single page web app.
 
-## Getting Started
+## About
 
-This project is a starting point for a Flutter application.
+Welcome to [my place](https://guilhermepata.github.io) on the web. I am a biomedical engineering student and aspiring neuroscientist. Here you can find my [essays](https://guilhermepata.github.io/essays) and my other little [projects](https://guilhermepata.github.io/projects). You can check out my [Medium](https://guilhermepata.medium.com) page too, where I also publish my essays. The code for this project is freely available here, on this GitHub repository.
 
-A few resources to get you started if this is your first Flutter project:
+## Contributing
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+I have now started using the [issues](https://github.com/guilhermepata/blog/issues) page to track feature additions and bug fixes. Feel free to contribute!
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Documentation
+
+Still a WIP! Remember kids: always comment your code! This is advice I should start following.
