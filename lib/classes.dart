@@ -12,23 +12,30 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'home_page.dart';
 
 class Article {
-  String/*!*/ _title, _subtitle, _rawContent, _imageUrl, _altText;
-  String/*!*/ _content;
-  String _asset;
+  late String _title;
+  late String _rawContent;
+  String? _subtitle, _imageUrl, _altText;
+  late String _content;
+  String? _asset;
   bool _isLoaded = false;
 
-  BodyTextParser parser;
+  BodyTextParser? parser;
 
   String get title => _title;
-  String get subtitle => _subtitle;
+  String? get subtitle => _subtitle;
   String get rawContent => _rawContent;
-  String get imageUrl => _imageUrl;
-  String get altText => _altText;
+  String? get imageUrl => _imageUrl;
+  String? get altText => _altText;
   String get content => _content;
   bool get isLoaded => _isLoaded;
 
   Article._(
-      {title, subtitle = '', rawContent, imageUrl = '', altText = '', asset}) {
+      {required title,
+      subtitle = '',
+      required rawContent,
+      imageUrl = '',
+      altText = '',
+      asset}) {
     this._title = title;
     this._subtitle = subtitle;
     this._rawContent = rawContent;
@@ -81,7 +88,7 @@ class Article {
   // }
 
   static Future<Article> fromAsset(String asset) async {
-    var result = Article._(asset: asset);
+    var result = Article._(asset: asset, rawContent: '', title: '');
     result._isLoaded = false;
     var markdown = await rootBundle.loadString(asset);
 
@@ -92,7 +99,7 @@ class Article {
     var titleExp = RegExp(r'(.+)\s*\n[=-]{3,}\s*\n*');
     var matches = titleExp.allMatches(markdown);
     assert(matches.length > 0, 'The article must have a title');
-    String title = matches.first.group(1);
+    String title = matches.first.group(1)!;
     result._title = title;
 
     return result;
@@ -101,8 +108,8 @@ class Article {
   Future load() async {
     if (isLoaded) return;
     if (_asset != null) {
-      var markdown = await rootBundle.loadString(_asset);
-      String subtitle, rawContent, imageUrl, altText;
+      var markdown = await rootBundle.loadString(_asset!);
+      String? subtitle, rawContent, imageUrl, altText;
 
       // matches something like:
       // Title
@@ -128,10 +135,10 @@ class Article {
       rawContent = rawContent.replaceFirst(titleExp, '');
       rawContent = rawContent.replaceFirst(imageExp, '');
 
-      _subtitle = subtitle;
+      _subtitle = subtitle!;
       _rawContent = rawContent;
-      _imageUrl = imageUrl;
-      _altText = altText;
+      _imageUrl = imageUrl!;
+      _altText = altText!;
 
       cleanContent();
 
@@ -155,37 +162,37 @@ class Article {
         RegExp(r'([^\n\_])[\_]{2}([^\n\_].+?[^\n\_])[\_]{2}([^\n\_])');
 
     _content = _content.replaceAllMapped(asteriskItalic,
-        (match) => match.group(1) + match.group(2) + match.group(3));
+        (match) => match.group(1)! + match.group(2)! + match.group(3)!);
     _content = _content.replaceAllMapped(asteriskBold,
-        (match) => match.group(1) + match.group(2) + match.group(3));
+        (match) => match.group(1)! + match.group(2)! + match.group(3)!);
     _content = _content.replaceAllMapped(underscoreItalic,
-        (match) => match.group(1) + match.group(2) + match.group(3));
+        (match) => match.group(1)! + match.group(2)! + match.group(3)!);
     _content = _content.replaceAllMapped(underscoreBold,
-        (match) => match.group(1) + match.group(2) + match.group(3));
+        (match) => match.group(1)! + match.group(2)! + match.group(3)!);
   }
 
   bool get isParsing {
     if (parser == null) parser = BodyTextParser(rawContent);
-    return parser.isParsing;
+    return parser!.isParsing;
   }
 
   int get numParagraphs {
     if (parser == null) parser = BodyTextParser(rawContent);
-    return isParsing ? parser.contentParts.length : parser.paragraphs.length;
+    return isParsing ? parser!.contentParts.length : parser!.paragraphs.length;
   }
 
   Widget buildParagraph(BuildContext context, int index,
       {double paragraphSpacing = 16,
-      TextStyle style,
-      TextStyle headlineStyle,
-      TextStyle quoteStyle,
+      TextStyle? style,
+      TextStyle? headlineStyle,
+      TextStyle? quoteStyle,
       TextAlign textAlign = TextAlign.justify,
-      TextOverflow overflow,
-      int maxLines}) {
+      TextOverflow? overflow,
+      int? maxLines}) {
     if (parser == null) parser = BodyTextParser(rawContent);
 
     final builder = BodyTextBuilder(
-        parser: parser,
+        parser: parser!,
         paragraphSpacing: paragraphSpacing,
         normalStyle: style,
         headlineStyle: headlineStyle,
@@ -199,16 +206,16 @@ class Article {
 
   List<Widget> buildContents(BuildContext context,
       {double paragraphSpacing = 16,
-      TextStyle style,
-      TextStyle headlineStyle,
-      TextStyle quoteStyle,
+      TextStyle? style,
+      TextStyle? headlineStyle,
+      TextStyle? quoteStyle,
       TextAlign textAlign = TextAlign.justify,
-      TextOverflow overflow,
-      int maxLines}) {
+      TextOverflow? overflow,
+      int? maxLines}) {
     if (parser == null) parser = BodyTextParser(rawContent);
 
     final builder = BodyTextBuilder(
-        parser: parser,
+        parser: parser!,
         paragraphSpacing: paragraphSpacing,
         normalStyle: style,
         headlineStyle: headlineStyle,
@@ -230,7 +237,7 @@ class Article {
 ///
 /// This class can be converted into a list of [SingleFormatString].
 class FormattedString {
-  String/*!*/ _string;
+  String _string;
   final List<Format> _characterFormats = <Format>[];
 
   /// Final string.
@@ -289,7 +296,7 @@ class FormattedString {
   /// Markdown format indicators (asterisks and underscores) will be removed
   /// from the input string and each character in the final string will be given
   /// the appropriate format.
-  FormattedString(String/*!*/ inputString) : this._string = inputString {
+  FormattedString(String inputString) : this._string = inputString {
     for (var i = 0; i < _string.length; i++) {
       _characterFormats.add(Format.normal);
     }
@@ -338,7 +345,7 @@ class FormattedString {
 
     final m = 0;
     while (matches.length > 0) {
-      var length = matches[m].group(1).length;
+      var length = matches[m].group(1)!.length;
 
       for (var k = 0; k < numSymbols; k++) {
         _characterFormats.removeAt(matches[m].start);
@@ -414,7 +421,7 @@ class FormattedString {
   /// First element is start of interval (i.e., inclusive)
   /// Second element is end of interval + 1 (i.e., exclusive)
   static List<List<int>> makeIntervals(List<int> indices) {
-    var pairs = <List<int>>[];
+    List<List<int>> pairs = <List<int>>[];
     var prevIndex = -2;
     var currIndex;
     for (var i = 0; i < indices.length; i++) {
@@ -434,21 +441,21 @@ class FormattedString {
 /// [TypeStyle]. If [TypeStyle] is [TypeStyle.link], it will also include the
 /// link's URL.
 class SingleFormatString {
-  final String/*!*/ string;
+  final String string;
   Format format;
   TypeStyle style;
-  String _url;
+  String? _url;
 
   /// Creates a [SingleFormatString]
   SingleFormatString(this.string,
-      {this.format = Format.normal, this.style = TypeStyle.body, String url})
+      {this.format = Format.normal, this.style = TypeStyle.body, String? url})
       : this._url = url {
     if (url != null) style = TypeStyle.link;
   }
 
-  String get url => _url;
+  String? get url => _url;
 
-  set url(String value) {
+  set url(String? value) {
     this._url = value;
     if (value != null) style = TypeStyle.link;
   }
@@ -464,7 +471,7 @@ class BodyTextParser {
   List<String> contentParts = [];
 
   bool isParsing = true;
-  Future<bool>/*!*/ isParsed;
+  late Future<bool> isParsed;
 
   BodyTextParser(this.content) {
     contentParts = content.split(RegExp(r'\n\s{1,}'));
@@ -509,8 +516,8 @@ class BodyTextParser {
       final matches = headlineExp.allMatches(paragraph).toList();
 
       if (matches.length > 0 && matches.first.start == 0) {
-        paragraph = paragraph.replaceFirst(matches.first.group(0), '');
-        final headline = matches.first.group(1);
+        paragraph = paragraph.replaceFirst(matches.first.group(0)!, '');
+        final headline = matches.first.group(1)!;
         final headlineSegments =
             FormattedString(headline).toSingleFormatStrings();
         for (var segment in headlineSegments)
@@ -535,7 +542,7 @@ class BodyTextParser {
       if (match != null) {
         final firstText = string.substring(0, match.start);
         final lastText = string.substring(match.end);
-        final linkLabel = match.group(1);
+        final linkLabel = match.group(1)!;
         final url = match.group(2);
 
         final firstSegment = SingleFormatString(firstText,
@@ -561,20 +568,20 @@ class BodyTextParser {
 class BodyTextBuilder {
   // final String content;
   final double paragraphSpacing;
-  final TextStyle normalStyle;
-  final TextStyle headlineStyle;
-  final TextStyle quoteStyle;
+  final TextStyle? normalStyle;
+  final TextStyle? headlineStyle;
+  final TextStyle? quoteStyle;
   final TextAlign textAlign;
-  final TextOverflow overflow;
-  final int maxLines;
+  final TextOverflow? overflow;
+  final int? maxLines;
 
   // final List<List<SingleFormatString>> paragraphs = [];
   // List<String> contentParts;
 
-  final BodyTextParser/*!*/ parser;
+  final BodyTextParser parser;
 
   BodyTextBuilder(
-      {@required this.parser,
+      {required this.parser,
       this.paragraphSpacing = 16,
       this.normalStyle,
       this.headlineStyle,
@@ -595,7 +602,7 @@ class BodyTextBuilder {
           EdgeInsets padding;
           if (!parser.isParsing) {
             final effectiveNormalStyle = normalStyle ??
-                Theme.of(context).textTheme.bodyText1.copyWith(
+                Theme.of(context).textTheme.bodyText1!.copyWith(
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
@@ -665,7 +672,7 @@ class BodyTextBuilder {
   static TextSpan toSpan(
     List<SingleFormatString> segments,
     TextStyle normalStyle,
-    TextStyle headlineStyle,
+    TextStyle? headlineStyle,
     TextStyle quoteStyle,
     Color linkDecorationColor,
     BuildContext context,
@@ -697,13 +704,13 @@ class BodyTextBuilder {
           spans.add(LinkSpan(
               child: LinkTextWidget(segments[i].string,
                   style: normalStyle.merge(segmentStyle), onTap: () {
-            return onLinkTapped(url: segments[i].url, context: context);
+            return onLinkTapped(url: segments[i].url!, context: context);
           })));
           break;
         case TypeStyle.headline:
           spans.add(TextSpan(
               text: segments[i].string,
-              style: headlineStyle.merge(segmentStyle)));
+              style: headlineStyle!.merge(segmentStyle)));
           break;
         default:
           spans.add(TextSpan(text: segments[i].string, style: segmentStyle));
@@ -713,8 +720,8 @@ class BodyTextBuilder {
     return (TextSpan(children: spans, style: spanStyle));
   }
 
-  static Future<bool> onLinkTapped(
-      {@required BuildContext context, @required String/*!*/ url, String/*!*//*!*/ label}) {
+  static Future<bool?> onLinkTapped(
+      {required BuildContext context, required String url, String? label}) {
     return showModalBottomSheet(
         context: context,
         isDismissible: true,
@@ -754,7 +761,7 @@ class BodyTextBuilder {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style:
-                                Theme.of(context).textTheme.bodyText2.copyWith(
+                                Theme.of(context).textTheme.bodyText2!.copyWith(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface
@@ -797,7 +804,7 @@ class BodyTextBuilder {
         });
   }
 
-  static void launchWebPage(BuildContext context, String/*!*/ url) {
+  static void launchWebPage(BuildContext context, String url) {
     showModalBottomSheet<dynamic>(
         context: context,
         isScrollControlled: true,
@@ -857,18 +864,18 @@ enum MenuOptions { externalBroswer }
 /// takes up some space.
 class LinkTextWidget extends StatefulWidget {
   /// Defaults to the theme accent color.
-  final Color decorationColor;
+  final Color? decorationColor;
 
   /// Function to run when the text is tapped.
   /// Can trigger a navigator or hyperlink
-  final Function() onTap;
+  final Function()? onTap;
 
   /// The string to display.
   final String text;
 
   /// The text style. This widget does not properly inherit the [TextStyle] of
   /// the parent [Text.rich] if placed inside a [WidgetSpan].
-  final TextStyle style;
+  final TextStyle? style;
 
   /// The distance, in fraction of line height, at which the underline should be
   /// from the top of the text widget. If left null or unset, it will default to
@@ -881,7 +888,7 @@ class LinkTextWidget extends StatefulWidget {
   final double thickness;
 
   const LinkTextWidget(this.text,
-      {Key key,
+      {Key? key,
       this.decorationColor,
       this.onTap,
       this.style,
@@ -895,23 +902,24 @@ class LinkTextWidget extends StatefulWidget {
 
 class _LinkTextWidgetState extends State<LinkTextWidget> {
   bool wasHovering = false;
-  Color decorationColor;
-  double textOpacity;
+  late Color decorationColor;
+  late double textOpacity;
 
   @override
   void initState() {
     super.initState();
     decorationColor =
-        widget.style.color.withOpacity(widget.style.color.opacity * 0.8);
-    textOpacity = widget.style.color.opacity;
+        widget.style!.color!.withOpacity(widget.style!.color!.opacity * 0.8);
+    textOpacity = widget.style!.color!.opacity;
   }
 
   void changeHighlight(bool isHighlighted) {
     setState(() {
       decorationColor = isHighlighted
           ? widget.decorationColor ?? Theme.of(context).colorScheme.secondary
-          : widget.style.color.withOpacity(widget.style.color.opacity * 0.8);
-      textOpacity = isHighlighted ? 1 : widget.style.color.opacity;
+          : widget.style!.color!
+              .withOpacity(widget.style!.color!.opacity * 0.8);
+      textOpacity = isHighlighted ? 1 : widget.style!.color!.opacity;
     });
   }
 
@@ -923,9 +931,9 @@ class _LinkTextWidgetState extends State<LinkTextWidget> {
     changeHighlight(true);
 
     if (widget.onTap is Future)
-      widget.onTap().then((_) => changeHighlight(false));
+      widget.onTap!().then((_) => changeHighlight(false));
     else {
-      widget.onTap();
+      widget.onTap!();
       changeHighlight(false);
     }
   }
@@ -973,15 +981,17 @@ class _LinkTextWidgetState extends State<LinkTextWidget> {
             duration: Duration(milliseconds: 100),
             child: Text(
               widget.text,
-              style: widget.style.copyWith(
-                color: widget.style.color.withOpacity(1),
+              style: widget.style!.copyWith(
+                color: widget.style!.color!.withOpacity(1),
               ),
               maxLines: 1,
             ),
           ),
         ),
         Positioned(
-            top: widget.style.height * widget.style.fontSize * widget.fraction,
+            top: widget.style!.height! *
+                widget.style!.fontSize! *
+                widget.fraction,
             child: AnimatedContainer(
               height: 0,
               clipBehavior: Clip.hardEdge,
@@ -1008,7 +1018,7 @@ class _LinkTextWidgetState extends State<LinkTextWidget> {
 
 class LinkSpan extends WidgetSpan {
   final Widget child;
-  LinkSpan({this.child})
+  LinkSpan({required this.child})
       : super(
             alignment: PlaceholderAlignment.baseline,
             baseline: TextBaseline.alphabetic,

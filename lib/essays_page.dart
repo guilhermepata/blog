@@ -8,9 +8,9 @@ import 'app_shell.dart';
 import 'widgets.dart';
 
 class EssaysScreen extends StatefulWidget {
-  const EssaysScreen({Key key, this.onArticleTapped}) : super(key: key);
+  const EssaysScreen({Key? key, this.onArticleTapped}) : super(key: key);
 
-  final void Function(Article) onArticleTapped;
+  final void Function(Article)? onArticleTapped;
 
   @override
   _EssaysScreenState createState() => _EssaysScreenState();
@@ -89,7 +89,7 @@ class _EssaysScreenState extends State<EssaysScreen> {
 
 class ContentTile extends StatelessWidget {
   const ContentTile({
-    Key key,
+    Key? key,
     this.title,
     this.subtitle,
     this.imageUrl,
@@ -98,12 +98,12 @@ class ContentTile extends StatelessWidget {
     this.condition = true,
   }) : super(key: key);
 
-  final Future<dynamic> future;
+  final Future<dynamic>? future;
   final bool condition;
-  final String title;
-  final String subtitle;
-  final String imageUrl;
-  final void Function() onTap;
+  final String? title;
+  final String? subtitle;
+  final String? imageUrl;
+  final void Function()? onTap;
 
   final double imageSide = 72 + 48.0 + 8;
 
@@ -154,7 +154,7 @@ class ContentTile extends StatelessWidget {
                                   const EdgeInsets.symmetric(vertical: 4.0),
                               child: CrossFadeTextWidgetBlock(
                                 Text(
-                                  condition ? subtitle : '',
+                                  condition ? subtitle! : '',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -184,7 +184,7 @@ class ContentTile extends StatelessWidget {
                                   height: imageSide,
                                   fit: BoxFit.cover,
                                   image: NetworkImage(
-                                    imageUrl,
+                                    imageUrl!,
                                   ),
                                 )
                               : null,
@@ -205,11 +205,11 @@ class ContentTile extends StatelessWidget {
 }
 
 class ArticleTile extends StatelessWidget {
-  const ArticleTile(this.article, {Key key, @required this.onArticleTapped})
+  const ArticleTile(this.article, {Key? key, required this.onArticleTapped})
       : super(key: key);
 
   final Article article;
-  final void Function(Article) onArticleTapped;
+  final void Function(Article)? onArticleTapped;
   final double imageSide = 72 + 48.0 + 8;
 
   @override
@@ -232,7 +232,7 @@ class ArticleTile extends StatelessWidget {
                   );
                 },
                 child: InkWell(
-                  onTap: () => onArticleTapped(article),
+                  onTap: () => onArticleTapped!(article),
                   child: Row(
                     children: [
                       Expanded(
@@ -258,7 +258,7 @@ class ArticleTile extends StatelessWidget {
                                   const EdgeInsets.symmetric(vertical: 4.0),
                               child: CrossFadeTextWidgetBlock(
                                 Text(
-                                  article.isLoaded ? article.subtitle : '',
+                                  article.isLoaded ? article.subtitle! : '',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -288,7 +288,7 @@ class ArticleTile extends StatelessWidget {
                                   height: imageSide,
                                   fit: BoxFit.cover,
                                   image: NetworkImage(
-                                    article.imageUrl,
+                                    article.imageUrl!,
                                   ),
                                 )
                               : null,

@@ -19,7 +19,7 @@ class FeatherIcon {
   FeatherIcon._();
 
   static const _kFontFam = 'FeatherIcon';
-  static const String _kFontPkg = null;
+  static const String? _kFontPkg = null;
 
   static const IconData feather =
       IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);

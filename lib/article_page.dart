@@ -19,9 +19,9 @@ class ImagePositionNotifier extends ValueNotifier {
 }
 
 class ArticlePage extends StatefulWidget {
-  final Article article;
+  final Article /*!*/ article;
 
-  const ArticlePage({Key key, this.article}) : super(key: key);
+  const ArticlePage({Key? key, required this.article}) : super(key: key);
 
   @override
   _ArticlePageState createState() => _ArticlePageState();
@@ -29,31 +29,31 @@ class ArticlePage extends StatefulWidget {
 
 class _ArticlePageState extends State<ArticlePage>
     with SingleTickerProviderStateMixin {
-  double width, height, usefulWidth, usefulHeight, gutters;
+  late double width, height, usefulWidth, usefulHeight, gutters;
 
-  double appBarMargins;
+  late double appBarMargins;
   double maxContentWidth = 600;
-  double contentWidth;
-  double webLayoutMinWidth;
-  double cardCornerRadius;
-  double initialSheetHeight;
-  double maxSheetHeight;
-  double totalSheetHeightDelta;
+  late double contentWidth;
+  late double webLayoutMinWidth;
+  late double cardCornerRadius;
+  late double initialSheetHeight;
+  late double maxSheetHeight;
+  late double totalSheetHeightDelta;
 
   // double imageScrollPosition = 0.0;
 
   ImagePositionNotifier imagePositionNotifier = ImagePositionNotifier(0.0);
 
   bool isInitialized = false;
-  bool isMobileLayout;
+  late bool isMobileLayout;
   bool isAppBarElevated = false;
 
   ScrollController scrollController = ScrollController();
   // ScrollController imageScrollController = ScrollController();
 
-  AnimationController appBarStateController;
-  Animation<Color> appBarColor;
-  Animation<Color> appBarForegroundColor;
+  late AnimationController appBarStateController;
+  late Animation<Color?> appBarColor;
+  late Animation<Color?> appBarForegroundColor;
   AppBarState appBarState = AppBarState.lowered;
 
   bool get displayMobileLayout {
@@ -214,7 +214,7 @@ class _ArticlePageState extends State<ArticlePage>
                   title: Text(
                     widget.article.title,
                     overflow: TextOverflow.fade,
-                    style: Theme.of(context).textTheme.headline6.copyWith(
+                    style: Theme.of(context).textTheme.headline6!.copyWith(
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
@@ -249,7 +249,7 @@ class _ArticlePageState extends State<ArticlePage>
                 title: Text(
                   'Essay: ' + widget.article.title,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.headline6.copyWith(
+                  style: Theme.of(context).textTheme.headline6!.copyWith(
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
@@ -297,9 +297,13 @@ class _ArticlePageState extends State<ArticlePage>
                 ],
               ),
               body: NotificationListener(
-                onNotification: (notification) {
-                  if (notification is ScrollUpdateNotification)
-                    imagePositionNotifier.value -= notification.scrollDelta / 4;
+                onNotification: (dynamic notification) {
+                  if (notification is ScrollUpdateNotification) {
+                    imagePositionNotifier.value -=
+                        notification.scrollDelta! / 4;
+                    return true;
+                  }
+                  return false;
                 },
                 child: Stack(
                   children: [
@@ -309,7 +313,7 @@ class _ArticlePageState extends State<ArticlePage>
                         builder: (context, imageScrollPosition, child) =>
                             Positioned(
                           top: imageScrollPosition.value,
-                          child: child,
+                          child: child!,
                         ),
                         child: Material(
                           elevation: 2,
@@ -320,13 +324,13 @@ class _ArticlePageState extends State<ArticlePage>
                                 minHeight: height * 1 / 3,
                                 maxHeight: height),
                             child: Image.network(
-                              widget.article.imageUrl,
+                              widget.article.imageUrl!,
                               fit: BoxFit.cover,
                               alignment: Alignment.center,
                               semanticLabel: widget.article.altText,
                               frameBuilder: (BuildContext context, Widget child,
-                                  int frame, bool wasSynchronouslyLoaded) {
-                                if (wasSynchronouslyLoaded ?? false) {
+                                  int? frame, bool wasSynchronouslyLoaded) {
+                                if (wasSynchronouslyLoaded) {
                                   return child;
                                 }
                                 return AnimatedOpacity(
@@ -408,7 +412,7 @@ class _ArticlePageState extends State<ArticlePage>
                       (widget.article.title.split(RegExp(r'[ ]')).length / 4)
                           .ceil(),
                   presetFontSizes: [93, 58, 46, 33],
-                  style: Theme.of(context).textTheme.headline1.copyWith(
+                  style: Theme.of(context).textTheme.headline1!.copyWith(
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
@@ -420,15 +424,15 @@ class _ArticlePageState extends State<ArticlePage>
                 ),
                 if (widget.article.subtitle != null)
                   AutoSizeText(
-                    widget.article.subtitle,
+                    widget.article.subtitle!,
                     overflow: TextOverflow.ellipsis,
                     presetFontSizes: [19, 18, 14],
                     minFontSize: 18,
                     maxLines:
-                        (widget.article.subtitle.split(RegExp(r'[ ]')).length /
+                        (widget.article.subtitle!.split(RegExp(r'[ ]')).length /
                                 9)
                             .ceil(),
-                    style: Theme.of(context).textTheme.subtitle2.copyWith(
+                    style: Theme.of(context).textTheme.subtitle2!.copyWith(
                           fontWeight: FontWeight.w400,
                           height: 1.3,
                           color: Theme.of(context)
@@ -452,25 +456,26 @@ class _ArticlePageState extends State<ArticlePage>
             Tooltip(
               message: 'Share',
               child: TextButton.icon(
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: Uri.base.toString()));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        width: width < maxContentWidth
-                            ? width - 32
-                            : maxContentWidth - 32,
-                        behavior: SnackBarBehavior.floating,
-                        content: Text(
-                          'URL copied to clipboard. Share it an app!',
-                        ),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: Uri.base.toString()));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      width: width < maxContentWidth
+                          ? width - 32
+                          : maxContentWidth - 32,
+                      behavior: SnackBarBehavior.floating,
+                      content: Text(
+                        'URL copied to clipboard. Share it an app!',
                       ),
-                    );
-                  },
-                  label: Text('Share'),
-                  icon: Icon(
-                    Icons.share,
-                    size: 18,
-                  )),
+                    ),
+                  );
+                },
+                label: Text('Share'),
+                icon: Icon(
+                  Icons.share,
+                  size: 18,
+                ),
+              ),
             )
           ],
         ),
@@ -481,7 +486,7 @@ class _ArticlePageState extends State<ArticlePage>
         child: widget.article.buildParagraph(
           context,
           index - 3,
-          style: Theme.of(context).textTheme.bodyText1.copyWith(
+          style: Theme.of(context).textTheme.bodyText1!.copyWith(
               fontSize: 16,
               height: 2,
               color: Theme.of(context).colorScheme.onSurface.withOpacity(.7)),

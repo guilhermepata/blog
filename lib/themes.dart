@@ -13,7 +13,7 @@ class AppTheme {
   static Color secondaryDark = Color(0xffCE9BE8);
   static Color secondaryVariantDark = Color(0xff9c6cb6);
 
-  static TextTheme appTextTheme({ColorScheme finalScheme}) {
+  static TextTheme appTextTheme({required ColorScheme finalScheme}) {
     final data = ThemeData.from(colorScheme: finalScheme);
     return data.textTheme.copyWith(
       headline1: GoogleFonts.lora(

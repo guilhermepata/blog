@@ -14,9 +14,9 @@ class ShellState extends ChangeNotifier {
 
   bool _isMobileLayout = false;
   // double _margins = 0;
-  double /*!*/ _gutters = 24;
-  double /*!*/ _cardCornerRadius = 8;
-  StandardDrawerState /*!*/ _standardDrawerState = StandardDrawerState.closed;
+  double _gutters = 24;
+  double _cardCornerRadius = 8;
+  StandardDrawerState _standardDrawerState = StandardDrawerState.closed;
   List<Article> articles = <Article>[];
   // ScrollController scrollController = ScrollController();
   Fling _appBarFlinger = Fling.none;
@@ -43,8 +43,8 @@ class ShellState extends ChangeNotifier {
   Fling get appBarFlinger => _appBarFlinger;
 
   bool get displayMobileLayout {
-    return (isMobileLayout ?? false) &&
-        (standardDrawerState == StandardDrawerState.closed ?? false);
+    return (isMobileLayout) &&
+        (standardDrawerState == StandardDrawerState.closed);
   }
 
   set isMobileLayout(bool value) {
@@ -87,7 +87,7 @@ class AppShell extends StatefulWidget {
   final void Function(AppMenu) onMenuTapped;
   final void Function(Article) onArticleTapped;
 
-  AppShell({@required this.onMenuTapped, @required this.onArticleTapped});
+  AppShell({required this.onMenuTapped, required this.onArticleTapped});
 
   @override
   _AppShellState createState() => _AppShellState();
@@ -95,25 +95,25 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   //
-  ShellState /*!*/ shellState;
+  late ShellState shellState;
 
   //
 
-  bool /*!*/ _isMobileLayout;
-  double /*!*/ _margins;
-  double _gutters;
-  double _cardCornerRadius;
-  StandardDrawerState _standardDrawerState;
+  late bool _isMobileLayout;
+  late double _margins;
+  late double _gutters;
+  late double _cardCornerRadius;
+  late StandardDrawerState _standardDrawerState;
   // List<Article> articles = <Article>[];
   // ScrollController scrollController = ScrollController();
 
-  bool /*!*/ get isMobileLayout => _isMobileLayout;
+  bool get isMobileLayout => _isMobileLayout;
   double get margins => _margins;
   double get gutters => _gutters;
   double get cardCornerRadius => _cardCornerRadius;
   StandardDrawerState get standardDrawerState => _standardDrawerState;
 
-  set isMobileLayout(bool /*!*/ value) {
+  set isMobileLayout(bool value) {
     _isMobileLayout = value;
     shellState.isMobileLayout = value;
   }
@@ -141,17 +141,17 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   }
 
   // rigth now these don't need to notify the listeners, I think
-  double width, height, usefulWidth, usefulHeight;
-  double appBarMargins;
+  late double width, height, usefulWidth, usefulHeight;
+  late double appBarMargins;
   double maxContentWidth = 600;
   // double contentWidth;
-  double webLayoutMinWidth;
+  late double webLayoutMinWidth;
   double standardDrawerMaxWidth = 144 + 8.0;
 
   bool isInitialized = false;
   bool isAppBarElevated = false;
-  AnimationController appBarStateController;
-  Animation<Color /*!*/ > appBarColor;
+  late AnimationController appBarStateController;
+  late Animation<Color?> appBarColor;
 
   AppBarState appBarState = AppBarState.lowered;
 
@@ -161,22 +161,22 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   }
 
   // Animations
-  AnimationController standardDrawerController;
-  Animation<double> standardDrawerWidth;
-  Animation<double> appBarSpacing;
+  late AnimationController standardDrawerController;
+  late Animation<double> standardDrawerWidth;
+  late Animation<double> appBarSpacing;
 
-  Brightness brightness;
+  Brightness? brightness;
 
   //for the delegate
-  InnerRouterDelegate _routerDelegate;
-  ChildBackButtonDispatcher _backButtonDispatcher;
+  late InnerRouterDelegate _routerDelegate;
+  ChildBackButtonDispatcher? _backButtonDispatcher;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Defer back button dispatching to the child router
     _backButtonDispatcher = Router.of(context)
-        .backButtonDispatcher
+        .backButtonDispatcher!
         .createChildBackButtonDispatcher();
     brightness = Theme.of(context).brightness;
     setState(() {
@@ -332,7 +332,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     // Claim priority, If there are parallel sub router, you will need
     // to pick which one should take priority;
-    _backButtonDispatcher.takePriority();
+    _backButtonDispatcher!.takePriority();
 
     buildState(context);
 
@@ -548,9 +548,9 @@ enum AppBarMenuOptions { changeTheme }
 enum StandardDrawerState { closed, closing, open, opening }
 
 class FadeAnimationPage extends Page {
-  final Widget child;
+  final Widget? child;
 
-  FadeAnimationPage({Key key, this.child}) : super(key: key);
+  FadeAnimationPage({Key? key, this.child}) : super(key: key as LocalKey?);
 
   Route createRoute(BuildContext context) {
     return PageRouteBuilder(
@@ -580,9 +580,9 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
   final ShellState shellState;
 
   InnerRouterDelegate(
-      {@required this.onMenuTapped,
-      @required this.onArticleTapped,
-      @required this.shellState});
+      {required this.onMenuTapped,
+      required this.onArticleTapped,
+      required this.shellState});
 
   @override
   Widget build(BuildContext context) {

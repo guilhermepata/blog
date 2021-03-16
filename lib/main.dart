@@ -30,7 +30,7 @@ class BlogApp extends StatefulWidget {
 }
 
 class _BlogAppState extends State<BlogApp> {
-  BlogRouterDelegate _routerDelegate;
+  late BlogRouterDelegate _routerDelegate;
   BlogRouteInformationParser _routeInformationParser =
       BlogRouteInformationParser();
   bool isInitialized = false;

@@ -10,9 +10,9 @@ import 'widgets.dart';
 import 'essays_page.dart';
 
 class ProjectsScreen extends StatefulWidget {
-  const ProjectsScreen({Key key, this.onArticleTapped}) : super(key: key);
+  const ProjectsScreen({Key? key, this.onArticleTapped}) : super(key: key);
 
-  final void Function(Article) onArticleTapped;
+  final void Function(Article)? onArticleTapped;
 
   @override
   _ProjectsScreenState createState() => _ProjectsScreenState();
@@ -101,6 +101,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         },
                         imageUrl:
                             'https://cdn.dribbble.com/users/1622791/screenshots/11174104/flutter_intro.png',
+                      );
+                    else
+                      return SizedBox(
+                        height: 0,
                       );
                   },
                 ),

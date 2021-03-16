@@ -12,11 +12,11 @@ import 'app_shell.dart';
 
 class AppState extends ChangeNotifier {
   final List<String> assets = [];
-  final Map<String/*!*/, Article> articles = Map();
-  Article _selectedArticle;
-  AppMenu _selectedMenu;
+  final Map<String, Article> articles = Map();
+  Article? _selectedArticle;
+  AppMenu? _selectedMenu;
   bool _areArticlesLoading = false;
-  Future<bool>/*!*/ _areArticlesLoaded;
+  late Future<bool> _areArticlesLoaded;
 
   bool _isThemeFlipped = false;
 
@@ -61,18 +61,18 @@ class AppState extends ChangeNotifier {
   bool get areArticlesLoading => _areArticlesLoading;
   Future<bool> get areArticlesLoaded => _areArticlesLoaded;
 
-  Article get selectedArticle => _selectedArticle;
+  Article? get selectedArticle => _selectedArticle;
 
-  set selectedArticle(Article article) {
+  set selectedArticle(Article? article) {
     _selectedArticle = article;
     notifyListeners();
   }
 
-  AppMenu get selectedMenu => _selectedMenu;
+  AppMenu? get selectedMenu => _selectedMenu;
 
   bool get isThemeFlipped => _isThemeFlipped;
 
-  set selectedMenu(AppMenu menu) {
+  set selectedMenu(AppMenu? menu) {
     _selectedMenu = menu;
     notifyListeners();
   }
@@ -90,7 +90,7 @@ class AppState extends ChangeNotifier {
     selectedArticle = articles[title];
   }
 
-  Future<void> setSelectedArticleByUrl(String/*!*/ urlTitle) async {
+  Future<void> setSelectedArticleByUrl(String urlTitle) async {
     await _areArticlesLoaded;
     for (var title in articles.keys) {
       if (urlTitle.isUrlOf(title)) {
@@ -112,7 +112,7 @@ class BlogRouteInformationParser extends RouteInformationParser<BlogPath> {
   @override
   Future<BlogPath> parseRouteInformation(
       RouteInformation routeInformation) async {
-    final uri = Uri.parse(routeInformation.location);
+    final uri = Uri.parse(routeInformation.location!);
 
     if (uri.pathSegments.isNotEmpty) {
       if (uri.pathSegments.length == 1) {
@@ -129,6 +129,8 @@ class BlogRouteInformationParser extends RouteInformationParser<BlogPath> {
           return BlogArticlePath.fromUrl(uri.pathSegments[1]);
         } else
           return UnknownPath();
+      } else {
+        return UnknownPath();
       }
     } else {
       return BlogHomePath();
@@ -139,19 +141,24 @@ class BlogRouteInformationParser extends RouteInformationParser<BlogPath> {
   RouteInformation restoreRouteInformation(BlogPath configuration) {
     if (configuration is BlogHomePath) {
       return RouteInformation(location: '/');
-    } else if (configuration is BlogAboutPath) {
+    }
+    if (configuration is BlogAboutPath) {
       // print('I tried setting the route to about');
       return RouteInformation(location: '/about');
-    } else if (configuration is BlogEssaysPath) {
+    }
+    if (configuration is BlogEssaysPath) {
       return RouteInformation(location: '/essays');
-    } else if (configuration is BlogProjectsPath) {
+    }
+    if (configuration is BlogProjectsPath) {
       return RouteInformation(location: '/projects');
-    } else if (configuration is BlogArticlePath) {
+    }
+    if (configuration is BlogArticlePath) {
       return RouteInformation(location: '/essays/${configuration.urlTitle}');
-    } else if (configuration is UnknownPath) {
+    }
+    if (configuration is UnknownPath) {
       return RouteInformation(location: '/404/');
     }
-    return null;
+    return RouteInformation(location: '/404/');
   }
 }
 
@@ -168,8 +175,8 @@ class BlogEssaysPath extends BlogPath {}
 class BlogProjectsPath extends BlogPath {}
 
 class BlogArticlePath extends BlogPath {
-  String _urlTitle;
-  String _title;
+  String? _urlTitle;
+  String? _title;
   bool isFromUrl = false;
   bool isFromTitle = false;
 
@@ -192,8 +199,8 @@ class BlogArticlePath extends BlogPath {
     isFromUrl = true;
   }
 
-  String get urlTitle => _urlTitle;
-  String get title => _title;
+  String? get urlTitle => _urlTitle;
+  String? get title => _title;
 }
 
 /// Handles the URL and navigation outside the menus
@@ -212,7 +219,7 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
       // print('I tried to change the config');
       return appState.selectedMenu.configuration;
     } else {
-      return BlogArticlePath.fromTitle(appState.selectedArticle.title);
+      return BlogArticlePath.fromTitle(appState.selectedArticle!.title);
     }
   }
 
@@ -244,10 +251,10 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
               if (appState.selectedArticle != null)
                 FadeAnimationPage(
                     child: ArticlePage(
-                      key: ValueKey(appState.selectedArticle.title + '1'),
-                      article: appState.selectedArticle,
+                      key: ValueKey(appState.selectedArticle!.title + '1'),
+                      article: appState.selectedArticle!,
                     ),
-                    key: ValueKey(appState.selectedArticle.title)),
+                    key: ValueKey(appState.selectedArticle!.title)),
               if (appState.selectedArticle == null &&
                   appState.selectedMenu == null)
                 //TODO
@@ -286,7 +293,7 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
   @override
   Future<void> setNewRoutePath(BlogPath path) async {
     if (path is BlogArticlePath) {
-      await appState.setSelectedArticleByUrl(path.urlTitle);
+      await appState.setSelectedArticleByUrl(path.urlTitle!);
       notifyListeners();
     } else {
       appState.selectedArticle = null;
@@ -298,7 +305,7 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -318,7 +325,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
 class UnknownPage extends StatelessWidget {
   const UnknownPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -366,7 +373,7 @@ class UnknownPage extends StatelessWidget {
                             child: Text('404',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .subtitle1
+                                    .subtitle1!
                                     .copyWith(
                                         color: Theme.of(context)
                                             .colorScheme
@@ -382,7 +389,7 @@ class UnknownPage extends StatelessWidget {
                             child: Text('Lost in space',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .subtitle1
+                                    .subtitle1!
                                     .copyWith(fontSize: 50)),
                           ),
                           Padding(
@@ -393,7 +400,7 @@ class UnknownPage extends StatelessWidget {
                                 textAlign: TextAlign.left,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .bodyText2
+                                    .bodyText2!
                                     .copyWith(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -461,7 +468,7 @@ extension StringCompare on String {
 
 enum AppMenu { home, about, essays, projects }
 
-extension AppMenuParser on AppMenu {
+extension AppMenuParser on AppMenu? {
   String get name {
     switch (this) {
       case AppMenu.home:
@@ -502,7 +509,7 @@ extension AppMenuParser on AppMenu {
     }
   }
 
-  static AppMenu fromPath(BlogPath path) {
+  static AppMenu? fromPath(BlogPath path) {
     if (path is BlogHomePath) {
       return AppMenu.home;
     }

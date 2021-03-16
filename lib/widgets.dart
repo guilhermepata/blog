@@ -28,11 +28,11 @@ class MouseState extends ValueNotifier {
 }
 
 class SmoothScroller extends StatefulWidget {
-  final ScrollController controller;
-  final Widget child;
+  final ScrollController? controller;
+  final Widget? child;
 
   const SmoothScroller({
-    Key key,
+    Key? key,
     this.controller,
     this.child,
   }) : super(key: key);
@@ -57,7 +57,7 @@ class _SmoothScrollerState extends State<SmoothScroller> {
   // bool triedWhenLocked = false;
   bool isScrollWheel = false;
 
-  Future<bool> hasAnimated;
+  late Future<bool> hasAnimated;
 
   bool hasTriedToDetect = false;
 
@@ -92,7 +92,7 @@ class _SmoothScrollerState extends State<SmoothScroller> {
   void animate(PointerScrollEvent pointerSignal, {bool wasScheduled = false}) {
     hasNewSchedule = false;
     // locked = true;
-    scrollPosition = widget.controller.position.pixels;
+    scrollPosition = widget.controller!.position.pixels;
     int micros;
     double dy;
 
@@ -106,10 +106,10 @@ class _SmoothScrollerState extends State<SmoothScroller> {
       delta = dy * touchPadExtentFactor;
 
     scrollPosition = scrollPosition + delta;
-    if (scrollPosition > widget.controller.position.maxScrollExtent) {
+    if (scrollPosition > widget.controller!.position.maxScrollExtent) {
       delta =
-          delta - (scrollPosition - widget.controller.position.maxScrollExtent);
-      scrollPosition = widget.controller.position.maxScrollExtent;
+          delta - (scrollPosition - widget.controller!.position.maxScrollExtent);
+      scrollPosition = widget.controller!.position.maxScrollExtent;
     } else if (scrollPosition < 0) {
       delta = delta + scrollPosition;
       scrollPosition = 0;
@@ -130,7 +130,7 @@ class _SmoothScrollerState extends State<SmoothScroller> {
     micros = (delta.abs() * 1000 / (scrollSpeed / 1000)).round();
     // locked = true;
     if (isScrollWheel)
-      this.hasAnimated = widget.controller
+      this.hasAnimated = widget.controller!
           .animateTo(
             scrollPosition,
             duration: Duration(microseconds: micros + 1),
@@ -139,7 +139,7 @@ class _SmoothScrollerState extends State<SmoothScroller> {
           .then((value) => true);
     else
       this.hasAnimated = Future(() {
-        widget.controller.jumpTo(scrollPosition);
+        widget.controller!.jumpTo(scrollPosition);
         return true;
       });
   }
@@ -151,6 +151,6 @@ class _SmoothScrollerState extends State<SmoothScroller> {
             onPointerSignal: onPointerSignal,
             child: widget.child,
           )
-        : widget.child;
+        : widget.child!;
   }
 }

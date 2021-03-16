@@ -9,8 +9,8 @@ import 'app_shell.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
-    Key key,
-    @required this.onArticleTapped,
+    Key? key,
+    required this.onArticleTapped,
   }) : super(key: key);
 
   final void Function(Article) onArticleTapped;
@@ -98,8 +98,8 @@ class _HomeScreenState extends State<HomeScreen> {
 class ArticleCard extends StatelessWidget {
   const ArticleCard(
     this.article, {
-    Key key,
-    @required this.onArticleTapped,
+    Key? key,
+    required this.onArticleTapped,
   }) : super(key: key);
 
   // final AsyncSnapshot<String> snapshot;
@@ -131,12 +131,12 @@ class ArticleCard extends StatelessWidget {
                         showFirst: article.isLoaded,
                         firstChild: article.isLoaded
                             ? Image.network(
-                                article.imageUrl,
+                                article.imageUrl!,
                                 frameBuilder: (BuildContext context,
                                     Widget child,
-                                    int frame,
+                                    int? frame,
                                     bool wasSynchronouslyLoaded) {
-                                  if (wasSynchronouslyLoaded ?? false) {
+                                  if (wasSynchronouslyLoaded) {
                                     return child;
                                   }
                                   return Stack(
@@ -156,7 +156,7 @@ class ArticleCard extends StatelessWidget {
                                   );
                                 },
                                 loadingBuilder: (BuildContext context,
-                                    Widget child, ImageChunkEvent progress) {
+                                    Widget child, ImageChunkEvent? progress) {
                                   return Stack(
                                     children: [
                                       if (progress != null)
@@ -206,7 +206,7 @@ class ArticleCard extends StatelessWidget {
                             showText: article.isLoaded,
                             style: Theme.of(context)
                                 .textTheme
-                                .subtitle1
+                                .subtitle1!
                                 .copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -221,7 +221,7 @@ class ArticleCard extends StatelessWidget {
                                   ? article.buildParagraph(context, 0,
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodyText2
+                                          .bodyText2!
                                           .copyWith(
                                               color: Theme.of(context)
                                                   .colorScheme
@@ -235,7 +235,7 @@ class ArticleCard extends StatelessWidget {
                               numLines: 4,
                               style: Theme.of(context)
                                   .textTheme
-                                  .bodyText2
+                                  .bodyText2!
                                   .copyWith(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -280,8 +280,8 @@ class ArticleCard extends StatelessWidget {
 class ArticleCard2 extends StatelessWidget {
   const ArticleCard2(
     this.article, {
-    Key key,
-    @required this.onArticleTapped,
+    Key? key,
+    required this.onArticleTapped,
   }) : super(key: key);
 
   // final AsyncSnapshot<String> snapshot;
@@ -321,12 +321,12 @@ class ArticleCard2 extends StatelessWidget {
                               showFirst: article.isLoaded,
                               firstChild: article.isLoaded
                                   ? Image.network(
-                                      article.imageUrl,
+                                      article.imageUrl!,
                                       frameBuilder: (BuildContext context,
                                           Widget child,
-                                          int frame,
+                                          int? frame,
                                           bool wasSynchronouslyLoaded) {
-                                        if (wasSynchronouslyLoaded ?? false) {
+                                        if (wasSynchronouslyLoaded) {
                                           return child;
                                         }
                                         return Stack(
@@ -348,7 +348,7 @@ class ArticleCard2 extends StatelessWidget {
                                       },
                                       loadingBuilder: (BuildContext context,
                                           Widget child,
-                                          ImageChunkEvent progress) {
+                                          ImageChunkEvent? progress) {
                                         return Stack(
                                           children: [
                                             if (progress != null)
@@ -403,7 +403,7 @@ class ArticleCard2 extends StatelessWidget {
                                     showText: article.isLoaded,
                                     style: Theme.of(context)
                                         .textTheme
-                                        .headline5
+                                        .headline5!
                                         .copyWith(
                                             color:
                                                 Colors.white.withOpacity(.87)),
@@ -418,7 +418,7 @@ class ArticleCard2 extends StatelessWidget {
                                     showText: article.isLoaded,
                                     style: Theme.of(context)
                                         .textTheme
-                                        .subtitle1
+                                        .subtitle1!
                                         .copyWith(
                                             color:
                                                 Colors.white.withOpacity(.60)),
@@ -449,7 +449,7 @@ class ArticleCard2 extends StatelessWidget {
                                   ? article.buildParagraph(context, 0,
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodyText2
+                                          .bodyText2!
                                           .copyWith(
                                               color: Theme.of(context)
                                                   .colorScheme
@@ -464,7 +464,7 @@ class ArticleCard2 extends StatelessWidget {
                               numLines: 4,
                               style: Theme.of(context)
                                   .textTheme
-                                  .bodyText2
+                                  .bodyText2!
                                   .copyWith(
                                       color: Theme.of(context)
                                           .colorScheme
@@ -507,17 +507,17 @@ class ArticleCard2 extends StatelessWidget {
 
 class CrossFadeTextWidgetBlock extends StatelessWidget {
   final bool showText;
-  final Widget textWidget;
-  final TextStyle style;
-  final double width;
+  final Widget? textWidget;
+  final TextStyle? style;
+  final double? width;
   final int numLines;
-  final TextOverflow overflow;
-  final TextAlign textAlign;
+  final TextOverflow? overflow;
+  final TextAlign? textAlign;
 
   const CrossFadeTextWidgetBlock(
     this.textWidget, {
-    Key key,
-    @required this.showText,
+    Key? key,
+    required this.showText,
     this.style,
     this.width,
     this.numLines = 5,
@@ -542,7 +542,7 @@ class CrossFadeTextWidgetBlock extends StatelessWidget {
             ),
             Skeleton(
               width: width,
-              height: style != null ? style.fontSize * 0.8 : 16 * 0.8,
+              height: style != null ? style!.fontSize! * 0.8 : 16 * 0.8,
             ),
           ],
         ),
@@ -569,15 +569,15 @@ class CrossFadeTextWidgetBlock extends StatelessWidget {
 
 class CrossFadeText extends StatelessWidget {
   final bool showText;
-  final String text;
-  final TextStyle style;
-  final double width;
-  final int maxLines;
+  final String? text;
+  final TextStyle? style;
+  final double? width;
+  final int? maxLines;
 
   const CrossFadeText(
     this.text, {
-    Key key,
-    @required this.showText,
+    Key? key,
+    required this.showText,
     this.style,
     this.width,
     this.maxLines,
@@ -607,7 +607,7 @@ class CrossFadeText extends StatelessWidget {
             ),
             Skeleton(
               width: width,
-              height: style != null ? style.fontSize * 0.8 : 16 * 0.8,
+              height: style != null ? style!.fontSize! * 0.8 : 16 * 0.8,
             ),
           ],
         ));
@@ -616,13 +616,13 @@ class CrossFadeText extends StatelessWidget {
 
 class CrossFadeWidgets extends StatelessWidget {
   const CrossFadeWidgets({
-    Key key,
-    @required this.firstChild,
-    @required this.secondChild,
-    @required this.showFirst,
+    Key? key,
+    required this.firstChild,
+    required this.secondChild,
+    required this.showFirst,
   }) : super(key: key);
 
-  final Widget firstChild;
+  final Widget? firstChild;
   final Widget secondChild;
   final bool showFirst;
 
@@ -633,7 +633,7 @@ class CrossFadeWidgets extends StatelessWidget {
       sizeCurve: Curves.fastOutSlowIn,
       firstCurve: Curves.fastOutSlowIn,
       secondCurve: Curves.fastOutSlowIn,
-      firstChild: showFirst ? firstChild : secondChild,
+      firstChild: showFirst ? firstChild! : secondChild,
       secondChild: secondChild,
       crossFadeState:
           showFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
@@ -644,18 +644,18 @@ class CrossFadeWidgets extends StatelessWidget {
 
 class Skeleton extends StatefulWidget {
   final double height;
-  final double width;
+  final double? width;
 
-  Skeleton({Key key, this.height = 20, this.width}) : super(key: key);
+  Skeleton({Key? key, this.height = 20, this.width}) : super(key: key);
 
   createState() => SkeletonState();
 }
 
 class SkeletonState extends State<Skeleton>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
-  Animation opacity;
+  late Animation opacity;
 
   @override
   void initState() {

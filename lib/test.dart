@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
 
 /// A "shell" with the app bar and drawer
 class AppShell extends StatefulWidget {
-  AppShell({Key key}) : super(key: key);
+  AppShell({Key? key}) : super(key: key);
 
   @override
   _AppShellState createState() => _AppShellState();
@@ -116,9 +116,9 @@ class _AppShellState extends State<AppShell> {
 }
 
 class FirstScreen extends StatelessWidget {
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
 
-  const FirstScreen({Key key, this.scrollController}) : super(key: key);
+  const FirstScreen({Key? key, this.scrollController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -138,9 +138,9 @@ class FirstScreen extends StatelessWidget {
 }
 
 class SecondScreen extends StatelessWidget {
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
 
-  const SecondScreen({Key key, this.scrollController}) : super(key: key);
+  const SecondScreen({Key? key, this.scrollController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

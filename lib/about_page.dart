@@ -10,9 +10,9 @@ import 'app_state.dart';
 import 'widgets.dart';
 
 class AboutPage extends StatefulWidget {
-  final void Function(AppMenu) onMenuTapped;
+  final void Function(AppMenu)? onMenuTapped;
 
-  const AboutPage({Key key, this.onMenuTapped}) : super(key: key);
+  const AboutPage({Key? key, this.onMenuTapped}) : super(key: key);
 
   @override
   _AboutPageState createState() => _AboutPageState();
@@ -87,11 +87,11 @@ class _AboutPageState extends State<AboutPage> {
 }
 
 class AboutCard extends StatelessWidget {
-  final void Function(AppMenu) onMenuTapped;
+  final void Function(AppMenu)? onMenuTapped;
 
   const AboutCard({
-    Key key,
-    @required this.onMenuTapped,
+    Key? key,
+    required this.onMenuTapped,
   }) : super(key: key);
 
   @override
@@ -125,7 +125,7 @@ class AboutCard extends StatelessWidget {
             ),
             Text(
               'MSc Biomedical Engineering',
-              style: Theme.of(context).textTheme.bodyText2.copyWith(
+              style: Theme.of(context).textTheme.bodyText2!.copyWith(
                   fontSize: 12,
                   color:
                       Theme.of(context).colorScheme.onSurface.withOpacity(.6)),
@@ -154,7 +154,7 @@ class AboutCard extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: 'pata  ',
-                          style: Theme.of(context).textTheme.subtitle1.copyWith(
+                          style: Theme.of(context).textTheme.subtitle1!.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface
@@ -173,7 +173,7 @@ class AboutCard extends StatelessWidget {
                         ),
                         TextSpan(
                           text: 'noun. f.s. noun: ',
-                          style: Theme.of(context).textTheme.caption.copyWith(
+                          style: Theme.of(context).textTheme.caption!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -184,7 +184,7 @@ class AboutCard extends StatelessWidget {
                           text: 'pata',
                           style: Theme.of(context)
                               .textTheme
-                              .caption
+                              .caption!
                               .copyWith(fontWeight: FontWeight.bold)
                               .copyWith(
                                 color: Theme.of(context)
@@ -195,7 +195,7 @@ class AboutCard extends StatelessWidget {
                         ),
                         TextSpan(
                           text: '; m.s. noun: ',
-                          style: Theme.of(context).textTheme.caption.copyWith(
+                          style: Theme.of(context).textTheme.caption!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -206,7 +206,7 @@ class AboutCard extends StatelessWidget {
                           text: 'pato',
                           style: Theme.of(context)
                               .textTheme
-                              .caption
+                              .caption!
                               .copyWith(fontWeight: FontWeight.bold)
                               .copyWith(
                                 color: Theme.of(context)
@@ -228,7 +228,7 @@ class AboutCard extends StatelessWidget {
                         // ),
                         TextSpan(
                           text: '; f.p. noun: ',
-                          style: Theme.of(context).textTheme.caption.copyWith(
+                          style: Theme.of(context).textTheme.caption!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -239,7 +239,7 @@ class AboutCard extends StatelessWidget {
                           text: 'patas',
                           style: Theme.of(context)
                               .textTheme
-                              .caption
+                              .caption!
                               .copyWith(fontWeight: FontWeight.bold)
                               .copyWith(
                                 color: Theme.of(context)
@@ -250,7 +250,7 @@ class AboutCard extends StatelessWidget {
                         ),
                         TextSpan(
                           text: '; m.p. noun: ',
-                          style: Theme.of(context).textTheme.caption.copyWith(
+                          style: Theme.of(context).textTheme.caption!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -261,7 +261,7 @@ class AboutCard extends StatelessWidget {
                           text: 'patos',
                           style: Theme.of(context)
                               .textTheme
-                              .caption
+                              .caption!
                               .copyWith(fontWeight: FontWeight.bold)
                               .copyWith(
                                 color: Theme.of(context)
@@ -283,7 +283,7 @@ class AboutCard extends StatelessWidget {
                         // ),
                         TextSpan(
                           text: '.',
-                          style: Theme.of(context).textTheme.caption.copyWith(
+                          style: Theme.of(context).textTheme.caption!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -301,7 +301,7 @@ class AboutCard extends StatelessWidget {
                             '1.  a waterbird with a broad blunt bill, short legs, webbed feet, and a waddling gait.',
                       ),
                       textAlign: TextAlign.left,
-                      style: Theme.of(context).textTheme.bodyText2.copyWith(
+                      style: Theme.of(context).textTheme.bodyText2!.copyWith(
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSurface
@@ -314,7 +314,7 @@ class AboutCard extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: 'Etymology: ',
-                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                          style: Theme.of(context).textTheme.bodyText2!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -325,7 +325,7 @@ class AboutCard extends StatelessWidget {
                         ),
                         TextSpan(
                           text: 'from Old Portuguese ',
-                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                          style: Theme.of(context).textTheme.bodyText2!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -335,7 +335,7 @@ class AboutCard extends StatelessWidget {
                         ),
                         TextSpan(
                           text: 'pato',
-                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                          style: Theme.of(context).textTheme.bodyText2!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -347,7 +347,7 @@ class AboutCard extends StatelessWidget {
                         TextSpan(
                           text:
                               ' (“duck”), from Andalusian Arabic  بَطّ‎  (paṭṭ), from Arabic  بَطّ‎  (baṭṭ, “duck”), from Persian  بت‎  (bat, “duck”).\n',
-                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                          style: Theme.of(context).textTheme.bodyText2!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSurface
@@ -383,7 +383,7 @@ class AboutCard extends StatelessWidget {
                       child: LinkTextWidget(
                         'Flutter',
                         fraction: 1,
-                        style: Theme.of(context).textTheme.bodyText2.copyWith(
+                        style: Theme.of(context).textTheme.bodyText2!.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface
@@ -402,14 +402,14 @@ class AboutCard extends StatelessWidget {
                       child: LinkTextWidget(
                         'essays',
                         fraction: 1,
-                        style: Theme.of(context).textTheme.bodyText2.copyWith(
+                        style: Theme.of(context).textTheme.bodyText2!.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface
                                   .withOpacity(.6),
                             ),
                         onTap: () {
-                          onMenuTapped(AppMenu.essays);
+                          onMenuTapped!(AppMenu.essays);
                         },
                       ),
                     ),
@@ -420,14 +420,14 @@ class AboutCard extends StatelessWidget {
                       child: LinkTextWidget(
                         'projects',
                         fraction: 1,
-                        style: Theme.of(context).textTheme.bodyText2.copyWith(
+                        style: Theme.of(context).textTheme.bodyText2!.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface
                                   .withOpacity(.6),
                             ),
                         onTap: () {
-                          onMenuTapped(AppMenu.projects);
+                          onMenuTapped!(AppMenu.projects);
                         },
                       ),
                     ),
@@ -438,7 +438,7 @@ class AboutCard extends StatelessWidget {
                       child: LinkTextWidget(
                         'Medium',
                         fraction: 1,
-                        style: Theme.of(context).textTheme.bodyText2.copyWith(
+                        style: Theme.of(context).textTheme.bodyText2!.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface
@@ -459,7 +459,7 @@ class AboutCard extends StatelessWidget {
                       child: LinkTextWidget(
                         'GitHub',
                         fraction: 1,
-                        style: Theme.of(context).textTheme.bodyText2.copyWith(
+                        style: Theme.of(context).textTheme.bodyText2!.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
                                   .onSurface
@@ -475,14 +475,14 @@ class AboutCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                style: Theme.of(context).textTheme.bodyText2.copyWith(
+                style: Theme.of(context).textTheme.bodyText2!.copyWith(
                       color: Theme.of(context)
                           .colorScheme
                           .onSurface
                           .withOpacity(.6),
                     ),
                 strutStyle: StrutStyle(
-                  height: Theme.of(context).textTheme.bodyText2.height,
+                  height: Theme.of(context).textTheme.bodyText2!.height,
                   forceStrutHeight: true,
                 ),
               ),
