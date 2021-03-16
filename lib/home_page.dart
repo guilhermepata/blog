@@ -20,12 +20,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  ScrollController scrollController;
+  ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    scrollController = ScrollController();
     scrollController.addListener(() {
       if (scrollController.offset > 0) {
         context.read<ShellState>().appBarFlinger = Fling.forward;

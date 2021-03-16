@@ -19,12 +19,11 @@ class AboutPage extends StatefulWidget {
 }
 
 class _AboutPageState extends State<AboutPage> {
-  ScrollController scrollController;
+  ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    scrollController = ScrollController();
     scrollController.addListener(() {
       if (scrollController.offset > 0) {
         context.read<ShellState>().appBarFlinger = Fling.forward;

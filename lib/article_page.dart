@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:palette_generator/palette_generator.dart';
-import 'package:icon_shadow/icon_shadow.dart';
+// import 'package:icon_shadow/icon_shadow.dart';
 import 'package:provider/provider.dart';
 // import 'package:visibility_detector/visibility_detector.dart';
 import 'classes.dart';
@@ -206,11 +206,7 @@ class _ArticlePageState extends State<ArticlePage>
                   backwardsCompatibility: false,
                   leadingWidth: 56 + appBarMargins,
                   leading: IconButton(
-                    icon: IconShadowWidget(
-                      Icon(Icons.arrow_back),
-                      showShadow: false,
-                      shadowColor: Colors.black,
-                    ),
+                    icon: Icon(Icons.arrow_back),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -242,10 +238,9 @@ class _ArticlePageState extends State<ArticlePage>
                 foregroundColor: appBarForegroundColor.value,
                 leadingWidth: 56 + appBarMargins,
                 leading: IconButton(
-                  icon: IconShadowWidget(
-                    Icon(Icons.arrow_back, color: appBarForegroundColor.value),
-                    showShadow: appBarStateController.isDismissed,
-                    shadowColor: Colors.black,
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: appBarForegroundColor.value,
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();

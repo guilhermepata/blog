@@ -1,0 +1,24 @@
+{
+  "name": "FeatherIcon",
+  "css_prefix_text": "",
+  "css_use_suffix": false,
+  "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
+  "glyphs": [
+    {
+      "uid": "fdfa7389b7be7c27404d0268d4edcb4b",
+      "css": "feather",
+      "code": 59392,
+      "src": "custom_icons",
+      "selected": true,
+      "svg": {
+        "path": "M833.3 854.2H708.3L593.8 739.6 656.3 677.1ZM406.3 427.1L656.3 677.1A118.3 118.3 0 0 0 656.3 510.4L281.3 135.4A323.7 323.7 0 0 0 281.3 593.8L427.1 739.6A118.3 118.3 0 0 0 593.8 739.6L406.3 552.1A88.3 88.3 0 0 1 406.3 427.1Z",
+        "width": 1000
+      },
+      "search": [
+        "feather"
+      ]
+    }
+  ]
+}

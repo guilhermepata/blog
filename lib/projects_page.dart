@@ -19,12 +19,11 @@ class ProjectsScreen extends StatefulWidget {
 }
 
 class _ProjectsScreenState extends State<ProjectsScreen> {
-  ScrollController scrollController;
+  ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    scrollController = ScrollController();
     scrollController.addListener(() {
       if (scrollController.offset > 0) {
         context.read<ShellState>().appBarFlinger = Fling.forward;

@@ -12,10 +12,10 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'home_page.dart';
 
 class Article {
-  String _title, _subtitle, _rawContent, _imageUrl, _altText;
-  String _content;
+  String/*!*/ _title, _subtitle, _rawContent, _imageUrl, _altText;
+  String/*!*/ _content;
   String _asset;
-  bool _isLoaded;
+  bool _isLoaded = false;
 
   BodyTextParser parser;
 
@@ -230,7 +230,7 @@ class Article {
 ///
 /// This class can be converted into a list of [SingleFormatString].
 class FormattedString {
-  String _string;
+  String/*!*/ _string;
   final List<Format> _characterFormats = <Format>[];
 
   /// Final string.
@@ -289,7 +289,7 @@ class FormattedString {
   /// Markdown format indicators (asterisks and underscores) will be removed
   /// from the input string and each character in the final string will be given
   /// the appropriate format.
-  FormattedString(String inputString) : this._string = inputString {
+  FormattedString(String/*!*/ inputString) : this._string = inputString {
     for (var i = 0; i < _string.length; i++) {
       _characterFormats.add(Format.normal);
     }
@@ -434,7 +434,7 @@ class FormattedString {
 /// [TypeStyle]. If [TypeStyle] is [TypeStyle.link], it will also include the
 /// link's URL.
 class SingleFormatString {
-  final String string;
+  final String/*!*/ string;
   Format format;
   TypeStyle style;
   String _url;
@@ -464,7 +464,7 @@ class BodyTextParser {
   List<String> contentParts = [];
 
   bool isParsing = true;
-  Future<bool> isParsed;
+  Future<bool>/*!*/ isParsed;
 
   BodyTextParser(this.content) {
     contentParts = content.split(RegExp(r'\n\s{1,}'));
@@ -571,7 +571,7 @@ class BodyTextBuilder {
   // final List<List<SingleFormatString>> paragraphs = [];
   // List<String> contentParts;
 
-  final BodyTextParser parser;
+  final BodyTextParser/*!*/ parser;
 
   BodyTextBuilder(
       {@required this.parser,
@@ -714,7 +714,7 @@ class BodyTextBuilder {
   }
 
   static Future<bool> onLinkTapped(
-      {@required BuildContext context, @required String url, String label}) {
+      {@required BuildContext context, @required String/*!*/ url, String/*!*//*!*/ label}) {
     return showModalBottomSheet(
         context: context,
         isDismissible: true,
@@ -797,7 +797,7 @@ class BodyTextBuilder {
         });
   }
 
-  static void launchWebPage(BuildContext context, String url) {
+  static void launchWebPage(BuildContext context, String/*!*/ url) {
     showModalBottomSheet<dynamic>(
         context: context,
         isScrollControlled: true,

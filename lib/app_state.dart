@@ -12,11 +12,11 @@ import 'app_shell.dart';
 
 class AppState extends ChangeNotifier {
   final List<String> assets = [];
-  final Map<String, Article> articles = Map();
+  final Map<String/*!*/, Article> articles = Map();
   Article _selectedArticle;
   AppMenu _selectedMenu;
   bool _areArticlesLoading = false;
-  Future<bool> _areArticlesLoaded;
+  Future<bool>/*!*/ _areArticlesLoaded;
 
   bool _isThemeFlipped = false;
 
@@ -90,7 +90,7 @@ class AppState extends ChangeNotifier {
     selectedArticle = articles[title];
   }
 
-  Future<void> setSelectedArticleByUrl(String urlTitle) async {
+  Future<void> setSelectedArticleByUrl(String/*!*/ urlTitle) async {
     await _areArticlesLoaded;
     for (var title in articles.keys) {
       if (urlTitle.isUrlOf(title)) {

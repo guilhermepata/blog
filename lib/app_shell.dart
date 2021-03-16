@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'feather_icon_icons.dart';
 import 'app_state.dart';
 import 'home_page.dart';
 import 'classes.dart';
@@ -13,12 +14,12 @@ class ShellState extends ChangeNotifier {
 
   bool _isMobileLayout = false;
   // double _margins = 0;
-  double _gutters = 24;
-  double _cardCornerRadius = 8;
-  StandardDrawerState _standardDrawerState = StandardDrawerState.closed;
+  double /*!*/ _gutters = 24;
+  double /*!*/ _cardCornerRadius = 8;
+  StandardDrawerState /*!*/ _standardDrawerState = StandardDrawerState.closed;
   List<Article> articles = <Article>[];
   // ScrollController scrollController = ScrollController();
-  Fling _appBarFlinger;
+  Fling _appBarFlinger = Fling.none;
 
   bool _areArticlesLoaded = false;
 
@@ -94,25 +95,25 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   //
-  ShellState shellState;
+  ShellState /*!*/ shellState;
 
   //
 
-  bool _isMobileLayout;
-  double _margins;
+  bool /*!*/ _isMobileLayout;
+  double /*!*/ _margins;
   double _gutters;
   double _cardCornerRadius;
   StandardDrawerState _standardDrawerState;
   // List<Article> articles = <Article>[];
   // ScrollController scrollController = ScrollController();
 
-  bool get isMobileLayout => _isMobileLayout;
+  bool /*!*/ get isMobileLayout => _isMobileLayout;
   double get margins => _margins;
   double get gutters => _gutters;
   double get cardCornerRadius => _cardCornerRadius;
   StandardDrawerState get standardDrawerState => _standardDrawerState;
 
-  set isMobileLayout(bool value) {
+  set isMobileLayout(bool /*!*/ value) {
     _isMobileLayout = value;
     shellState.isMobileLayout = value;
   }
@@ -150,7 +151,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   bool isInitialized = false;
   bool isAppBarElevated = false;
   AnimationController appBarStateController;
-  Animation<Color> appBarColor;
+  Animation<Color /*!*/ > appBarColor;
 
   AppBarState appBarState = AppBarState.lowered;
 
@@ -380,9 +381,9 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
         backgroundColor: appBarColor.value,
         leadingWidth: 56 + appBarMargins,
         title: Padding(
-            padding: EdgeInsets.only(left: appBarSpacing.value),
-            child: Text('The Duckling') //Text("To Papáki"),
-            ),
+          padding: EdgeInsets.only(left: appBarSpacing.value),
+          child: buildTitle(),
+        ),
         leading: !displayMobileLayout
             ? IconButton(
                 icon: AnimatedIcon(
@@ -468,9 +469,9 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                 backgroundColor: Theme.of(context).canvasColor,
                 leadingWidth: 56 + appBarMargins,
                 title: Padding(
-                    padding: EdgeInsets.only(left: appBarSpacing.value),
-                    child: Text('The Duckling') //Text("To Papáki"),
-                    ),
+                  padding: EdgeInsets.only(left: appBarSpacing.value),
+                  child: buildTitle(),
+                ),
                 leading: IconButton(
                     icon: Icon(
                       Icons.close,
@@ -483,6 +484,33 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
             buildDrawerChildren(),
       ),
     ));
+  }
+
+  Row buildTitle() {
+    return Row(
+      children: [
+        Icon(
+          FeatherIcon.feather,
+          size: 24,
+        ),
+        SizedBox(
+          width: 4,
+        ),
+        Text.rich(
+          TextSpan(
+            text: 'The Duckling',
+            // children: [
+            //   TextSpan(
+            //     text: '.',
+            //     style: TextStyle(
+            //       color: Theme.of(context).colorScheme.primary,
+            //     ),
+            //   ),
+            // ],
+          ),
+        ),
+      ],
+    );
   }
 
   List<Widget> buildDrawerChildren() {
