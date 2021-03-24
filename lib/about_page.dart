@@ -114,7 +114,7 @@ class AboutCard extends StatelessWidget {
                   backgroundColor: Colors.transparent,
                   radius: 72,
                   foregroundImage:
-                      AssetImage('assets/images/photo_cropped_small.jpeg')),
+                      AssetImage('assets/images/photo_old_rotated.jpeg')),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -154,11 +154,14 @@ class AboutCard extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: 'pata  ',
-                          style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withOpacity(.6)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1!
+                              .copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(.6)),
                         ),
                         TextSpan(
                           text: '/ˈpa.tɐ/\n',
@@ -314,46 +317,50 @@ class AboutCard extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: 'Etymology: ',
-                          style: Theme.of(context).textTheme.bodyText2!.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(.38),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyText2!.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(.38),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         TextSpan(
                           text: 'from Old Portuguese ',
-                          style: Theme.of(context).textTheme.bodyText2!.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(.38),
-                                fontSize: 12,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyText2!.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(.38),
+                                    fontSize: 12,
+                                  ),
                         ),
                         TextSpan(
                           text: 'pato',
-                          style: Theme.of(context).textTheme.bodyText2!.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(.38),
-                                fontSize: 12,
-                                fontStyle: FontStyle.italic,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyText2!.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(.38),
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                  ),
                         ),
                         TextSpan(
                           text:
                               ' (“duck”), from Andalusian Arabic  بَطّ‎  (paṭṭ), from Arabic  بَطّ‎  (baṭṭ, “duck”), from Persian  بت‎  (bat, “duck”).\n',
-                          style: Theme.of(context).textTheme.bodyText2!.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(.38),
-                                fontSize: 12,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyText2!.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(.38),
+                                    fontSize: 12,
+                                  ),
                         ),
                       ],
                     ),

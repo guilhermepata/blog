@@ -19,7 +19,7 @@ class AppTheme {
       headline1: GoogleFonts.lora(
         color: finalScheme.onSurface.withOpacity(.87),
         fontSize: 93,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w600,
         letterSpacing: -0.3,
         wordSpacing: -1.5,
       ),
@@ -58,7 +58,7 @@ class AppTheme {
       ),
       subtitle2: GoogleFonts.ibmPlexSerif(
         fontSize: 14,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
         color: finalScheme.onSurface.withOpacity(.87),
       ),
       caption: GoogleFonts.rubik(
@@ -70,7 +70,7 @@ class AppTheme {
       ),
       bodyText1: GoogleFonts.ibmPlexSerif(
         color: finalScheme.onSurface.withOpacity(.87),
-        fontSize: 16,
+        fontSize: 17,
         height: 2,
         fontWeight: FontWeight.w400,
       ),

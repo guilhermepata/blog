@@ -32,7 +32,7 @@ class _ArticlePageState extends State<ArticlePage>
   late double width, height, usefulWidth, usefulHeight, gutters;
 
   late double appBarMargins;
-  double maxContentWidth = 600;
+  double maxContentWidth = 672;
   late double contentWidth;
   late double webLayoutMinWidth;
   late double cardCornerRadius;
@@ -155,11 +155,11 @@ class _ArticlePageState extends State<ArticlePage>
       initialSheetHeight = usefulHeight / 3;
       totalSheetHeightDelta = maxSheetHeight - initialSheetHeight;
 
-      if (width < 720) {
+      if (width < maxContentWidth) {
         gutters = 24;
         appBarMargins = 0;
       } else {
-        gutters = 24;
+        gutters = 48;
         appBarMargins = 24;
       }
 
@@ -172,7 +172,7 @@ class _ArticlePageState extends State<ArticlePage>
       if (usefulWidth < maxContentWidth)
         cardCornerRadius = 0;
       else
-        cardCornerRadius = gutters / 4;
+        cardCornerRadius = 6;
 
       isInitialized = true;
     });
@@ -315,33 +315,55 @@ class _ArticlePageState extends State<ArticlePage>
                           top: imageScrollPosition.value,
                           child: child!,
                         ),
-                        child: Material(
-                          elevation: 2,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                                maxWidth: usefulWidth,
-                                minWidth: usefulWidth,
-                                minHeight: height * 1 / 3,
-                                maxHeight: height),
-                            child: Image.network(
-                              widget.article.imageUrl!,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.center,
-                              semanticLabel: widget.article.altText,
-                              frameBuilder: (BuildContext context, Widget child,
-                                  int? frame, bool wasSynchronouslyLoaded) {
-                                if (wasSynchronouslyLoaded) {
-                                  return child;
-                                }
-                                return AnimatedOpacity(
-                                  child: child,
-                                  opacity: frame == null ? 0 : 1,
-                                  duration: const Duration(milliseconds: 200),
-                                  curve: Curves.easeIn,
-                                );
-                              },
+                        child: Stack(
+                          alignment: AlignmentDirectional.topCenter,
+                          children: [
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                  maxWidth: usefulWidth,
+                                  minWidth: usefulWidth,
+                                  minHeight: height * 1 / 3,
+                                  maxHeight: height),
+                              child: Image.network(
+                                widget.article.imageUrl!,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.center,
+                                semanticLabel: widget.article.altText,
+                                frameBuilder: (BuildContext context,
+                                    Widget child,
+                                    int? frame,
+                                    bool wasSynchronouslyLoaded) {
+                                  if (wasSynchronouslyLoaded) {
+                                    return child;
+                                  }
+                                  return AnimatedOpacity(
+                                    child: child,
+                                    opacity: frame == null ? 0 : 1,
+                                    duration: const Duration(milliseconds: 200),
+                                    curve: Curves.easeIn,
+                                  );
+                                },
+                              ),
                             ),
-                          ),
+                            Container(
+                              constraints: BoxConstraints(
+                                  maxWidth: usefulWidth,
+                                  minWidth: usefulWidth,
+                                  minHeight: height * 1 / 3 + 1,
+                                  maxHeight: height + 1),
+                              alignment: Alignment.bottomLeft,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [
+                                    Theme.of(context).colorScheme.background,
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -411,12 +433,14 @@ class _ArticlePageState extends State<ArticlePage>
                   maxLines:
                       (widget.article.title.split(RegExp(r'[ ]')).length / 4)
                           .ceil(),
-                  presetFontSizes: [93, 58, 46, 33],
+                  presetFontSizes: [46, 33],
                   style: Theme.of(context).textTheme.headline1!.copyWith(
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
                             .withOpacity(.87),
+                        // fontWeight: FontWeight.w100,
+                        fontStyle: FontStyle.italic,
                       ),
                 ),
                 SizedBox(
@@ -445,7 +469,7 @@ class _ArticlePageState extends State<ArticlePage>
         ),
       );
     else if (index == 1)
-      return Divider(height: 36, indent: 24, endIndent: 24);
+      return Divider(height: 36, indent: gutters, endIndent: gutters);
     else if (index == 2)
       result = Padding(
         padding: const EdgeInsets.only(bottom: 12),
@@ -487,9 +511,9 @@ class _ArticlePageState extends State<ArticlePage>
           context,
           index - 3,
           style: Theme.of(context).textTheme.bodyText1!.copyWith(
-              fontSize: 16,
+              fontSize: 17,
               height: 2,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(.7)),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(.63)),
           textAlign: TextAlign.left,
           overflow: TextOverflow.visible,
         ),

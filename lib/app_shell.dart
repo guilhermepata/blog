@@ -310,7 +310,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
     if (usefulWidth < maxContentWidth)
       cardCornerRadius = 0;
     else
-      cardCornerRadius = gutters / 4;
+      cardCornerRadius = 6;
 
     if (!isInitialized) {
       standardDrawerState = StandardDrawerState.open;
