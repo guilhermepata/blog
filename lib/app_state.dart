@@ -39,7 +39,7 @@ class AppState extends ChangeNotifier {
 
   Future<bool> loadArticles() async {
     final articlesJson = await http.read(Uri.parse(
-        'https://api.github.com/repos/guilhermepata/blog/contents/assets/posts'));
+        'https://api.github.com/repos/guilhermepata/blog/contents/essays'));
 
     final articlesList = await compute(jsonDecode, articlesJson);
 
