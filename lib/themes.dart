@@ -45,10 +45,10 @@ class AppTheme {
         fontSize: 23,
         fontWeight: FontWeight.bold,
       ),
-      headline6: GoogleFonts.lora(
+      headline6: GoogleFonts.rubik(
         color: finalScheme.onSurface.withOpacity(.87),
         fontSize: 19,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
         letterSpacing: 0.15,
       ),
       subtitle1: GoogleFonts.rubik(

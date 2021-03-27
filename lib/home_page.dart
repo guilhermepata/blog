@@ -27,9 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     scrollController.addListener(() {
       if (scrollController.offset > 0) {
-        context.read<ShellState>().appBarFlinger = Fling.forward;
+        context.read<ShellState>().pastTitleNotifier.value = true;
       } else {
-        context.read<ShellState>().appBarFlinger = Fling.backward;
+        context.read<ShellState>().pastTitleNotifier.value = false;
       }
     });
     // context.read<AppState>().addListener(scrollControllerListener);
@@ -306,7 +306,7 @@ class ArticleCard2 extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(cardCornerRadius)),
                     margin: EdgeInsets.zero,
-                    clipBehavior: Clip.hardEdge,
+                    clipBehavior: Clip.antiAlias,
                     child: child,
                   );
                 },

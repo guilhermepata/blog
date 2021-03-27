@@ -40,21 +40,17 @@ class _ArticlePageState extends State<ArticlePage>
   late double maxSheetHeight;
   late double totalSheetHeightDelta;
 
+  ValueNotifier pastTitleNotifier = ValueNotifier(false);
+
   // double imageScrollPosition = 0.0;
 
   ImagePositionNotifier imagePositionNotifier = ImagePositionNotifier(0.0);
 
   bool isInitialized = false;
   late bool isMobileLayout;
-  bool isAppBarElevated = false;
 
   ScrollController scrollController = ScrollController();
   // ScrollController imageScrollController = ScrollController();
-
-  late AnimationController appBarStateController;
-  late Animation<Color?> appBarColor;
-  late Animation<Color?> appBarForegroundColor;
-  AppBarState appBarState = AppBarState.lowered;
 
   bool get displayMobileLayout {
     return isMobileLayout;
@@ -64,78 +60,28 @@ class _ArticlePageState extends State<ArticlePage>
   void initState() {
     // VisibilityDetectorController.instance.updateInterval = Duration.zero;
 
+    MouseState().addListener(() {
+      setState(() {});
+    });
+
     scrollController.addListener(() {
-      if (scrollController.position.pixels > height / 3 - 56 &&
-          appBarState != AppBarState.raised &&
-          appBarState != AppBarState.raising) {
-        appBarStateController.fling();
-      } else if (scrollController.position.pixels < height / 3 - 56 &&
-          appBarState != AppBarState.lowered &&
-          appBarState != AppBarState.lowering) {
-        appBarStateController.fling(velocity: -1);
+      if (scrollController.position.pixels > height / 3 - 56) {
+        pastTitleNotifier.value = true;
+      } else if (scrollController.position.pixels < height / 3 - 56) {
+        pastTitleNotifier.value = false;
       }
       // if (scrollController.offset < height * 4) {
       //   imageScrollController.jumpTo(scrollController.offset / 4);
       // }
     });
 
-    appBarStateController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
-    appBarStateController.addStatusListener((status) {
-      if (status == AnimationStatus.completed)
-        setState(() {
-          appBarState = AppBarState.raised;
-          isAppBarElevated = true;
-        });
-      else if (status == AnimationStatus.dismissed)
-        setState(() {
-          appBarState = AppBarState.lowered;
-          isAppBarElevated = false;
-        });
-      else if (status == AnimationStatus.forward)
-        setState(() {
-          appBarState = AppBarState.raising;
-        });
-      else if (status == AnimationStatus.reverse)
-        setState(() {
-          appBarState = AppBarState.lowering;
-        });
-    });
-    appBarStateController.addListener(() {
-      setState(() {});
-    });
-
-    MouseState().addListener(() {
-      setState(() {});
-    });
-
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    appBarColor = ColorTween(
-            begin: Colors.transparent,
-            end: Color.alphaBlend(Colors.white.withOpacity(.09),
-                Theme.of(context).colorScheme.surface))
-        .animate(appBarStateController);
-    appBarColor.addListener(() {
-      setState(() {});
-    });
-    appBarForegroundColor = ColorTween(
-            begin: Colors.white,
-            end: Theme.of(context).appBarTheme.foregroundColor)
-        .animate(appBarStateController);
-    appBarForegroundColor.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
   void dispose() {
     scrollController.dispose();
-    appBarStateController.dispose();
+
     MouseState().removeListener(() {
       setState(() {});
     });
@@ -189,21 +135,6 @@ class _ArticlePageState extends State<ArticlePage>
             return Scaffold(
                 appBar: AppBar(
                   // THIS IS THE LOADING ONE
-                  brightness: isAppBarElevated
-                      ? Theme.of(context).brightness == Brightness.light
-                          ? Brightness.light
-                          : Brightness.dark
-                      : Brightness.dark,
-                  systemOverlayStyle: isAppBarElevated
-                      ? Theme.of(context).brightness == Brightness.light
-                          ? SystemUiOverlayStyle.dark
-                          : SystemUiOverlayStyle.light
-                      : SystemUiOverlayStyle.light,
-                  shadowColor: Colors.black.withOpacity(
-                      appBarStateController.value *
-                          appBarStateController.value),
-                  backgroundColor: appBarColor.value,
-                  backwardsCompatibility: false,
                   leadingWidth: 56 + appBarMargins,
                   leading: IconButton(
                     icon: Icon(Icons.arrow_back),
@@ -218,84 +149,20 @@ class _ArticlePageState extends State<ArticlePage>
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
-                            .withOpacity(appBarStateController.value * .87)),
+                            .withOpacity(.87)),
                   ),
                 ),
                 body: Center(child: CircularProgressIndicator()));
           else
             return Scaffold(
               extendBodyBehindAppBar: true,
-              appBar: AppBar(
-                shadowColor: Colors.black.withOpacity(
-                    appBarStateController.value * appBarStateController.value),
-                backgroundColor: appBarColor.value,
-                backwardsCompatibility: false,
-                systemOverlayStyle: isAppBarElevated
-                    ? Theme.of(context).brightness == Brightness.light
-                        ? SystemUiOverlayStyle.dark
-                        : SystemUiOverlayStyle.light
-                    : SystemUiOverlayStyle.light,
-                foregroundColor: appBarForegroundColor.value,
-                leadingWidth: 56 + appBarMargins,
-                leading: IconButton(
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: appBarForegroundColor.value,
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                title: Text(
-                  'Essay: ' + widget.article.title,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.headline6!.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(appBarStateController.value * .87),
-                      ),
-                ),
-                actions: [
-                  Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 0),
-                      child: PopupMenuButton<AppBarMenuOptions>(
-                        onSelected: (AppBarMenuOptions result) {
-                          if (result == AppBarMenuOptions.changeTheme) {
-                            context.read<AppState>().flipTheme();
-                          }
-                        },
-                        itemBuilder: (BuildContext context) =>
-                            <PopupMenuEntry<AppBarMenuOptions>>[
-                          PopupMenuItem<AppBarMenuOptions>(
-                            value: AppBarMenuOptions.changeTheme,
-                            child: ListTile(
-                              dense: true,
-                              // visualDensity:
-                              //     VisualDensity(horizontal: -4, vertical: -4),
-                              minLeadingWidth: 18,
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 0),
-                              horizontalTitleGap: 8,
-                              leading: Icon(
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Icons.brightness_7
-                                    : Icons.brightness_4,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withOpacity(.87),
-                              ),
-                              title: Text(
-                                'Change theme',
-                                // style: Theme.of(context).textTheme.bodyText2,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ))
-                ],
-              ),
+              appBar: PreferredSize(
+                  preferredSize: Size.fromHeight(56),
+                  child: AnimatedAppBar(
+                    title: widget.article.title,
+                    appBarMargins: appBarMargins,
+                    pastTitleNotifier: pastTitleNotifier,
+                  )),
               body: NotificationListener(
                 onNotification: (dynamic notification) {
                   if (notification is ScrollUpdateNotification) {
@@ -514,6 +381,12 @@ class _ArticlePageState extends State<ArticlePage>
               fontSize: 17,
               height: 2,
               color: Theme.of(context).colorScheme.onSurface.withOpacity(.63)),
+          headlineStyle: GoogleFonts.lora(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
+            fontSize: 19,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.15,
+          ),
           textAlign: TextAlign.left,
           overflow: TextOverflow.visible,
         ),
@@ -521,5 +394,172 @@ class _ArticlePageState extends State<ArticlePage>
     else
       result = SizedBox(height: 0);
     return result;
+  }
+}
+
+class AnimatedAppBar extends StatefulWidget {
+  const AnimatedAppBar({
+    Key? key,
+    required this.title,
+    required this.appBarMargins,
+    required this.pastTitleNotifier,
+  }) : super(key: key);
+
+  final String title;
+  final double appBarMargins;
+  final ValueNotifier pastTitleNotifier;
+
+  @override
+  _AnimatedAppBarState createState() => _AnimatedAppBarState();
+}
+
+class _AnimatedAppBarState extends State<AnimatedAppBar>
+    with SingleTickerProviderStateMixin {
+  bool isAppBarElevated = false;
+  late AnimationController appBarStateController;
+  late Animation<Color?> appBarColor;
+  late Animation<Color?> appBarForegroundColor;
+  AppBarState appBarState = AppBarState.lowered;
+
+  @override
+  void initState() {
+    widget.pastTitleNotifier.addListener(() {
+      if (widget.pastTitleNotifier.value == true &&
+          appBarState != AppBarState.raised &&
+          appBarState != AppBarState.raising) {
+        appBarStateController.fling();
+      } else if (widget.pastTitleNotifier.value == false &&
+          appBarState != AppBarState.lowered &&
+          appBarState != AppBarState.lowering) {
+        appBarStateController.fling(velocity: -1);
+      }
+    });
+
+    appBarStateController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
+    appBarStateController.addStatusListener((status) {
+      if (status == AnimationStatus.completed)
+        setState(() {
+          appBarState = AppBarState.raised;
+          isAppBarElevated = true;
+        });
+      else if (status == AnimationStatus.dismissed)
+        setState(() {
+          appBarState = AppBarState.lowered;
+          isAppBarElevated = false;
+        });
+      else if (status == AnimationStatus.forward)
+        setState(() {
+          appBarState = AppBarState.raising;
+        });
+      else if (status == AnimationStatus.reverse)
+        setState(() {
+          appBarState = AppBarState.lowering;
+        });
+    });
+    appBarStateController.addListener(() {
+      setState(() {});
+    });
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    appBarColor = ColorTween(
+            begin: Colors.transparent,
+            end: Color.alphaBlend(Colors.white.withOpacity(.09),
+                Theme.of(context).colorScheme.surface))
+        .animate(appBarStateController);
+    appBarColor.addListener(() {
+      setState(() {});
+    });
+    appBarForegroundColor = ColorTween(
+            begin: Colors.white,
+            end: Theme.of(context).appBarTheme.foregroundColor)
+        .animate(appBarStateController);
+    appBarForegroundColor.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    appBarStateController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      shadowColor: Colors.black.withOpacity(
+          appBarStateController.value * appBarStateController.value),
+      backgroundColor: appBarColor.value,
+      backwardsCompatibility: false,
+      systemOverlayStyle: isAppBarElevated
+          ? Theme.of(context).brightness == Brightness.light
+              ? SystemUiOverlayStyle.dark
+              : SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.light,
+      foregroundColor: appBarForegroundColor.value,
+      leadingWidth: 56 + widget.appBarMargins,
+      leading: IconButton(
+        icon: Icon(
+          Icons.arrow_back,
+          color: appBarForegroundColor.value,
+        ),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+      title: Text(
+        'Essay: ' + widget.title,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.headline6!.copyWith(
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withOpacity(appBarStateController.value * .87),
+            ),
+      ),
+      actions: [
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0),
+            child: PopupMenuButton<AppBarMenuOptions>(
+              onSelected: (AppBarMenuOptions result) {
+                if (result == AppBarMenuOptions.changeTheme) {
+                  context.read<AppState>().flipTheme();
+                }
+              },
+              itemBuilder: (BuildContext context) =>
+                  <PopupMenuEntry<AppBarMenuOptions>>[
+                PopupMenuItem<AppBarMenuOptions>(
+                  value: AppBarMenuOptions.changeTheme,
+                  child: ListTile(
+                    dense: true,
+                    // visualDensity:
+                    //     VisualDensity(horizontal: -4, vertical: -4),
+                    minLeadingWidth: 18,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                    horizontalTitleGap: 8,
+                    leading: Icon(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Icons.brightness_7
+                          : Icons.brightness_4,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(.87),
+                    ),
+                    title: Text(
+                      'Change theme',
+                      // style: Theme.of(context).textTheme.bodyText2,
+                    ),
+                  ),
+                ),
+              ],
+            ))
+      ],
+    );
   }
 }

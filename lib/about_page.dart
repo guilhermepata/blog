@@ -26,9 +26,9 @@ class _AboutPageState extends State<AboutPage> {
     super.initState();
     scrollController.addListener(() {
       if (scrollController.offset > 0) {
-        context.read<ShellState>().appBarFlinger = Fling.forward;
+        context.read<ShellState>().pastTitleNotifier.value = true;
       } else {
-        context.read<ShellState>().appBarFlinger = Fling.backward;
+        context.read<ShellState>().pastTitleNotifier.value = false;
       }
     });
     MouseState().addListener(() {

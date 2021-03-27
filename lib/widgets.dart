@@ -46,7 +46,7 @@ class _SmoothScrollerState extends State<SmoothScroller> {
   final double touchPadSpeed = 8100; // in logical pixels per second
   final double touchPadExtentFactor = .9;
 
-  final double scrollWheelSpeed = 710;
+  final double scrollWheelSpeed = 1000;
   final double scrollWheelExtentFactor = 1.5;
   final double _increaseSpeedFactor = 3;
   double increaseSpeedFactor = 1;
@@ -107,8 +107,8 @@ class _SmoothScrollerState extends State<SmoothScroller> {
 
     scrollPosition = scrollPosition + delta;
     if (scrollPosition > widget.controller!.position.maxScrollExtent) {
-      delta =
-          delta - (scrollPosition - widget.controller!.position.maxScrollExtent);
+      delta = delta -
+          (scrollPosition - widget.controller!.position.maxScrollExtent);
       scrollPosition = widget.controller!.position.maxScrollExtent;
     } else if (scrollPosition < 0) {
       delta = delta + scrollPosition;

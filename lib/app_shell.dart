@@ -1,5 +1,6 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'feather_icon_icons.dart';
 import 'app_state.dart';
@@ -20,6 +21,8 @@ class ShellState extends ChangeNotifier {
   List<Article> articles = <Article>[];
   // ScrollController scrollController = ScrollController();
   Fling _appBarFlinger = Fling.none;
+
+  ValueNotifier pastTitleNotifier = ValueNotifier(false);
 
   bool _areArticlesLoaded = false;
 
@@ -150,10 +153,10 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
 
   bool isInitialized = false;
   bool isAppBarElevated = false;
-  late AnimationController appBarStateController;
+  // late AnimationController appBarStateController;
   late Animation<Color?> appBarColor;
 
-  AppBarState appBarState = AppBarState.lowered;
+  // AppBarState appBarState = AppBarState.lowered;
 
   //
   bool get displayMobileLayout {
@@ -179,16 +182,6 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
         .backButtonDispatcher!
         .createChildBackButtonDispatcher();
     brightness = Theme.of(context).brightness;
-    setState(() {
-      appBarColor = ColorTween(
-              begin: Theme.of(context).colorScheme.background,
-              end: Color.alphaBlend(Colors.white.withOpacity(.0),
-                  Theme.of(context).colorScheme.surface))
-          .animate(appBarStateController);
-      appBarColor.addListener(() {
-        setState(() {});
-      });
-    });
   }
 
   @override
@@ -230,45 +223,45 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
       setState(() {});
     });
 
-    appBarStateController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 50));
-    appBarStateController.addStatusListener((status) {
-      if (status == AnimationStatus.completed)
-        setState(() {
-          isAppBarElevated = true;
-          appBarState = AppBarState.raised;
-        });
-      else if (status == AnimationStatus.dismissed)
-        setState(() {
-          isAppBarElevated = false;
-          appBarState = AppBarState.lowered;
-        });
-      else if (status == AnimationStatus.forward)
-        setState(() {
-          appBarState = AppBarState.raising;
-        });
-      else if (status == AnimationStatus.reverse)
-        setState(() {
-          appBarState = AppBarState.lowering;
-        });
-    });
-    appBarStateController.addListener(() {
-      setState(() {});
-    });
+    // appBarStateController =
+    //     AnimationController(vsync: this, duration: Duration(milliseconds: 50));
+    // appBarStateController.addStatusListener((status) {
+    //   if (status == AnimationStatus.completed)
+    //     setState(() {
+    //       isAppBarElevated = true;
+    //       appBarState = AppBarState.raised;
+    //     });
+    //   else if (status == AnimationStatus.dismissed)
+    //     setState(() {
+    //       isAppBarElevated = false;
+    //       appBarState = AppBarState.lowered;
+    //     });
+    //   else if (status == AnimationStatus.forward)
+    //     setState(() {
+    //       appBarState = AppBarState.raising;
+    //     });
+    //   else if (status == AnimationStatus.reverse)
+    //     setState(() {
+    //       appBarState = AppBarState.lowering;
+    //     });
+    // });
+    // appBarStateController.addListener(() {
+    //   setState(() {});
+    // });
 
-    shellState.addListener(() {
-      if (shellState.appBarFlinger == Fling.forward &&
-          appBarState != AppBarState.raising &&
-          appBarState != AppBarState.raised) {
-        appBarStateController.fling();
-        shellState.appBarFlinger = Fling.none;
-      } else if (shellState.appBarFlinger == Fling.backward &&
-          appBarState != AppBarState.lowering &&
-          appBarState != AppBarState.lowered) {
-        appBarStateController.fling(velocity: -1);
-        shellState.appBarFlinger = Fling.none;
-      }
-    });
+    // shellState.addListener(() {
+    //   if (shellState.appBarFlinger == Fling.forward &&
+    //       appBarState != AppBarState.raising &&
+    //       appBarState != AppBarState.raised) {
+    //     appBarStateController.fling();
+    //     shellState.appBarFlinger = Fling.none;
+    //   } else if (shellState.appBarFlinger == Fling.backward &&
+    //       appBarState != AppBarState.lowering &&
+    //       appBarState != AppBarState.lowered) {
+    //     appBarStateController.fling(velocity: -1);
+    //     shellState.appBarFlinger = Fling.none;
+    //   }
+    // });
 
     _routerDelegate = InnerRouterDelegate(
         onMenuTapped: widget.onMenuTapped,
@@ -337,61 +330,16 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
     buildState(context);
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: appBarStateController.value * 4,
-        actions: [
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              child: PopupMenuButton<AppBarMenuOptions>(
-                onSelected: (AppBarMenuOptions result) {
-                  if (result == AppBarMenuOptions.changeTheme) {
-                    context.read<AppState>().flipTheme();
-                  }
-                },
-                itemBuilder: (BuildContext context) =>
-                    <PopupMenuEntry<AppBarMenuOptions>>[
-                  PopupMenuItem<AppBarMenuOptions>(
-                    value: AppBarMenuOptions.changeTheme,
-                    child: ListTile(
-                      dense: true,
-                      // visualDensity:
-                      //     VisualDensity(horizontal: -4, vertical: -4),
-                      minLeadingWidth: 18,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 0),
-                      horizontalTitleGap: 8,
-                      leading: Icon(
-                        Theme.of(context).brightness == Brightness.dark
-                            ? Icons.brightness_7
-                            : Icons.brightness_4,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(.87),
-                      ),
-                      title: Text(
-                        'Change theme',
-
-                        // style: Theme.of(context).textTheme.bodyText2,
-                      ),
-                    ),
-                  ),
-                ],
-              ))
-        ],
-        backgroundColor: appBarColor.value,
-        leadingWidth: 56 + appBarMargins,
-        title: Padding(
-          padding: EdgeInsets.only(left: appBarSpacing.value),
-          child: buildTitle(),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(56),
+        child: ShellAppBar(
+          displayMobileLayout: displayMobileLayout,
+          appBarMargins: appBarMargins,
+          appBarSpacing: appBarSpacing,
+          standardDrawerController: standardDrawerController,
+          pastTitleNotifier: shellState.pastTitleNotifier,
+          onPressed: () => toggleDrawer(context),
         ),
-        leading: !displayMobileLayout
-            ? IconButton(
-                icon: AnimatedIcon(
-                  progress: standardDrawerController,
-                  icon: AnimatedIcons.menu_close,
-                ),
-                onPressed: () => toggleDrawer(context))
-            : null,
       ),
       drawer: displayMobileLayout ? buildModalDrawer() : null,
       body: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -470,7 +418,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                 leadingWidth: 56 + appBarMargins,
                 title: Padding(
                   padding: EdgeInsets.only(left: appBarSpacing.value),
-                  child: buildTitle(),
+                  child: Title(),
                 ),
                 leading: IconButton(
                     icon: Icon(
@@ -484,33 +432,6 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
             buildDrawerChildren(),
       ),
     ));
-  }
-
-  Row buildTitle() {
-    return Row(
-      children: [
-        Icon(
-          FeatherIcon.feather,
-          size: 24,
-        ),
-        SizedBox(
-          width: 4,
-        ),
-        Text.rich(
-          TextSpan(
-            text: 'The Duckling',
-            // children: [
-            //   TextSpan(
-            //     text: '.',
-            //     style: TextStyle(
-            //       color: Theme.of(context).colorScheme.primary,
-            //     ),
-            //   ),
-            // ],
-          ),
-        ),
-      ],
-    );
   }
 
   List<Widget> buildDrawerChildren() {
@@ -531,7 +452,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
             onTap: () {
               widget.onMenuTapped(menu);
               if (displayMobileLayout) Navigator.of(context).pop();
-              appBarStateController.fling(velocity: -1);
+              shellState.pastTitleNotifier.value = false;
             },
           ),
         ),
@@ -654,5 +575,217 @@ class InnerRouterDelegate extends RouterDelegate<BlogPath>
     // This is not required for inner router delegate because it does not
     // parse route
     assert(false);
+  }
+}
+
+class ShellAppBar extends StatefulWidget {
+  const ShellAppBar({
+    Key? key,
+    // required this.title,
+    required this.displayMobileLayout,
+    required this.appBarMargins,
+    required this.appBarSpacing,
+    required this.standardDrawerController,
+    required this.pastTitleNotifier,
+    required this.onPressed,
+  }) : super(key: key);
+
+  // final String title;
+  final bool displayMobileLayout;
+  final double appBarMargins;
+  final Animation appBarSpacing;
+  final AnimationController standardDrawerController;
+  final ValueNotifier pastTitleNotifier;
+  final void Function() onPressed;
+
+  @override
+  _ShellAppBarState createState() => _ShellAppBarState();
+}
+
+class _ShellAppBarState extends State<ShellAppBar>
+    with SingleTickerProviderStateMixin {
+  bool isAppBarElevated = false;
+  late AnimationController appBarStateController;
+  late Animation<Color?> appBarColor;
+  late Animation<Color?> appBarForegroundColor;
+  AppBarState appBarState = AppBarState.lowered;
+
+  @override
+  void initState() {
+    widget.pastTitleNotifier.addListener(() {
+      if (widget.pastTitleNotifier.value == true &&
+          appBarState != AppBarState.raised &&
+          appBarState != AppBarState.raising) {
+        appBarStateController.fling();
+      } else if (widget.pastTitleNotifier.value == false &&
+          appBarState != AppBarState.lowered &&
+          appBarState != AppBarState.lowering) {
+        appBarStateController.fling(velocity: -1);
+      }
+    });
+
+    appBarStateController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
+    appBarStateController.addStatusListener((status) {
+      if (status == AnimationStatus.completed)
+        setState(() {
+          appBarState = AppBarState.raised;
+          isAppBarElevated = true;
+        });
+      else if (status == AnimationStatus.dismissed)
+        setState(() {
+          appBarState = AppBarState.lowered;
+          isAppBarElevated = false;
+        });
+      else if (status == AnimationStatus.forward)
+        setState(() {
+          appBarState = AppBarState.raising;
+        });
+      else if (status == AnimationStatus.reverse)
+        setState(() {
+          appBarState = AppBarState.lowering;
+        });
+    });
+    appBarStateController.addListener(() {
+      setState(() {});
+    });
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    appBarColor = ColorTween(
+            begin: Colors.transparent,
+            end: Color.alphaBlend(Colors.white.withOpacity(.09),
+                Theme.of(context).colorScheme.surface))
+        .animate(appBarStateController);
+    appBarColor.addListener(() {
+      setState(() {});
+    });
+    appBarForegroundColor = ColorTween(
+            begin: Colors.white,
+            end: Theme.of(context).appBarTheme.foregroundColor)
+        .animate(appBarStateController);
+    appBarForegroundColor.addListener(() {
+      setState(() {});
+    });
+    setState(() {
+      appBarColor = ColorTween(
+              begin: Theme.of(context).colorScheme.background,
+              end: Color.alphaBlend(Colors.white.withOpacity(.0),
+                  Theme.of(context).colorScheme.surface))
+          .animate(appBarStateController);
+      appBarColor.addListener(() {
+        setState(() {});
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    appBarStateController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      elevation: appBarStateController.value * 4,
+      actions: [
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0),
+            child: PopupMenuButton<AppBarMenuOptions>(
+              onSelected: (AppBarMenuOptions result) {
+                if (result == AppBarMenuOptions.changeTheme) {
+                  context.read<AppState>().flipTheme();
+                }
+              },
+              itemBuilder: (BuildContext context) =>
+                  <PopupMenuEntry<AppBarMenuOptions>>[
+                PopupMenuItem<AppBarMenuOptions>(
+                  value: AppBarMenuOptions.changeTheme,
+                  child: ListTile(
+                    dense: true,
+                    // visualDensity:
+                    //     VisualDensity(horizontal: -4, vertical: -4),
+                    minLeadingWidth: 18,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                    horizontalTitleGap: 8,
+                    leading: Icon(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Icons.brightness_7
+                          : Icons.brightness_4,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(.87),
+                    ),
+                    title: Text(
+                      'Change theme',
+
+                      // style: Theme.of(context).textTheme.bodyText2,
+                    ),
+                  ),
+                ),
+              ],
+            ))
+      ],
+      backgroundColor: appBarColor.value,
+      leadingWidth: 56 + widget.appBarMargins,
+      title: Padding(
+        padding: EdgeInsets.only(left: widget.appBarSpacing.value),
+        child: Title(),
+      ),
+      leading: !widget.displayMobileLayout
+          ? IconButton(
+              icon: AnimatedIcon(
+                progress: widget.standardDrawerController,
+                icon: AnimatedIcons.menu_close,
+              ),
+              onPressed: widget.onPressed, //() => toggleDrawer(context)
+            )
+          : null,
+    );
+  }
+}
+
+class Title extends StatelessWidget {
+  const Title({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          FeatherIcon.feather,
+          size: 24,
+        ),
+        SizedBox(
+          width: 4,
+        ),
+        Text.rich(
+          TextSpan(
+            text: 'The Duckling',
+            style: GoogleFonts.lora(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
+              fontSize: 19,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.15,
+            ),
+            // children: [
+            //   TextSpan(
+            //     text: '.',
+            //     style: TextStyle(
+            //       color: Theme.of(context).colorScheme.primary,
+            //     ),
+            //   ),
+            // ],
+          ),
+        ),
+      ],
+    );
   }
 }
