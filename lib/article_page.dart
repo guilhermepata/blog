@@ -118,7 +118,7 @@ class _ArticlePageState extends State<ArticlePage>
       if (usefulWidth < maxContentWidth)
         cardCornerRadius = 0;
       else
-        cardCornerRadius = 6;
+        cardCornerRadius = 0;
 
       isInitialized = true;
     });
@@ -158,7 +158,7 @@ class _ArticlePageState extends State<ArticlePage>
               extendBodyBehindAppBar: true,
               appBar: PreferredSize(
                   preferredSize: Size.fromHeight(56),
-                  child: AnimatedAppBar(
+                  child: ArticlePageAppBar(
                     title: widget.article.title,
                     appBarMargins: appBarMargins,
                     pastTitleNotifier: pastTitleNotifier,
@@ -264,7 +264,7 @@ class _ArticlePageState extends State<ArticlePage>
                                       delegate: SliverChildBuilderDelegate(
                                         buildContentCard,
                                         childCount:
-                                            3 + widget.article.numParagraphs,
+                                            4 + widget.article.numParagraphs,
                                       ),
                                     )
                                   ],
@@ -371,7 +371,7 @@ class _ArticlePageState extends State<ArticlePage>
           ],
         ),
       );
-    else if (index > 2)
+    else if (index > 2 && index < widget.article.numParagraphs + 3)
       result = Padding(
         padding: EdgeInsets.symmetric(horizontal: gutters),
         child: widget.article.buildParagraph(
@@ -391,14 +391,16 @@ class _ArticlePageState extends State<ArticlePage>
           overflow: TextOverflow.visible,
         ),
       );
+    else if (index == widget.article.numParagraphs + 3)
+      result = SizedBox(height: gutters);
     else
       result = SizedBox(height: 0);
     return result;
   }
 }
 
-class AnimatedAppBar extends StatefulWidget {
-  const AnimatedAppBar({
+class ArticlePageAppBar extends StatefulWidget {
+  const ArticlePageAppBar({
     Key? key,
     required this.title,
     required this.appBarMargins,
@@ -410,10 +412,10 @@ class AnimatedAppBar extends StatefulWidget {
   final ValueNotifier pastTitleNotifier;
 
   @override
-  _AnimatedAppBarState createState() => _AnimatedAppBarState();
+  _ArticlePageAppBarState createState() => _ArticlePageAppBarState();
 }
 
-class _AnimatedAppBarState extends State<AnimatedAppBar>
+class _ArticlePageAppBarState extends State<ArticlePageAppBar>
     with SingleTickerProviderStateMixin {
   bool isAppBarElevated = false;
   late AnimationController appBarStateController;

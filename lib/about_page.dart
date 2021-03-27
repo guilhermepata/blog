@@ -53,26 +53,22 @@ class _AboutPageState extends State<AboutPage> {
             controller: scrollController,
             isAlwaysShown: MouseState.isPresent,
             thickness: MouseState.isPresent ? null : 0,
-            child: SmoothScroller(
+            child: SingleChildScrollView(
               controller: scrollController,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                physics: MouseState.isPresent
-                    ? NeverScrollableScrollPhysics()
-                    : null,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      // left: state.margins,
-                      // right: state.margins,
-                      top: state.gutters,
-                      bottom: state.gutters),
-                  child: Center(
-                    child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: 600,
-                        ),
-                        child: child),
-                  ),
+              physics:
+                  MouseState.isPresent ? NeverScrollableScrollPhysics() : null,
+              child: Padding(
+                padding: EdgeInsets.only(
+                    // left: state.margins,
+                    // right: state.margins,
+                    top: state.gutters,
+                    bottom: state.gutters),
+                child: Center(
+                  child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: 600,
+                      ),
+                      child: child),
                 ),
               ),
             ),

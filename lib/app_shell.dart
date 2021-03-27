@@ -16,7 +16,7 @@ class ShellState extends ChangeNotifier {
   bool _isMobileLayout = false;
   // double _margins = 0;
   double _gutters = 24;
-  double _cardCornerRadius = 8;
+  double _cardCornerRadius = 0;
   StandardDrawerState _standardDrawerState = StandardDrawerState.closed;
   List<Article> articles = <Article>[];
   // ScrollController scrollController = ScrollController();
@@ -303,7 +303,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
     if (usefulWidth < maxContentWidth)
       cardCornerRadius = 0;
     else
-      cardCornerRadius = 6;
+      cardCornerRadius = 0;
 
     if (!isInitialized) {
       standardDrawerState = StandardDrawerState.open;
@@ -450,13 +450,37 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
             selected: menu == state.selectedMenu,
             title: Text(menu.name),
             onTap: () {
-              widget.onMenuTapped(menu);
-              if (displayMobileLayout) Navigator.of(context).pop();
-              shellState.pastTitleNotifier.value = false;
+              if (menu != state.selectedMenu) {
+                widget.onMenuTapped(menu);
+                if (displayMobileLayout) Navigator.of(context).pop();
+                shellState.pastTitleNotifier.value = false;
+              }
             },
           ),
         ),
       );
+      // result.add(
+      //   Consumer<AppState>(
+      //     builder: (context, state, _) => GestureDetector(
+      //       onTap: () {
+      //         widget.onMenuTapped(menu);
+      //         if (displayMobileLayout) Navigator.of(context).pop();
+      //         shellState.pastTitleNotifier.value = false;
+      //       },
+      //       child: Padding(
+      //         padding: EdgeInsets.only(left: gutters + 16, right: gutters + 16),
+      //         child: Container(
+      //           child: Text(menu.name),
+      //           // onTap: () {
+      //           //   widget.onMenuTapped(menu);
+      //           //   if (displayMobileLayout) Navigator.of(context).pop();
+      //           //   shellState.pastTitleNotifier.value = false;
+      //           // },
+      //         ),
+      //       ),
+      //     ),
+      //   ),
+      // );
       // topGutters = false;
     }
 
@@ -625,7 +649,7 @@ class _ShellAppBarState extends State<ShellAppBar>
     });
 
     appBarStateController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
+        AnimationController(vsync: this, duration: Duration(milliseconds: 50));
     appBarStateController.addStatusListener((status) {
       if (status == AnimationStatus.completed)
         setState(() {

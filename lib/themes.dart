@@ -49,7 +49,7 @@ class AppTheme {
         color: finalScheme.onSurface.withOpacity(.87),
         fontSize: 19,
         fontWeight: FontWeight.w500,
-        letterSpacing: 0.15,
+        // letterSpacing: 0.15,
       ),
       subtitle1: GoogleFonts.rubik(
         fontSize: 16,

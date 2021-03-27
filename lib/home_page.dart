@@ -6,6 +6,7 @@ import 'package:tuple/tuple.dart';
 import 'classes.dart';
 import 'app_state.dart';
 import 'app_shell.dart';
+import 'essays_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -72,22 +73,61 @@ class _HomeScreenState extends State<HomeScreen> {
               thickness: MouseState.isPresent ? null : 0,
               isAlwaysShown: MouseState.isPresent,
               controller: scrollController,
-              child: SmoothScroller(
+              child: ListView.separated(
+                physics: MouseState.isPresent
+                    ? NeverScrollableScrollPhysics()
+                    : null,
                 controller: scrollController,
-                child: ListView.separated(
-                  physics: MouseState.isPresent
-                      ? NeverScrollableScrollPhysics()
-                      : null,
-                  controller: scrollController,
-                  padding: EdgeInsets.symmetric(vertical: state.item2),
-                  itemCount: state.item3.length,
-                  separatorBuilder: (context, int i) =>
-                      SizedBox(height: state.item2),
-                  itemBuilder: (context, int i) {
-                    return ArticleCard2(state.item3[i],
+                padding: EdgeInsets.only(bottom: state.item2 * 4),
+                itemCount: state.item3.length == 0
+                    ? 0
+                    : state.item3.length == 1
+                        ? state.item3.length + 1
+                        : state.item3.length + 2,
+                separatorBuilder: (context, int i) {
+                  if (i == 0 || i == 2)
+                    return SizedBox(
+                      height: 0,
+                    );
+                  if (i == 1) return SizedBox(height: state.item2);
+                  return Center(
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: 600),
+                      child: Divider(
+                        height: 0,
+                      ),
+                    ),
+                  );
+                },
+                itemBuilder: (context, int i) {
+                  if (i == 0)
+                    return Center(
+                      child: Container(
+                        constraints: BoxConstraints(maxWidth: 600),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: state.item2, vertical: 4),
+                          title: Text('Newest essay'),
+                        ),
+                      ),
+                    );
+                  if (i == 1)
+                    return ArticleCard2(state.item3[i - 1],
                         onArticleTapped: widget.onArticleTapped);
-                  },
-                ),
+                  if (i == 2)
+                    return Center(
+                      child: Container(
+                        constraints: BoxConstraints(maxWidth: 600),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: state.item2, vertical: 4),
+                          title: Text('Older essays'),
+                        ),
+                      ),
+                    );
+                  return ArticleTile(state.item3[i - 2],
+                      onArticleTapped: widget.onArticleTapped);
+                },
               ),
             ),
           );
@@ -277,7 +317,7 @@ class ArticleCard extends StatelessWidget {
   }
 }
 
-class ArticleCard2 extends StatelessWidget {
+class ArticleCard2 extends StatefulWidget {
   const ArticleCard2(
     this.article, {
     Key? key,
@@ -288,13 +328,19 @@ class ArticleCard2 extends StatelessWidget {
   final Article article;
   final void Function(Article) onArticleTapped;
 
-  final double imageAspectRatio = 16 / 9;
+  @override
+  _ArticleCard2State createState() => _ArticleCard2State();
+}
+
+class _ArticleCard2State extends State<ArticleCard2> {
+  final double imageAspectRatio = 18 / 9;
   final double maxContentWidth = 600;
+  bool isHovered = false;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: article.load(),
+        future: widget.article.load(),
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
           return Center(
             child: ConstrainedBox(
@@ -303,11 +349,23 @@ class ArticleCard2 extends StatelessWidget {
                 selector: (_, state) => state.cardCornerRadius,
                 builder: (contex, cardCornerRadius, child) {
                   return Card(
+                    elevation: isHovered ? 8 : 1,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(cardCornerRadius)),
                     margin: EdgeInsets.zero,
                     clipBehavior: Clip.antiAlias,
-                    child: child,
+                    child: InkWell(
+                        hoverColor: Colors.transparent,
+                        onTap: () {
+                          if (widget.article.isLoaded)
+                            widget.onArticleTapped(widget.article);
+                        },
+                        onHover: (_) {
+                          setState(() {
+                            isHovered = _;
+                          });
+                        },
+                        child: child),
                   );
                 },
                 child: Column(
@@ -318,61 +376,66 @@ class ArticleCard2 extends StatelessWidget {
                         alignment: AlignmentDirectional.bottomStart,
                         children: [
                           CrossFadeWidgets(
-                              showFirst: article.isLoaded,
-                              firstChild: article.isLoaded
-                                  ? Image.network(
-                                      article.imageUrl!,
-                                      frameBuilder: (BuildContext context,
-                                          Widget child,
-                                          int? frame,
-                                          bool wasSynchronouslyLoaded) {
-                                        if (wasSynchronouslyLoaded) {
-                                          return child;
-                                        }
-                                        return Stack(
-                                          children: [
-                                            Skeleton(
-                                              width: maxContentWidth,
-                                              height: maxContentWidth /
-                                                  imageAspectRatio,
-                                            ),
-                                            AnimatedOpacity(
-                                              child: child,
-                                              opacity: frame == null ? 0 : 1,
-                                              duration: const Duration(
-                                                  milliseconds: 200),
-                                              curve: Curves.easeIn,
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                      loadingBuilder: (BuildContext context,
-                                          Widget child,
-                                          ImageChunkEvent? progress) {
-                                        return Stack(
-                                          children: [
-                                            if (progress != null)
-                                              Skeleton(
-                                                width: maxContentWidth,
-                                                height: maxContentWidth /
-                                                    imageAspectRatio,
+                            showFirst: widget.article.isLoaded,
+                            firstChild: widget.article.isLoaded
+                                ? Image.network(
+                                    widget.article.imageUrl!,
+                                    frameBuilder: (BuildContext context,
+                                        Widget child,
+                                        int? frame,
+                                        bool wasSynchronouslyLoaded) {
+                                      if (wasSynchronouslyLoaded) {
+                                        return child;
+                                      }
+                                      return Stack(
+                                        children: [
+                                          Skeleton(
+                                              // width: maxContentWidth,
+                                              // height: maxContentWidth /
+                                              //     imageAspectRatio,
                                               ),
-                                            child
-                                          ],
-                                        );
-                                      },
-                                      semanticLabel: article.altText,
-                                      width: maxContentWidth,
-                                      height:
-                                          maxContentWidth / imageAspectRatio,
-                                      fit: BoxFit.cover,
-                                      // width: 300,
-                                    )
-                                  : null,
-                              secondChild: Skeleton(
-                                width: maxContentWidth,
-                                height: maxContentWidth / imageAspectRatio,
-                              )),
+                                          AnimatedOpacity(
+                                            child: child,
+                                            opacity: frame == null ? 0 : 1,
+                                            duration: const Duration(
+                                                milliseconds: 200),
+                                            curve: Curves.easeIn,
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                    loadingBuilder: (BuildContext context,
+                                        Widget child,
+                                        ImageChunkEvent? progress) {
+                                      return Stack(
+                                        children: [
+                                          if (progress != null)
+                                            Skeleton(
+                                                // width: maxContentWidth,
+                                                // height: maxContentWidth /
+                                                //     imageAspectRatio,
+                                                ),
+                                          child
+                                        ],
+                                      );
+                                    },
+                                    semanticLabel: widget.article.altText,
+                                    width: maxContentWidth,
+                                    // height:
+                                    //     maxContentWidth / imageAspectRatio,
+                                    fit: BoxFit.cover,
+                                    // width: 300,
+                                  )
+                                : null,
+                            secondChild: Skeleton(
+                                // width: maxContentWidth,
+                                // height: maxContentWidth / imageAspectRatio,
+                                ),
+                          ),
+                          Container(
+                            height: 2,
+                            color: Colors.black,
+                          ),
                           Container(
                             height: maxContentWidth / imageAspectRatio,
                             alignment: Alignment.bottomLeft,
@@ -399,8 +462,10 @@ class ArticleCard2 extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   CrossFadeText(
-                                    article.isLoaded ? article.title : null,
-                                    showText: article.isLoaded,
+                                    widget.article.isLoaded
+                                        ? widget.article.title
+                                        : null,
+                                    showText: widget.article.isLoaded,
                                     style: Theme.of(context)
                                         .textTheme
                                         .headline5!
@@ -414,8 +479,10 @@ class ArticleCard2 extends StatelessWidget {
                                     height: 6,
                                   ),
                                   CrossFadeText(
-                                    article.isLoaded ? article.subtitle : null,
-                                    showText: article.isLoaded,
+                                    widget.article.isLoaded
+                                        ? widget.article.subtitle
+                                        : null,
+                                    showText: widget.article.isLoaded,
                                     style: Theme.of(context)
                                         .textTheme
                                         .subtitle1!
@@ -445,8 +512,8 @@ class ArticleCard2 extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CrossFadeTextWidgetBlock(
-                              article.isLoaded
-                                  ? article.buildParagraph(context, 0,
+                              widget.article.isLoaded
+                                  ? widget.article.buildParagraph(context, 0,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyText2!
@@ -456,11 +523,11 @@ class ArticleCard2 extends StatelessWidget {
                                                   .onSurface
                                                   .withOpacity(.60)),
                                       overflow: TextOverflow.ellipsis,
-                                      maxLines: 4,
+                                      maxLines: 3,
                                       paragraphSpacing: 0,
                                       textAlign: TextAlign.justify)
                                   : null,
-                              showText: article.isLoaded,
+                              showText: widget.article.isLoaded,
                               numLines: 4,
                               style: Theme.of(context)
                                   .textTheme
@@ -475,14 +542,14 @@ class ArticleCard2 extends StatelessWidget {
                       ),
                     ),
                     CrossFadeWidgets(
-                      showFirst: article.isLoaded,
+                      showFirst: widget.article.isLoaded,
                       firstChild: ButtonBar(
                         buttonPadding:
                             EdgeInsets.all(context.read<ShellState>().gutters),
                         children: [
                           OutlinedButton(
                               onPressed: () {
-                                onArticleTapped(article);
+                                widget.onArticleTapped(widget.article);
                               },
                               child: Text('Read more')),
                         ],
