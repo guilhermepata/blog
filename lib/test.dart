@@ -1,161 +1,169 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
-void main() {
-  runApp(MyApp());
-}
+// import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.dark(),
-      home: AppShell(),
-    );
+void main() async {
+  final articlesJson = await http.read(Uri.parse(
+      'https://api.github.com/repos/guilhermepata/blog/contents/assets/posts'));
+  final articlesMap = json.decode(articlesJson).toList();
+  for (var articleMap in articlesMap) {
+    print(articleMap['download_url']);
   }
 }
 
-// class ControllerHolder extends ValueNotifier {
-//   ControllerHolder._privateConstructor(value) : super(value);
+// // class MyApp extends StatelessWidget {
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return MaterialApp(
+// //       theme: ThemeData.dark(),
+// //       home: AppShell(),
+// //     );
+// //   }
+// // }
 
-//   static final ControllerHolder _instance =
-//       ControllerHolder._privateConstructor(ScrollController());
+// // class ControllerHolder extends ValueNotifier {
+// //   ControllerHolder._privateConstructor(value) : super(value);
 
-//   factory ControllerHolder() {
-//     return _instance;
+// //   static final ControllerHolder _instance =
+// //       ControllerHolder._privateConstructor(ScrollController());
+
+// //   factory ControllerHolder() {
+// //     return _instance;
+// //   }
+
+// //   static ScrollController get controller {
+// //     return ControllerHolder().value;
+// //   }
+
+// //   static set controller(ScrollController value) {
+// //     ControllerHolder().value = value;
+// //   }
+// // }
+
+// /// A "shell" with the app bar and drawer
+// class AppShell extends StatefulWidget {
+//   AppShell({Key? key}) : super(key: key);
+
+//   @override
+//   _AppShellState createState() => _AppShellState();
+// }
+
+// class _AppShellState extends State<AppShell> {
+//   int selectedMenu = 0;
+//   bool isAppBarRed = false;
+//   ScrollController scrollController = ScrollController();
+
+//   // scrollController controls appbar elevation
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     scrollController.addListener(() {
+//       if (scrollController.position.pixels > 0)
+//         setState(() {
+//           isAppBarRed = true;
+//         });
+//       else
+//         setState(() {
+//           isAppBarRed = false;
+//         });
+//     });
 //   }
 
-//   static ScrollController get controller {
-//     return ControllerHolder().value;
-//   }
-
-//   static set controller(ScrollController value) {
-//     ControllerHolder().value = value;
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//           title: Text('App bar'),
+//           backgroundColor: isAppBarRed ? Colors.red : Colors.black54),
+//       body: Center(
+//         child: AnimatedCrossFade(
+//           duration: Duration(milliseconds: 1000),
+//           firstChild: selectedMenu == 0
+//               ? FirstScreen(
+//                   scrollController: scrollController,
+//                 )
+//               : Container(),
+//           secondChild: selectedMenu == 1
+//               ? SecondScreen(
+//                   scrollController: scrollController,
+//                 )
+//               : Container(),
+//           crossFadeState: selectedMenu == 0
+//               ? CrossFadeState.showFirst
+//               : CrossFadeState.showSecond,
+//         ),
+//       ),
+//       drawer: Drawer(
+//         child: Column(
+//           children: [
+//             ListTile(
+//               selected: selectedMenu == 0,
+//               title: Text('First screen'),
+//               onTap: () => setState(() {
+//                 selectedMenu = 0;
+//                 isAppBarRed = false;
+//                 Navigator.of(context).pop();
+//               }),
+//             ),
+//             ListTile(
+//               selected: selectedMenu == 1,
+//               title: Text('Second screen'),
+//               onTap: () => setState(() {
+//                 selectedMenu = 1;
+//                 isAppBarRed = false;
+//                 Navigator.of(context).pop();
+//               }),
+//             )
+//           ],
+//         ),
+//       ),
+//     );
 //   }
 // }
 
-/// A "shell" with the app bar and drawer
-class AppShell extends StatefulWidget {
-  AppShell({Key? key}) : super(key: key);
+// class FirstScreen extends StatelessWidget {
+//   final ScrollController? scrollController;
 
-  @override
-  _AppShellState createState() => _AppShellState();
-}
+//   const FirstScreen({Key? key, this.scrollController}) : super(key: key);
 
-class _AppShellState extends State<AppShell> {
-  int selectedMenu = 0;
-  bool isAppBarRed = false;
-  ScrollController scrollController = ScrollController();
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 300,
+//       width: 300,
+//       child: ListView.builder(
+//         controller: scrollController,
+//         itemBuilder: (_, __) {
+//           return ListTile(
+//             title: Text('First screen list item'),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
 
-  // scrollController controls appbar elevation
-  @override
-  void initState() {
-    super.initState();
+// class SecondScreen extends StatelessWidget {
+//   final ScrollController? scrollController;
 
-    scrollController.addListener(() {
-      if (scrollController.position.pixels > 0)
-        setState(() {
-          isAppBarRed = true;
-        });
-      else
-        setState(() {
-          isAppBarRed = false;
-        });
-    });
-  }
+//   const SecondScreen({Key? key, this.scrollController}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          title: Text('App bar'),
-          backgroundColor: isAppBarRed ? Colors.red : Colors.black54),
-      body: Center(
-        child: AnimatedCrossFade(
-          duration: Duration(milliseconds: 1000),
-          firstChild: selectedMenu == 0
-              ? FirstScreen(
-                  scrollController: scrollController,
-                )
-              : Container(),
-          secondChild: selectedMenu == 1
-              ? SecondScreen(
-                  scrollController: scrollController,
-                )
-              : Container(),
-          crossFadeState: selectedMenu == 0
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-        ),
-      ),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            ListTile(
-              selected: selectedMenu == 0,
-              title: Text('First screen'),
-              onTap: () => setState(() {
-                selectedMenu = 0;
-                isAppBarRed = false;
-                Navigator.of(context).pop();
-              }),
-            ),
-            ListTile(
-              selected: selectedMenu == 1,
-              title: Text('Second screen'),
-              onTap: () => setState(() {
-                selectedMenu = 1;
-                isAppBarRed = false;
-                Navigator.of(context).pop();
-              }),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class FirstScreen extends StatelessWidget {
-  final ScrollController? scrollController;
-
-  const FirstScreen({Key? key, this.scrollController}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 300,
-      width: 300,
-      child: ListView.builder(
-        controller: scrollController,
-        itemBuilder: (_, __) {
-          return ListTile(
-            title: Text('First screen list item'),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class SecondScreen extends StatelessWidget {
-  final ScrollController? scrollController;
-
-  const SecondScreen({Key? key, this.scrollController}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 300,
-      width: 300,
-      child: ListView.builder(
-        itemCount: 100,
-        controller: scrollController,
-        itemBuilder: (_, __) {
-          return ListTile(
-            title: Text('Second screen list item'),
-          );
-        },
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 300,
+//       width: 300,
+//       child: ListView.builder(
+//         itemCount: 100,
+//         controller: scrollController,
+//         itemBuilder: (_, __) {
+//           return ListTile(
+//             title: Text('Second screen list item'),
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }

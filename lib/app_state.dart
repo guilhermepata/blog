@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,7 +11,7 @@ import 'classes.dart';
 import 'app_shell.dart';
 
 class AppState extends ChangeNotifier {
-  final List<String> assets = [];
+  final List<String> articleUrls = [];
   final Map<String, Article> articles = Map();
   Article? _selectedArticle;
   AppMenu? _selectedMenu;
@@ -26,30 +26,29 @@ class AppState extends ChangeNotifier {
     _selectedMenu = AppMenu.home;
   }
 
-  static Map<String, dynamic> jsonDecode(String string) {
-    return json.decode(string);
+  static List<dynamic> jsonDecode(String string) {
+    return json.decode(string).toList();
   }
 
-  static List<String> getArticlePaths(Map<String, dynamic> manifestMap) {
-    return manifestMap.keys
-        .where((String key) => key.contains('posts/'))
-        .where((String key) => key.contains('.md'))
-        .toList();
-  }
+  // static List<String> getArticlePaths(Map<String, dynamic> manifestMap) {
+  //   return manifestMap.keys
+  //       .where((String key) => key.contains('posts/'))
+  //       .where((String key) => key.contains('.md'))
+  //       .toList();
+  // }
 
   Future<bool> loadArticles() async {
-    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+    final articlesJson = await http.read(Uri.parse(
+        'https://api.github.com/repos/guilhermepata/blog/contents/assets/posts'));
 
-    final Map<String, dynamic> manifestMap =
-        await compute(jsonDecode, manifestContent);
-    // >> To get paths you need these 2 lines
+    final articlesList = await compute(jsonDecode, articlesJson);
 
-    final articlePaths = await compute(getArticlePaths, manifestMap);
+    for (var articleMap in articlesList) {
+      articleUrls.add(articleMap['download_url']);
+    }
 
-    assets.addAll(articlePaths);
-
-    for (var asset in assets)
-      await Article.fromAsset(asset).then((article) {
+    for (var url in articleUrls)
+      await Article.fromUrl(url).then((article) {
         articles[article.title] = article;
         notifyListeners();
       });

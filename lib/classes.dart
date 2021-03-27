@@ -1,5 +1,6 @@
 // import 'dart:html';
 import 'dart:ui';
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
@@ -16,7 +17,7 @@ class Article {
   late String _rawContent;
   String? _subtitle, _imageUrl, _altText;
   late String _content;
-  String? _asset;
+  String? _url;
   bool _isLoaded = false;
 
   BodyTextParser? parser;
@@ -35,13 +36,13 @@ class Article {
       required rawContent,
       imageUrl = '',
       altText = '',
-      asset}) {
+      url}) {
     this._title = title;
     this._subtitle = subtitle;
     this._rawContent = rawContent;
     this._imageUrl = imageUrl;
     this._altText = altText;
-    this._asset = asset;
+    this._url = url;
   }
 
   // factory Article.fromMarkdown(String markdown) {
@@ -87,10 +88,10 @@ class Article {
   //   return result;
   // }
 
-  static Future<Article> fromAsset(String asset) async {
-    var result = Article._(asset: asset, rawContent: '', title: '');
+  static Future<Article> fromUrl(String url) async {
+    var result = Article._(url: url, rawContent: '', title: '');
     result._isLoaded = false;
-    var markdown = await rootBundle.loadString(asset);
+    var markdown = await http.read(Uri.parse(url));
 
     // matches something like:
     // Title
@@ -107,8 +108,8 @@ class Article {
 
   Future load() async {
     if (isLoaded) return;
-    if (_asset != null) {
-      var markdown = await rootBundle.loadString(_asset!);
+    if (_url != null) {
+      var markdown = await http.read(Uri.parse(_url!));
       String? subtitle, rawContent, imageUrl, altText;
 
       // matches something like:

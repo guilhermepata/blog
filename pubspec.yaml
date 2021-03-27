@@ -40,6 +40,7 @@ dependencies:
   webview_flutter: ^2.0.2
   xml: ^5.0.2
   flutter_launcher_icons: ^0.9.0
+  http: ^0.13.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -77,7 +78,6 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
       - google-fonts/
-      - assets/posts/
       - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
