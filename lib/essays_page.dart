@@ -60,7 +60,8 @@ class _EssaysScreenState extends State<EssaysScreen> {
                     ? NeverScrollableScrollPhysics()
                     : null,
                 controller: scrollController,
-                padding: EdgeInsets.only(bottom: state.item2 * 4),
+                padding:
+                    EdgeInsets.only(bottom: state.item2 * 4, left: 8, right: 8),
                 itemCount: state.item3.length + 1,
                 separatorBuilder: (context, int i) {
                   if (i == 0)
@@ -92,8 +93,12 @@ class _EssaysScreenState extends State<EssaysScreen> {
                         ),
                       ),
                     );
-                  return ArticleTile(state.item3[i - 1],
-                      onArticleTapped: widget.onArticleTapped);
+                  return ArticleTile(
+                    state.item3[i - 1],
+                    onArticleTapped: widget.onArticleTapped,
+                    placement:
+                        ItemPlacement.placement(i - 1, state.item3.length),
+                  );
                 },
               ),
             ),
@@ -102,7 +107,7 @@ class _EssaysScreenState extends State<EssaysScreen> {
   }
 }
 
-class ContentTile extends StatelessWidget {
+class ContentTile extends StatefulWidget {
   const ContentTile({
     Key? key,
     this.title,
@@ -111,6 +116,7 @@ class ContentTile extends StatelessWidget {
     this.onTap,
     this.future,
     this.condition = true,
+    this.placement = TilePlacement.lone,
   }) : super(key: key);
 
   final Future<dynamic>? future;
@@ -119,13 +125,20 @@ class ContentTile extends StatelessWidget {
   final String? subtitle;
   final String? imageUrl;
   final void Function()? onTap;
+  final TilePlacement placement;
 
-  final double imageSide = 72 + 48.0 + 8;
+  @override
+  _ContentTileState createState() => _ContentTileState();
+}
+
+class _ContentTileState extends State<ContentTile> {
+  final double imageSide = 72 + 16;
+  bool isHovered = false;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: future ?? Future(() {}),
+        future: widget.future ?? Future(() {}),
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
           return Center(
             child: ConstrainedBox(
@@ -134,15 +147,28 @@ class ContentTile extends StatelessWidget {
                 selector: (_, state) => state.cardCornerRadius,
                 builder: (contex, cardCornerRadius, child) {
                   return Card(
+                    elevation: isHovered ? 8 : 1,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(cardCornerRadius)),
+                        borderRadius: widget.placement == TilePlacement.lone
+                            ? BorderRadius.circular(cardCornerRadius)
+                            : widget.placement == TilePlacement.start
+                                ? BorderRadius.vertical(
+                                    top: Radius.circular(cardCornerRadius))
+                                : widget.placement == TilePlacement.end
+                                    ? BorderRadius.vertical(
+                                        bottom:
+                                            Radius.circular(cardCornerRadius))
+                                    : BorderRadius.zero),
                     margin: EdgeInsets.zero,
                     clipBehavior: Clip.hardEdge,
                     child: child,
                   );
                 },
                 child: InkWell(
-                  onTap: onTap,
+                  onTap: widget.onTap,
+                  onHover: (_) => setState(() {
+                    isHovered = _;
+                  }),
                   child: Row(
                     children: [
                       Expanded(
@@ -150,7 +176,8 @@ class ContentTile extends StatelessWidget {
                           selector: (_, state) => state.gutters,
                           builder: (context, gutters, child) {
                             return Padding(
-                              padding: EdgeInsets.all(gutters),
+                              padding:
+                                  EdgeInsets.symmetric(horizontal: gutters),
                               child: child,
                             );
                           },
@@ -158,22 +185,21 @@ class ContentTile extends StatelessWidget {
                             // isThreeLine: true,
                             contentPadding: EdgeInsets.zero,
                             title: CrossFadeText(
-                              condition ? title : null,
-                              showText: condition,
+                              widget.condition ? widget.title : null,
+                              showText: widget.condition,
                               maxLines: 1,
                               // style: Theme.of(context).textTheme.headline5,
                               // width: 200,
                             ),
                             subtitle: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 4.0),
+                              padding: const EdgeInsets.symmetric(vertical: 4),
                               child: CrossFadeTextWidgetBlock(
                                 Text(
-                                  condition ? subtitle! : '',
+                                  widget.condition ? widget.subtitle! : '',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                showText: condition,
+                                showText: widget.condition,
                                 numLines: 2,
                                 // style: Theme.of(context)
                                 //     .textTheme
@@ -188,24 +214,33 @@ class ContentTile extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: imageSide,
-                        width: imageSide,
-                        child: CrossFadeWidgets(
-                          showFirst: condition,
-                          firstChild: condition
-                              ? Ink.image(
-                                  width: imageSide,
-                                  height: imageSide,
-                                  fit: BoxFit.cover,
-                                  image: NetworkImage(
-                                    imageUrl!,
-                                  ),
-                                )
-                              : null,
-                          secondChild: Skeleton(
-                            width: imageSide,
-                            height: imageSide,
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: SizedBox(
+                          height: imageSide,
+                          width: imageSide,
+                          child: CrossFadeWidgets(
+                            showFirst: widget.condition,
+                            firstChild: widget.condition
+                                ? Ink(
+                                    width: imageSide,
+                                    height: imageSide,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(6),
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                          widget.imageUrl!,
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  )
+                                : null,
+                            secondChild: Skeleton(
+                              width: imageSide,
+                              height: imageSide,
+                            ),
                           ),
                         ),
                       ),
@@ -220,18 +255,22 @@ class ContentTile extends StatelessWidget {
 }
 
 class ArticleTile extends StatefulWidget {
-  const ArticleTile(this.article, {Key? key, required this.onArticleTapped})
+  const ArticleTile(this.article,
+      {Key? key,
+      required this.onArticleTapped,
+      this.placement = TilePlacement.lone})
       : super(key: key);
 
   final Article article;
   final void Function(Article)? onArticleTapped;
+  final TilePlacement placement;
 
   @override
   _ArticleTileState createState() => _ArticleTileState();
 }
 
 class _ArticleTileState extends State<ArticleTile> {
-  final double imageSide = 72 + 24;
+  final double imageSide = 72 + 16;
 
   bool isHovered = false;
 
@@ -249,7 +288,16 @@ class _ArticleTileState extends State<ArticleTile> {
                   return Card(
                     elevation: isHovered ? 8 : 1,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(cardCornerRadius)),
+                        borderRadius: widget.placement == TilePlacement.lone
+                            ? BorderRadius.circular(cardCornerRadius)
+                            : widget.placement == TilePlacement.start
+                                ? BorderRadius.vertical(
+                                    top: Radius.circular(cardCornerRadius))
+                                : widget.placement == TilePlacement.end
+                                    ? BorderRadius.vertical(
+                                        bottom:
+                                            Radius.circular(cardCornerRadius))
+                                    : BorderRadius.zero),
                     margin: EdgeInsets.zero,
                     clipBehavior: Clip.hardEdge,
                     child: child,
@@ -260,7 +308,7 @@ class _ArticleTileState extends State<ArticleTile> {
                   onHover: (_) => setState(() {
                     isHovered = _;
                   }),
-                  hoverColor: Colors.transparent,
+                  // hoverColor: Colors.transparent,
                   child: Row(
                     children: [
                       Expanded(
@@ -294,6 +342,7 @@ class _ArticleTileState extends State<ArticleTile> {
                                       : '',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.start,
                                 ),
                                 showText: widget.article.isLoaded,
                                 numLines: 2,
@@ -311,7 +360,7 @@ class _ArticleTileState extends State<ArticleTile> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(12.0),
                         child: CrossFadeWidgets(
                           showFirst: widget.article.isLoaded,
                           firstChild: widget.article.isLoaded
@@ -347,5 +396,16 @@ class _ArticleTileState extends State<ArticleTile> {
             ),
           );
         });
+  }
+}
+
+enum TilePlacement { start, middle, end, lone }
+
+extension ItemPlacement on TilePlacement {
+  static TilePlacement placement(int index, int length) {
+    if (length == 1) return TilePlacement.lone;
+    if (index == 0) return TilePlacement.start;
+    if (index == length - 1) return TilePlacement.end;
+    return TilePlacement.middle;
   }
 }

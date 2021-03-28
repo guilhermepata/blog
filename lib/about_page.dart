@@ -62,7 +62,9 @@ class _AboutPageState extends State<AboutPage> {
                     // left: state.margins,
                     // right: state.margins,
                     top: state.gutters,
-                    bottom: state.gutters),
+                    bottom: state.gutters,
+                    left: 8,
+                    right: 8),
                 child: Center(
                   child: ConstrainedBox(
                       constraints: BoxConstraints(

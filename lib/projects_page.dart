@@ -60,24 +60,42 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                     ? NeverScrollableScrollPhysics()
                     : null,
                 controller: scrollController,
-                padding: EdgeInsets.only(bottom: state.item2 * 4),
-                itemCount: 2,
+                padding:
+                    EdgeInsets.only(bottom: state.item2 * 4, left: 8, right: 8),
+                itemCount: 3,
                 separatorBuilder: (context, int i) {
-                  if (MediaQuery.of(context).size.width > 600)
+                  if (i == 0)
                     return SizedBox(
-                      height: state.item2,
+                      height: 0,
                     );
-                  else
-                    return Material(
-                      // color: Colors.white,
-                      child: Divider(
-                        height: 0.5,
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: 600),
+                      child: Material(
+                        elevation: 2,
+                        color: Theme.of(context).colorScheme.surface,
+                        child: Divider(
+                          height: 0,
+                        ),
                       ),
-                    );
+                    ),
+                  );
                 },
                 itemBuilder: (context, int i) {
                   if (i == 0)
+                    return Center(
+                      child: Container(
+                        constraints: BoxConstraints(maxWidth: 600),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: state.item2, vertical: 4),
+                          title: Text('Essays'),
+                        ),
+                      ),
+                    );
+                  if (i == 1)
                     return ContentTile(
+                      placement: TilePlacement.start,
                       title: 'Rhythm App',
                       subtitle:
                           'A timer and metronome to use at the gym. WIP, and built for small screen sizes oriented in portrait mode.',
@@ -88,8 +106,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       imageUrl:
                           'https://cdn.dribbble.com/users/1622791/screenshots/11174104/flutter_intro.png',
                     );
-                  if (i == 1)
+                  if (i == 2)
                     return ContentTile(
+                      placement: TilePlacement.end,
                       title: 'Song ranker',
                       subtitle:
                           'A responsive web app to rank songs in an album. Built for both web and mobile, adjusting comfortably to any screen size.',
