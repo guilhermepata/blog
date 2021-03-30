@@ -4,7 +4,7 @@ What do our ancestors reveal about the gender roles of the modern day?
 ---
 *In our society, a gender binary is instilled in us since birth, restricting us to set paths in life. But has this always been so? In what way did sex and gender identity impact the social and labor duties of our distant ancestors? And how, from these past societies, did we arrive at the gender asymmetries of today?*
 
-*This article was orignally published in [Diferencial](https://diferencial.tecnico.ulisboa.pt/sociedade/cacadoras-coletoras-cuidadoras/), in Portuguese.*
+*This article was orignally published in [Diferencial](https://diferencial.tecnico.ulisboa.pt/sociedade/cacadoras-coletoras-cuidadoras/) in Portuguese.*
 
 ![San women gathering for food](https://i.imgur.com/RKCBG1v.jpg)
 
