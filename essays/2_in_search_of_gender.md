@@ -7,7 +7,7 @@ The topic of gender identity still generates controversy in popular discourse an
 
 ![The fall of Man](https://miro.medium.com/max/1500/1*9EVAXp8By5JflVEuFCOrGw.jpeg)
 
- *This article was originally published in [Diferencial](https://diferencial.tecnico.ulisboa.pt/ciencia/ao-encontro-do-genero-uma-desmistificacao-da-biologia-do-sexo-do-genero-e-das-pessoas-nao-conformantes-com-o-sexo-atribuido-a-nascenca/) in [Portuguese](url.com)*.
+ *This article was originally published in [Diferencial](https://diferencial.tecnico.ulisboa.pt/ciencia/ao-encontro-do-genero-uma-desmistificacao-da-biologia-do-sexo-do-genero-e-das-pessoas-nao-conformantes-com-o-sexo-atribuido-a-nascenca/) in Portuguese*.
 
 # The Castes of Ants
 The existence of the sexes — that is, the biological distinction between male and female — is, from an evolutionary point of view, something that demands explanation. In living organisms, traits generally vary continuously and independently; jumps are not observed. However, in polymorphisms such as sexual dimorphism, these do occur: a single gene or signaling molecule is enough to give rise to completely different morphologies, that nevertheless are made from essentially the same genomes¹. How can we explain this? [1]
