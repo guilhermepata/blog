@@ -3,15 +3,15 @@ In Search of Gender
 A demystification of the biology of sex, gender, and those who do not conform with the sex assigned at birth
 ---
 
-The topic of gender identity still generates controversy in popular discourse and often leads to skepticism about the existence and legitimacy of people who are nonconforming to the sex they were assigned at birth. In the midst of this, the idea that this subject has no scientific integrity and, even worse, that biology is on the side of those who defend the binary essentialism of sexuality, has somehow prevailed. However, the complex variability of the biological world is inherently opposed to this idea.
+*The topic of gender identity is still the source of controversy in the public discourse and often leads to skepticism about the existence and legitimacy of people who do not conform with the sex they were assigned at birth. In the midst of this, the idea that this subject has no scientific integrity and, even worse, that biology is on the side of those who defend the binary essentialism of sexuality, has somehow prevailed. However, the complex variability of the biological world is inherently opposed to this idea.*
 
 ![The fall of Man](https://miro.medium.com/max/1500/1*9EVAXp8By5JflVEuFCOrGw.jpeg)
 
  *This article was originally published in [Diferencial](https://diferencial.tecnico.ulisboa.pt/ciencia/ao-encontro-do-genero-uma-desmistificacao-da-biologia-do-sexo-do-genero-e-das-pessoas-nao-conformantes-com-o-sexo-atribuido-a-nascenca/) in Portuguese*.
 
-# The Castes of Ants
 The existence of the sexes — that is, the biological distinction between male and female — is, from an evolutionary point of view, something that demands explanation. In living organisms, traits generally vary continuously and independently; jumps are not observed. However, in polymorphisms such as sexual dimorphism, these do occur: a single gene or signaling molecule is enough to give rise to completely different morphologies, that nevertheless are made from essentially the same genomes¹. How can we explain this? [1]
 
+# The Castes of Ants
 The caste of an ant is defined by molecular signals, as is often the case with sex. For ants, it is the food they eat as larvae that determines whether they will be a worker or a queen. But how does this distinction exist, biologically speaking? To understand it, it is enough to consider that, in the context of an ant colony, the activation of queen genes does not bring any benefit — and indeed, brings detriment — in bodies that in everything else are workers' bodies, and vice versa. A fat worker who cannot move or a queen who cannot lay eggs are — generally speaking — equally incapable of contributing to the upkeep of the colony, and therefore natural selection keeps them as distinct phenotypes², even if intermediate forms sometimes arise. [2, 3] 
 
 > There is no one to decide that there are ants of one type and another — there is instead a selective pressure that gives rise to the illusion that there are distinct castes, when in fact all ants are made from the same genomes.
