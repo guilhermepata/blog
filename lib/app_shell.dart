@@ -738,6 +738,7 @@ class _ShellAppBarState extends State<ShellAppBar>
         Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
             child: PopupMenuButton<AppBarMenuOptions>(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
               onSelected: (AppBarMenuOptions result) {
                 if (result == AppBarMenuOptions.changeTheme) {
                   context.read<AppState>().flipTheme();
@@ -782,6 +783,7 @@ class _ShellAppBarState extends State<ShellAppBar>
       leading: !widget.displayMobileLayout
           ? IconButton(
               icon: AnimatedIcon(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
                 progress: widget.standardDrawerController,
                 icon: AnimatedIcons.menu_close,
               ),
@@ -804,6 +806,7 @@ class Title extends StatelessWidget {
         Icon(
           FeatherIcon.feather,
           size: 24,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
         ),
         SizedBox(
           width: 4,
