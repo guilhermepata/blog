@@ -57,9 +57,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<ShellState, Tuple4<bool, double, List<Article>, bool>>(
-        selector: (_, state) => Tuple4(state.displayMobileLayout, state.gutters,
-            state.articles, state.areArticlesLoaded),
+    return Selector<ShellState,
+            Tuple5<bool, double, List<Article>, bool, bool>>(
+        selector: (_, state) => Tuple5(
+              state.displayMobileLayout,
+              state.gutters,
+              state.articles,
+              state.areArticlesLoaded,
+              state.refresher,
+            ),
         builder: (context, state, _) {
           // final articleCards = <Widget>[];
 
@@ -73,66 +79,72 @@ class _HomeScreenState extends State<HomeScreen> {
               thickness: MouseState.isPresent ? null : 0,
               isAlwaysShown: MouseState.isPresent,
               controller: scrollController,
-              child: ListView.separated(
-                physics: MouseState.isPresent
-                    ? NeverScrollableScrollPhysics()
-                    : null,
-                controller: scrollController,
-                padding:
-                    EdgeInsets.only(bottom: state.item2 * 4, right: 8, left: 8),
-                itemCount: state.item3.length == 0
-                    ? 0
-                    : state.item3.length == 1
-                        ? state.item3.length + 1
-                        : state.item3.length + 2,
-                separatorBuilder: (context, int i) {
-                  if (i == 0 || i == 2)
-                    return SizedBox(
-                      height: 0,
-                    );
-                  if (i == 1) return SizedBox(height: state.item2);
-                  return Center(
-                    child: Container(
-                      constraints: BoxConstraints(maxWidth: 600),
-                      child: Divider(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await context.read<AppState>().loadArticles();
+                  await context.read<ShellState>().refreshArticles();
+                },
+                child: ListView.separated(
+                  physics: MouseState.isPresent
+                      ? NeverScrollableScrollPhysics()
+                      : AlwaysScrollableScrollPhysics(),
+                  controller: scrollController,
+                  padding: EdgeInsets.only(
+                      bottom: state.item2 * 4, right: 8, left: 8),
+                  itemCount: state.item3.length == 0
+                      ? 0
+                      : state.item3.length == 1
+                          ? state.item3.length + 1
+                          : state.item3.length + 2,
+                  separatorBuilder: (context, int i) {
+                    if (i == 0 || i == 2)
+                      return SizedBox(
                         height: 0,
-                      ),
-                    ),
-                  );
-                },
-                itemBuilder: (context, int i) {
-                  if (i == 0)
+                      );
+                    if (i == 1) return SizedBox(height: state.item2);
                     return Center(
                       child: Container(
                         constraints: BoxConstraints(maxWidth: 600),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: state.item2, vertical: 4),
-                          title: Text('Newest essay'),
+                        child: Divider(
+                          height: 0,
                         ),
                       ),
                     );
-                  if (i == 1)
-                    return ArticleCard3(state.item3[i - 1],
-                        onArticleTapped: widget.onArticleTapped);
-                  if (i == 2)
-                    return Center(
-                      child: Container(
-                        constraints: BoxConstraints(maxWidth: 600),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: state.item2, vertical: 4),
-                          title: Text('Older essays'),
+                  },
+                  itemBuilder: (context, int i) {
+                    if (i == 0)
+                      return Center(
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: 600),
+                          child: ListTile(
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: state.item2, vertical: 4),
+                            title: Text('Newest essay'),
+                          ),
                         ),
-                      ),
+                      );
+                    if (i == 1)
+                      return ArticleCard3(state.item3[i - 1],
+                          onArticleTapped: widget.onArticleTapped);
+                    if (i == 2)
+                      return Center(
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: 600),
+                          child: ListTile(
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: state.item2, vertical: 4),
+                            title: Text('Older essays'),
+                          ),
+                        ),
+                      );
+                    return ArticleTile(
+                      state.item3[i - 2],
+                      onArticleTapped: widget.onArticleTapped,
+                      placement: ItemPlacement.placement(
+                          i - 3, state.item3.length - 1),
                     );
-                  return ArticleTile(
-                    state.item3[i - 2],
-                    onArticleTapped: widget.onArticleTapped,
-                    placement:
-                        ItemPlacement.placement(i - 2, state.item3.length - 1),
-                  );
-                },
+                  },
+                ),
               ),
             ),
           );
@@ -597,6 +609,9 @@ class _ArticleCard3State extends State<ArticleCard3> {
   final double maxContentWidth = 600;
   bool isHovered = false;
 
+  double gradientBorder = 0;
+  double gradientBorder2 = 1;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -623,64 +638,86 @@ class _ArticleCard3State extends State<ArticleCard3> {
                   child: Stack(
                     alignment: AlignmentDirectional.bottomStart,
                     children: [
-                      CrossFadeWidgets(
-                        showFirst: widget.article.isLoaded,
-                        firstChild: widget.article.isLoaded
-                            ? Image.network(
-                                widget.article.imageUrl!,
-                                frameBuilder: (BuildContext context,
-                                    Widget child,
-                                    int? frame,
-                                    bool wasSynchronouslyLoaded) {
-                                  if (wasSynchronouslyLoaded) {
-                                    return child;
-                                  }
-                                  return Stack(
-                                    children: [
-                                      Skeleton(
-                                        width: maxContentWidth,
-                                        height:
-                                            maxContentWidth / imageAspectRatio,
-                                      ),
-                                      AnimatedOpacity(
-                                        child: child,
-                                        opacity: frame == null ? 0 : 1,
-                                        duration:
-                                            const Duration(milliseconds: 200),
-                                        curve: Curves.easeIn,
-                                      ),
-                                    ],
-                                  );
-                                },
-                                loadingBuilder: (BuildContext context,
-                                    Widget child, ImageChunkEvent? progress) {
-                                  return Stack(
-                                    children: [
-                                      if (progress != null)
-                                        Skeleton(
-                                          width: maxContentWidth,
-                                          height: maxContentWidth /
-                                              imageAspectRatio,
-                                        ),
-                                      child
-                                    ],
-                                  );
-                                },
-                                semanticLabel: widget.article.altText,
+                      SingleChildScrollView(
+                        reverse: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        child: Column(
+                          children: [
+                            CrossFadeWidgets(
+                              showFirst: widget.article.isLoaded,
+                              firstChild: widget.article.isLoaded
+                                  ? Image.network(
+                                      widget.article.imageUrl!,
+                                      frameBuilder: (BuildContext context,
+                                          Widget child,
+                                          int? frame,
+                                          bool wasSynchronouslyLoaded) {
+                                        if (wasSynchronouslyLoaded) {
+                                          return child;
+                                        }
+                                        return Stack(
+                                          children: [
+                                            Skeleton(
+                                              width: maxContentWidth,
+                                              height: maxContentWidth /
+                                                      imageAspectRatio -
+                                                  gradientBorder,
+                                            ),
+                                            AnimatedOpacity(
+                                              child: child,
+                                              opacity: frame == null ? 0 : 1,
+                                              duration: const Duration(
+                                                  milliseconds: 200),
+                                              curve: Curves.easeIn,
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                      loadingBuilder: (BuildContext context,
+                                          Widget child,
+                                          ImageChunkEvent? progress) {
+                                        return Stack(
+                                          children: [
+                                            if (progress != null)
+                                              Skeleton(
+                                                width: maxContentWidth,
+                                                height: maxContentWidth /
+                                                        imageAspectRatio -
+                                                    gradientBorder,
+                                              ),
+                                            child
+                                          ],
+                                        );
+                                      },
+                                      semanticLabel: widget.article.altText,
+                                      width: maxContentWidth,
+                                      height:
+                                          maxContentWidth / imageAspectRatio -
+                                              gradientBorder,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                              secondChild: Skeleton(
                                 width: maxContentWidth,
-                                height: maxContentWidth / imageAspectRatio,
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                        secondChild: Skeleton(
-                          width: maxContentWidth,
-                          height: maxContentWidth / imageAspectRatio,
+                                height: maxContentWidth / imageAspectRatio -
+                                    gradientBorder,
+                              ),
+                            ),
+                            Center(
+                              child: Container(
+                                height: gradientBorder,
+                                color: Colors.black,
+                                constraints:
+                                    BoxConstraints(maxWidth: maxContentWidth),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Ink(
-                        height: 2,
+                      Container(
+                        height: gradientBorder2,
                         color: Colors.black,
-                        width: maxContentWidth,
+                        constraints: BoxConstraints(maxWidth: maxContentWidth),
                       ),
                       Material(
                         elevation: 0,
@@ -699,6 +736,7 @@ class _ArticleCard3State extends State<ArticleCard3> {
                             width: maxContentWidth,
                             height: maxContentWidth / imageAspectRatio,
                             // alignment: Alignment.bottomLeft,
+                            padding: EdgeInsets.zero,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.bottomCenter,

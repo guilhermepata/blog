@@ -18,11 +18,12 @@ class AppState extends ChangeNotifier {
   bool _areArticlesLoading = false;
   late Future<bool> _areArticlesLoaded;
 
+  bool hasLoadedOnce = false;
+
   bool _isThemeFlipped = false;
 
   AppState() {
-    _areArticlesLoaded = loadArticles();
-    _areArticlesLoading = true;
+    loadArticles();
     _selectedMenu = AppMenu.home;
   }
 
@@ -37,24 +38,35 @@ class AppState extends ChangeNotifier {
   //       .toList();
   // }
 
-  Future<bool> loadArticles() async {
-    final articlesJson = await http.read(Uri.parse(
-        'https://api.github.com/repos/guilhermepata/blog/contents/essays'));
+  Future<bool> loadArticles() {
+    _areArticlesLoaded = () async {
+      _areArticlesLoading = true;
+      articles.clear();
+      articleUrls.clear();
+      notifyListeners();
 
-    final articlesList = await compute(jsonDecode, articlesJson);
+      final articlesJson = await http.read(Uri.parse(
+          'https://api.github.com/repos/guilhermepata/blog/contents/essays'));
 
-    for (var articleMap in articlesList) {
-      articleUrls.add(articleMap['download_url']);
-    }
+      final articlesList = (await compute(jsonDecode, articlesJson)).toList();
 
-    for (var url in articleUrls)
-      await Article.fromUrl(url).then((article) {
-        articles[article.title] = article;
-        notifyListeners();
-      });
-    _areArticlesLoading = false;
-    notifyListeners();
-    return true;
+      for (var articleMap in articlesList) {
+        articleUrls.add(articleMap['download_url']);
+      }
+
+      for (var url in articleUrls)
+        await Article.fromUrl(url).then((article) {
+          articles[article.title] = article;
+          notifyListeners();
+        });
+
+      _areArticlesLoading = false;
+      if (!hasLoadedOnce) hasLoadedOnce = true;
+      notifyListeners();
+
+      return true;
+    }();
+    return _areArticlesLoaded;
   }
 
   bool get areArticlesLoading => _areArticlesLoading;
@@ -181,7 +193,8 @@ class BlogArticlePath extends BlogPath {
 
   BlogArticlePath.fromTitle(String title) {
     this._title = title;
-    var parts = title.split((RegExp(r'[ —]')));
+    var parts =
+        title.replaceAll(',', '').replaceAll('?', '').split((RegExp(r'[ —]')));
     this._urlTitle = parts
         .sublist(0, parts.length < 5 ? parts.length : 5)
         .reduce((value, element) => value + '_' + element)
@@ -231,7 +244,7 @@ class BlogRouterDelegate extends RouterDelegate<BlogPath>
 
     return Navigator(
       key: navigatorKey,
-      pages: appState.areArticlesLoading
+      pages: appState.areArticlesLoading && !appState.hasLoadedOnce
           ? [
               FadeAnimationPage(
                   child: LoadingScreen(
@@ -454,7 +467,10 @@ extension StringCompare on String {
   }
 
   bool isUrlOf(String biggerString) {
-    final bigParts = biggerString.split(RegExp(r'[ —]'));
+    final bigParts = biggerString
+        .replaceAll(',', '')
+        .replaceAll('?', '')
+        .split(RegExp(r'[ —]'));
     final smallParts = this.split(RegExp(r'[_]'));
     if (smallParts.length < 5 && smallParts.length < bigParts.length)
       return false;

@@ -8,9 +8,9 @@ What do our ancestors reveal about the gender roles of the modern day?
 
 ![San women gathering for food](https://i.imgur.com/RKCBG1v.jpg)
 
-Among the hunter-gatherer peoples of the Arctic, we find the Inuit, whose way of life is radically different from ours. Despite sometimes gathering tubers and berries, the main source of sustenance for these peoples is the consumption of meat – in particular, seal meat. The Inuit survive with this extreme diet since they consume the whole animal, including the organs, thus obtaining all nutrients essential to human life, which are otherwise difficult to find only in meat.\u00a0[1]
+Among the hunter-gatherer peoples of the Arctic, we find the Inuit, whose way of life is radically different from ours. Despite sometimes gathering tubers and berries, the main source of sustenance for these peoples is the consumption of meat – in particular, seal meat. The Inuit survive with this extreme diet since they consume the whole animal, including the organs, thus obtaining all nutrients essential to human life, which are otherwise difficult to find only in meat.\u{00a0}[1]
 
-In traditional Inuit society, hunting is a man’s job. Even though women can participate in hunting-adjacent tasks, their primary role is childcare. Thus, since most of the Inuit diet is meat-based, women are entirely dependent on men for their survival. Despite this, the Inuit social structure is relatively egalitarian, and women are not seen as the property of their fathers or husbands – contrary to the cultural norms that prevailed in the “civilized” and stratified societies of our past.\u00a0[2]
+In traditional Inuit society, hunting is a man’s job. Even though women can participate in hunting-adjacent tasks, their primary role is childcare. Thus, since most of the Inuit diet is meat-based, women are entirely dependent on men for their survival. Despite this, the Inuit social structure is relatively egalitarian, and women are not seen as the property of their fathers or husbands – contrary to the cultural norms that prevailed in the “civilized” and stratified societies of our past.\u{00a0}[2]
 
 > In the present-day, sex-related differences between labor roles do exist in hunter-gatherer societies, but they do not establish a strict dichotomy, much as the differences between the sexes themselves.
 

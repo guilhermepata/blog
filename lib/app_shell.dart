@@ -26,11 +26,29 @@ class ShellState extends ChangeNotifier {
 
   bool _areArticlesLoaded = false;
 
+  /// the value is not important, this variable simply exists to change state
+  /// when the articles refresh
+  bool refresher = false;
+
   ShellState(this.context) {
     context.read<AppState>().areArticlesLoaded.then((value) {
       for (var article in context.read<AppState>().articles.values)
         articles.add(article);
       _areArticlesLoaded = true;
+      notifyListeners();
+    });
+  }
+
+  Future<void> refreshArticles() async {
+    _areArticlesLoaded = false;
+    // notifyListeners();
+    articles.removeRange(0, articles.length);
+    context.read<AppState>().areArticlesLoaded.then((value) {
+      for (var article in context.read<AppState>().articles.values) {
+        articles.add(article);
+      }
+      _areArticlesLoaded = true;
+      refresher = !refresher;
       notifyListeners();
     });
   }

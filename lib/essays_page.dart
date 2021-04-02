@@ -45,61 +45,73 @@ class _EssaysScreenState extends State<EssaysScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<ShellState, Tuple4<bool, double, List<Article>, bool>>(
-        selector: (_, state) => Tuple4(state.displayMobileLayout, state.gutters,
-            state.articles, state.areArticlesLoaded),
+    return Selector<ShellState,
+            Tuple5<bool, double, List<Article>, bool, bool>>(
+        selector: (_, state) => Tuple5(
+              state.displayMobileLayout,
+              state.gutters,
+              state.articles,
+              state.areArticlesLoaded,
+              state.refresher,
+            ),
         builder: (context, state, _) {
           return Scaffold(
             body: Scrollbar(
               thickness: MouseState.isPresent ? null : 0,
               isAlwaysShown: MouseState.isPresent,
               controller: scrollController,
-              child: ListView.separated(
-                clipBehavior: Clip.none,
-                physics: MouseState.isPresent
-                    ? NeverScrollableScrollPhysics()
-                    : null,
-                controller: scrollController,
-                padding:
-                    EdgeInsets.only(bottom: state.item2 * 4, left: 8, right: 8),
-                itemCount: state.item3.length + 1,
-                separatorBuilder: (context, int i) {
-                  if (i == 0)
-                    return SizedBox(
-                      height: 0,
-                    );
-                  return Center(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: 600),
-                      child: Material(
-                        elevation: 2,
-                        color: Theme.of(context).colorScheme.surface,
-                        child: Divider(
-                          height: 0,
-                        ),
-                      ),
-                    ),
-                  );
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  context.read<AppState>().loadArticles();
+                  await context.read<ShellState>().refreshArticles();
                 },
-                itemBuilder: (context, int i) {
-                  if (i == 0)
+                child: ListView.separated(
+                  clipBehavior: Clip.none,
+                  physics: MouseState.isPresent
+                      ? NeverScrollableScrollPhysics()
+                      : AlwaysScrollableScrollPhysics(),
+                  controller: scrollController,
+                  padding: EdgeInsets.only(
+                      bottom: state.item2 * 4, left: 8, right: 8),
+                  itemCount: state.item3.length + 1,
+                  separatorBuilder: (context, int i) {
+                    if (i == 0)
+                      return SizedBox(
+                        height: 0,
+                      );
                     return Center(
-                      child: Container(
+                      child: ConstrainedBox(
                         constraints: BoxConstraints(maxWidth: 600),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: state.item2, vertical: 4),
-                          title: Text('Essays'),
+                        child: Material(
+                          elevation: 2,
+                          color: Theme.of(context).colorScheme.surface,
+                          child: Divider(
+                            height: 0,
+                          ),
                         ),
                       ),
                     );
-                  return ArticleTile(
-                    state.item3[i - 1],
-                    onArticleTapped: widget.onArticleTapped,
-                    placement:
-                        ItemPlacement.placement(i - 1, state.item3.length),
-                  );
-                },
+                  },
+                  itemBuilder: (context, int i) {
+                    if (i == 0)
+                      return Center(
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: 600),
+                          child: ListTile(
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: state.item2, vertical: 4),
+                            title: Text('Essays'),
+                          ),
+                        ),
+                      );
+                    return ArticleTile(
+                      state.item3[i - 1],
+                      onArticleTapped: widget.onArticleTapped,
+                      placement:
+                          ItemPlacement.placement(i - 1, state.item3.length),
+                    );
+                  },
+                ),
               ),
             ),
           );
@@ -226,7 +238,6 @@ class _ContentTileState extends State<ContentTile> {
                                     width: imageSide,
                                     height: imageSide,
                                     decoration: BoxDecoration(
-                                      color: Colors.red,
                                       borderRadius: BorderRadius.circular(6),
                                       image: DecorationImage(
                                         image: NetworkImage(

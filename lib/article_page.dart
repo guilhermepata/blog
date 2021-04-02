@@ -189,7 +189,7 @@ class _ArticlePageState extends State<ArticlePage>
                               constraints: BoxConstraints(
                                   maxWidth: usefulWidth,
                                   minWidth: usefulWidth,
-                                  minHeight: height * 1 / 3,
+                                  minHeight: height * 4 / 6,
                                   maxHeight: height),
                               child: Image.network(
                                 widget.article.imageUrl!,
@@ -290,17 +290,14 @@ class _ArticlePageState extends State<ArticlePage>
         child: Padding(
           padding: EdgeInsets.only(top: gutters),
           child: Column(
-              mainAxisSize: MainAxisSize.min,
+              // mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                AutoSizeText(
+                Text(
                   widget.article.title,
                   overflow: TextOverflow.ellipsis,
-                  maxLines:
-                      (widget.article.title.split(RegExp(r'[ ]')).length / 4)
-                          .ceil(),
-                  presetFontSizes: [46, 33],
+                  maxLines: 50000,
                   style: Theme.of(context).textTheme.headline1!.copyWith(
                         color: Theme.of(context)
                             .colorScheme
@@ -308,28 +305,27 @@ class _ArticlePageState extends State<ArticlePage>
                             .withOpacity(.87),
                         // fontWeight: FontWeight.w100,
                         fontStyle: FontStyle.italic,
+                        fontSize: width < maxContentWidth ? 33 : 46,
                       ),
+                  textAlign: TextAlign.start,
                 ),
                 SizedBox(
                   height: 8,
                 ),
                 if (widget.article.subtitle != null)
-                  AutoSizeText(
+                  Text(
                     widget.article.subtitle!,
                     overflow: TextOverflow.ellipsis,
-                    presetFontSizes: [19, 18, 14],
-                    minFontSize: 18,
-                    maxLines:
-                        (widget.article.subtitle!.split(RegExp(r'[ ]')).length /
-                                9)
-                            .ceil(),
+                    textAlign: TextAlign.start,
+                    maxLines: 5000,
                     style: Theme.of(context).textTheme.subtitle2!.copyWith(
                           fontWeight: FontWeight.w400,
+                          fontSize: width < maxContentWidth ? 18 : 19,
                           height: 1.3,
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(.6),
+                              .withOpacity(.86),
                         ),
                   ),
               ]),
@@ -378,9 +374,9 @@ class _ArticlePageState extends State<ArticlePage>
           context,
           index - 3,
           style: Theme.of(context).textTheme.bodyText1!.copyWith(
-              fontSize: 17,
+              fontSize: 17.5,
               height: 2,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(.63)),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(.87)),
           headlineStyle: GoogleFonts.lora(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
             fontSize: 19,
