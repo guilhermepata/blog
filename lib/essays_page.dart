@@ -176,87 +176,157 @@ class _ContentTileState extends State<ContentTile> {
                     child: child,
                   );
                 },
-                child: InkWell(
-                  onTap: widget.onTap,
-                  onHover: (_) => setState(() {
-                    isHovered = _;
-                  }),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Selector<ShellState, double>(
-                          selector: (_, state) => state.gutters,
-                          builder: (context, gutters, child) {
-                            return Padding(
-                              padding:
-                                  EdgeInsets.symmetric(horizontal: gutters),
-                              child: child,
-                            );
-                          },
-                          child: ListTile(
-                            // isThreeLine: true,
-                            contentPadding: EdgeInsets.zero,
-                            title: CrossFadeText(
-                              widget.condition ? widget.title : null,
-                              showText: widget.condition,
-                              maxLines: 1,
-                              // style: Theme.of(context).textTheme.headline5,
-                              // width: 200,
+                child: Stack(
+                  children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: SizedBox(
+                          height: imageSide,
+                          width: imageSide,
+                          child: Card(
+                            color: Colors.transparent,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: CrossFadeTextWidgetBlock(
-                                Text(
-                                  widget.condition ? widget.subtitle! : '',
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                showText: widget.condition,
-                                numLines: 2,
-                                // style: Theme.of(context)
-                                //     .textTheme
-                                //     .subtitle1
-                                //     .copyWith(
-                                //         color: Theme.of(context)
-                                //             .colorScheme
-                                //             .onSurface
-                                //             .withOpacity(.60)),
+                            clipBehavior: Clip.antiAlias,
+                            child: CrossFadeWidgets(
+                              showFirst: widget.condition,
+                              firstChild: widget.condition
+                                  ? Image.network(
+                                      widget.imageUrl!,
+                                      width: imageSide,
+                                      height: imageSide,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder:
+                                          (context, child, progress) {
+                                        if (progress == null)
+                                          return Stack(
+                                            children: [
+                                              Skeleton(
+                                                width: imageSide,
+                                                height: imageSide,
+                                              ),
+                                              child,
+                                            ],
+                                          );
+                                        else
+                                          return Skeleton(
+                                            width: imageSide,
+                                            height: imageSide,
+                                          );
+                                      },
+                                    )
+
+                                  // Ink(
+                                  //     width: imageSide,
+                                  //     height: imageSide,
+                                  //     decoration: BoxDecoration(
+                                  //       borderRadius: BorderRadius.circular(6),
+                                  //       image: DecorationImage(
+                                  //         image: NetworkImage(
+                                  //           widget.imageUrl!,
+                                  //         ),
+                                  //         fit: BoxFit.cover,
+                                  //       ),
+                                  //     ),
+                                  //   )
+                                  : null,
+                              secondChild: Skeleton(
+                                width: imageSide,
+                                height: imageSide,
                               ),
                             ),
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: SizedBox(
-                          height: imageSide,
-                          width: imageSide,
-                          child: CrossFadeWidgets(
-                            showFirst: widget.condition,
-                            firstChild: widget.condition
-                                ? Ink(
-                                    width: imageSide,
-                                    height: imageSide,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(6),
-                                      image: DecorationImage(
-                                        image: NetworkImage(
-                                          widget.imageUrl!,
-                                        ),
-                                        fit: BoxFit.cover,
-                                      ),
+                    ]),
+                    InkWell(
+                      onTap: widget.onTap,
+                      onHover: (_) => setState(() {
+                        isHovered = _;
+                      }),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Selector<ShellState, double>(
+                              selector: (_, state) => state.gutters,
+                              builder: (context, gutters, child) {
+                                return Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: gutters),
+                                  child: child,
+                                );
+                              },
+                              child: ListTile(
+                                // isThreeLine: true,
+                                contentPadding: EdgeInsets.zero,
+                                title: CrossFadeText(
+                                  widget.condition ? widget.title : null,
+                                  showText: widget.condition,
+                                  maxLines: 1,
+                                  // style: Theme.of(context).textTheme.headline5,
+                                  // width: 200,
+                                ),
+                                subtitle: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4),
+                                  child: CrossFadeTextWidgetBlock(
+                                    Text(
+                                      widget.condition ? widget.subtitle! : '',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  )
-                                : null,
-                            secondChild: Skeleton(
-                              width: imageSide,
-                              height: imageSide,
+                                    showText: widget.condition,
+                                    numLines: 2,
+                                    // style: Theme.of(context)
+                                    //     .textTheme
+                                    //     .subtitle1
+                                    //     .copyWith(
+                                    //         color: Theme.of(context)
+                                    //             .colorScheme
+                                    //             .onSurface
+                                    //             .withOpacity(.60)),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: SizedBox(
+                              height: imageSide,
+                              width: imageSide,
+                              // child:
+                              // CrossFadeWidgets(
+                              //   showFirst: widget.condition,
+                              //   firstChild: widget.condition
+                              //       ? Ink(
+                              //           width: imageSide,
+                              //           height: imageSide,
+                              //           decoration: BoxDecoration(
+                              //             borderRadius: BorderRadius.circular(6),
+                              //             image: DecorationImage(
+                              //               image: NetworkImage(
+                              //                 widget.imageUrl!,
+                              //               ),
+                              //               fit: BoxFit.cover,
+                              //             ),
+                              //           ),
+                              //         )
+                              //       : null,
+                              //   secondChild: Skeleton(
+                              //     width: imageSide,
+                              //     height: imageSide,
+                              //   ),
+                              // ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -314,94 +384,162 @@ class _ArticleTileState extends State<ArticleTile> {
                     child: child,
                   );
                 },
-                child: InkWell(
-                  onTap: () => widget.onArticleTapped!(widget.article),
-                  onHover: (_) => setState(() {
-                    isHovered = _;
-                  }),
-                  // hoverColor: Colors.transparent,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Selector<ShellState, double>(
-                          selector: (_, state) => state.gutters,
-                          builder: (context, gutters, child) {
-                            return Padding(
-                              padding:
-                                  EdgeInsets.symmetric(horizontal: gutters),
-                              child: child,
-                            );
-                          },
-                          child: ListTile(
-                            // isThreeLine: true,
-                            contentPadding: EdgeInsets.zero,
-                            title: CrossFadeText(
-                              widget.article.isLoaded
-                                  ? widget.article.title
+                child: Stack(
+                  children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: SizedBox(
+                          height: imageSide,
+                          width: imageSide,
+                          child: Card(
+                            color: Colors.transparent,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6)),
+                            clipBehavior: Clip.antiAlias,
+                            child: CrossFadeWidgets(
+                              showFirst: widget.article.isLoaded,
+                              firstChild: widget.article.isLoaded
+                                  ? Image.network(
+                                      widget.article.imageUrl!,
+                                      width: imageSide,
+                                      height: imageSide,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder:
+                                          (context, child, progress) {
+                                        if (progress == null)
+                                          return Stack(
+                                            children: [
+                                              Skeleton(
+                                                width: imageSide,
+                                                height: imageSide,
+                                              ),
+                                              child,
+                                            ],
+                                          );
+                                        else
+                                          return Skeleton(
+                                            width: imageSide,
+                                            height: imageSide,
+                                          );
+                                      },
+                                    )
+
+                                  // Ink(
+                                  //     width: imageSide,
+                                  //     height: imageSide,
+                                  //     decoration: BoxDecoration(
+                                  //       borderRadius: BorderRadius.circular(6),
+                                  //       image: DecorationImage(
+                                  //         image: NetworkImage(
+                                  //           widget.imageUrl!,
+                                  //         ),
+                                  //         fit: BoxFit.cover,
+                                  //       ),
+                                  //     ),
+                                  //   )
                                   : null,
-                              showText: widget.article.isLoaded,
-                              // style: Theme.of(context).textTheme.headline5,
-                              // width: 200,
-                            ),
-                            subtitle: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 4.0),
-                              child: CrossFadeTextWidgetBlock(
-                                Text(
-                                  widget.article.isLoaded
-                                      ? widget.article.subtitle!
-                                      : '',
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.start,
-                                ),
-                                showText: widget.article.isLoaded,
-                                numLines: 2,
-                                // style: Theme.of(context)
-                                //     .textTheme
-                                //     .subtitle1
-                                //     .copyWith(
-                                //         color: Theme.of(context)
-                                //             .colorScheme
-                                //             .onSurface
-                                //             .withOpacity(.60)),
+                              secondChild: Skeleton(
+                                width: imageSide,
+                                height: imageSide,
                               ),
                             ),
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: CrossFadeWidgets(
-                          showFirst: widget.article.isLoaded,
-                          firstChild: widget.article.isLoaded
-                              ? Ink(
-                                  width: imageSide,
-                                  height: imageSide,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(6),
-                                    image: DecorationImage(
-                                      image: NetworkImage(
-                                        widget.article.imageUrl!,
-                                      ),
-                                      fit: BoxFit.cover,
+                    ]),
+                    InkWell(
+                      onTap: () {
+                        widget.onArticleTapped!(widget.article);
+                      },
+                      onHover: (_) => setState(() {
+                        isHovered = _;
+                      }),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Selector<ShellState, double>(
+                              selector: (_, state) => state.gutters,
+                              builder: (context, gutters, child) {
+                                return Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: gutters),
+                                  child: child,
+                                );
+                              },
+                              child: ListTile(
+                                // isThreeLine: true,
+                                contentPadding: EdgeInsets.zero,
+                                title: CrossFadeText(
+                                  widget.article.isLoaded
+                                      ? widget.article.title
+                                      : null,
+                                  showText: widget.article.isLoaded,
+                                  maxLines: 1,
+                                  // style: Theme.of(context).textTheme.headline5,
+                                  // width: 200,
+                                ),
+                                subtitle: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4),
+                                  child: CrossFadeTextWidgetBlock(
+                                    Text(
+                                      widget.article.isLoaded
+                                          ? widget.article.subtitle!
+                                          : '',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
+                                    showText: widget.article.isLoaded,
+                                    numLines: 2,
+                                    // style: Theme.of(context)
+                                    //     .textTheme
+                                    //     .subtitle1
+                                    //     .copyWith(
+                                    //         color: Theme.of(context)
+                                    //             .colorScheme
+                                    //             .onSurface
+                                    //             .withOpacity(.60)),
                                   ),
-                                  // child:
-                                  // fit: BoxFit.cover,
-                                  // image: NetworkImage(
-                                  //   article.imageUrl!,
-                                  // ),
-                                )
-                              : null,
-                          secondChild: Skeleton(
-                            width: imageSide,
-                            height: imageSide,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: SizedBox(
+                              height: imageSide,
+                              width: imageSide,
+                              // child:
+                              // CrossFadeWidgets(
+                              //   showFirst: widget.condition,
+                              //   firstChild: widget.condition
+                              //       ? Ink(
+                              //           width: imageSide,
+                              //           height: imageSide,
+                              //           decoration: BoxDecoration(
+                              //             borderRadius: BorderRadius.circular(6),
+                              //             image: DecorationImage(
+                              //               image: NetworkImage(
+                              //                 widget.imageUrl!,
+                              //               ),
+                              //               fit: BoxFit.cover,
+                              //             ),
+                              //           ),
+                              //         )
+                              //       : null,
+                              //   secondChild: Skeleton(
+                              //     width: imageSide,
+                              //     height: imageSide,
+                              //   ),
+                              // ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
