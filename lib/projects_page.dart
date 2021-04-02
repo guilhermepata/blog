@@ -89,7 +89,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         child: ListTile(
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: state.item2, vertical: 4),
-                          title: Text('Essays'),
+                          title: Text('Projects'),
                         ),
                       ),
                     );
