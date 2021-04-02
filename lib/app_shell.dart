@@ -738,7 +738,11 @@ class _ShellAppBarState extends State<ShellAppBar>
         Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
             child: PopupMenuButton<AppBarMenuOptions>(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
+              icon: Icon(
+                Icons.more_vert,
+                size: 24,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
+              ),
               onSelected: (AppBarMenuOptions result) {
                 if (result == AppBarMenuOptions.changeTheme) {
                   context.read<AppState>().flipTheme();
