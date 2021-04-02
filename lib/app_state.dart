@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,6 +19,8 @@ class AppState extends ChangeNotifier {
   bool _areArticlesLoading = false;
   late Future<bool> _areArticlesLoaded;
 
+  Future<SharedPreferences> preferences = SharedPreferences.getInstance();
+
   bool hasLoadedOnce = false;
 
   bool _isThemeFlipped = false;
@@ -25,6 +28,7 @@ class AppState extends ChangeNotifier {
   AppState() {
     loadArticles();
     _selectedMenu = AppMenu.home;
+    loadPreferences();
   }
 
   static List<dynamic> jsonDecode(String string) {
@@ -37,6 +41,13 @@ class AppState extends ChangeNotifier {
   //       .where((String key) => key.contains('.md'))
   //       .toList();
   // }
+
+  void loadPreferences() {
+    preferences.then((prefs) {
+      _isThemeFlipped = prefs.getBool('isThemeFlipped') ?? false;
+      notifyListeners();
+    });
+  }
 
   Future<bool> loadArticles() {
     _areArticlesLoaded = () async {
@@ -90,6 +101,9 @@ class AppState extends ChangeNotifier {
 
   set isThemeFlipped(bool value) {
     _isThemeFlipped = value;
+    preferences.then((prefs) {
+      prefs.setBool('isThemeFlipped', value);
+    });
     notifyListeners();
   }
 
