@@ -47,11 +47,19 @@ If the traits implicated in sexual dimorphism, like all others, can vary continu
 
 # References
 [1] A. Griffiths, W. Gelbart, and J. Miller, "Genetics begins with Variation," in Modern Genetic Analysis, New York, W. H. Freeman, 1999.
+
 [2] R. Singh, Elements of Entomology, Rastogi Publications, 2006, p. 284.
+
 [3] K. Anderson, T. Linksvayer, and C. Smith, "The causes and consequences of genetic caste determination in ants (Hymenoptera: Formicidae)," 2008.
+
 [4] B. Johnson, M. Borowiec, J. Chiu, E. Lee, J. Atallah, and P. Ward, "Phylogenomics resolves evolutionary relationships among ants, bees, and wasps," Current Biology, vol. 23, 2013.
+
 [5] P. Berta, J. Hawkins, A. Sinclair, A. Taylor, B. Griffiths, P. Goodfellow, and M. Fellous, "Genetic evidence equating SRY and the testis-determining factor," 1990.
+
 [6] A. Galani, S. Kitsiou-Tzeli, C. Sofokleous, E. Kanavakis, and A. Kalpini-Mavrou, "Androgen insensitivity syndrome: clinical features and molecular defects," 2008.
+
 [7] United Nations Office of the High Commissioner for Human Rights, "Free & Equal Campaign Fact Sheet: Intersex," 2015.
+
 [8] D. Swaab et al., "A sex difference in the human brain and its relation to transsexuality," 1995.
+
 [9] American Psychiatry Association, Diagnostic and Statistical Manual of Mental Disorders (DSM-5), 5 ed., American Psychiatric Publishing.
