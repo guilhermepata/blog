@@ -658,16 +658,16 @@ class _ShellAppBarState extends State<ShellAppBar>
       if (widget.pastTitleNotifier.value == true &&
           appBarState != AppBarState.raised &&
           appBarState != AppBarState.raising) {
-        appBarStateController.fling();
+        appBarStateController.fling(velocity: 100);
       } else if (widget.pastTitleNotifier.value == false &&
           appBarState != AppBarState.lowered &&
           appBarState != AppBarState.lowering) {
-        appBarStateController.fling(velocity: -1);
+        appBarStateController.fling(velocity: -100);
       }
     });
 
     appBarStateController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 50));
+        AnimationController(vsync: this, duration: Duration(milliseconds: 1));
     appBarStateController.addStatusListener((status) {
       if (status == AnimationStatus.completed)
         setState(() {
