@@ -10,6 +10,7 @@ import 'package:tuple/tuple.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'home_page.dart';
 
 class Article {
@@ -226,6 +227,47 @@ class Article {
         maxLines: maxLines);
 
     return builder.buildWidgets(context);
+  }
+
+  Widget buildMarkdown(BuildContext context,
+      {double paragraphSpacing = 16,
+      TextStyle? style,
+      TextStyle? headlineStyle,
+      TextStyle? quoteStyle,
+      TextAlign textAlign = TextAlign.justify,
+      TextOverflow? overflow,
+      int? maxLines}) {
+    return MarkdownBody(
+      data: rawContent,
+      selectable: true,
+      onTapLink: (text, url, title) {
+        BodyTextBuilder.onLinkTapped(
+          context: context,
+          url: url!,
+          label: title,
+        );
+      },
+      styleSheet: MarkdownStyleSheet(
+        p: style,
+        a: TextStyle(color: Theme.of(context).colorScheme.secondary),
+        h1: headlineStyle,
+        blockquote: quoteStyle ??
+            GoogleFonts.ibmPlexSerif(
+                fontSize: 20,
+                fontWeight: FontWeight.w300,
+                color: Theme.of(context).colorScheme.onSurface),
+        blockquotePadding: EdgeInsets.symmetric(
+          vertical: paragraphSpacing * 0.5,
+          horizontal: 48,
+        ),
+        tableHead: quoteStyle,
+        tableBody: quoteStyle,
+        code: quoteStyle,
+        listBullet: quoteStyle,
+        blockquoteDecoration: BoxDecoration(),
+        blockSpacing: paragraphSpacing,
+      ),
+    );
   }
 }
 

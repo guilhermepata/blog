@@ -263,8 +263,7 @@ class _ArticlePageState extends State<ArticlePage>
                                     SliverList(
                                       delegate: SliverChildBuilderDelegate(
                                         buildContentCard,
-                                        childCount:
-                                            4 + widget.article.numParagraphs,
+                                        childCount: 5,
                                       ),
                                     )
                                   ],
@@ -290,45 +289,46 @@ class _ArticlePageState extends State<ArticlePage>
         child: Padding(
           padding: EdgeInsets.only(top: gutters),
           child: Column(
-              // mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
+            // mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                widget.article.title,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 50000,
+                style: Theme.of(context).textTheme.headline1!.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(.87),
+                      // fontWeight: FontWeight.w100,
+                      fontStyle: FontStyle.italic,
+                      fontSize: width < maxContentWidth ? 33 : 46,
+                    ),
+                textAlign: TextAlign.start,
+              ),
+              SizedBox(
+                height: 8,
+              ),
+              if (widget.article.subtitle != null)
                 Text(
-                  widget.article.title,
+                  widget.article.subtitle!,
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 50000,
-                  style: Theme.of(context).textTheme.headline1!.copyWith(
+                  textAlign: TextAlign.start,
+                  maxLines: 5000,
+                  style: Theme.of(context).textTheme.subtitle2!.copyWith(
+                        fontWeight: FontWeight.w400,
+                        fontSize: width < maxContentWidth ? 18 : 19,
+                        height: 1.3,
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
-                            .withOpacity(.87),
-                        // fontWeight: FontWeight.w100,
-                        fontStyle: FontStyle.italic,
-                        fontSize: width < maxContentWidth ? 33 : 46,
+                            .withOpacity(.86),
                       ),
-                  textAlign: TextAlign.start,
                 ),
-                SizedBox(
-                  height: 8,
-                ),
-                if (widget.article.subtitle != null)
-                  Text(
-                    widget.article.subtitle!,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.start,
-                    maxLines: 5000,
-                    style: Theme.of(context).textTheme.subtitle2!.copyWith(
-                          fontWeight: FontWeight.w400,
-                          fontSize: width < maxContentWidth ? 18 : 19,
-                          height: 1.3,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withOpacity(.86),
-                        ),
-                  ),
-              ]),
+            ],
+          ),
         ),
       );
     else if (index == 1)
@@ -367,27 +367,33 @@ class _ArticlePageState extends State<ArticlePage>
           ],
         ),
       );
-    else if (index > 2 && index < widget.article.numParagraphs + 3)
+    else if (index == 3)
       result = Padding(
         padding: EdgeInsets.symmetric(horizontal: gutters),
-        child: widget.article.buildParagraph(
+        child: widget.article.buildMarkdown(
           context,
-          index - 3,
+          // index - 3,
           style: Theme.of(context).textTheme.bodyText1!.copyWith(
-              fontSize: 17.5,
-              height: 2,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(.87)),
+                fontSize: 17.5,
+                height: 1.75,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
+              ),
           headlineStyle: GoogleFonts.lora(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
             fontSize: 19,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.15,
           ),
+          quoteStyle: GoogleFonts.ibmPlexSerif(
+            fontSize: 20,
+            fontWeight: FontWeight.w300,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           textAlign: TextAlign.left,
           overflow: TextOverflow.visible,
         ),
       );
-    else if (index == widget.article.numParagraphs + 3)
+    else if (index == 4)
       result = SizedBox(height: gutters);
     else
       result = SizedBox(height: 0);
@@ -425,11 +431,11 @@ class _ArticlePageAppBarState extends State<ArticlePageAppBar>
       if (widget.pastTitleNotifier.value == true &&
           appBarState != AppBarState.raised &&
           appBarState != AppBarState.raising) {
-        appBarStateController.fling();
+        appBarStateController.fling(velocity: 100);
       } else if (widget.pastTitleNotifier.value == false &&
           appBarState != AppBarState.lowered &&
           appBarState != AppBarState.lowering) {
-        appBarStateController.fling(velocity: -1);
+        appBarStateController.fling(velocity: -100);
       }
     });
 
