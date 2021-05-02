@@ -5,9 +5,9 @@ A demystification of the biology of sex, gender, and those who do not conform wi
 
 *The topic of gender identity is still the source of controversy in the public discourse and often leads to skepticism about the existence and legitimacy of people who do not conform with the sex they were assigned at birth. In the midst of this, the idea that this subject has no scientific integrity and, even worse, that biology is on the side of those who defend the binary essentialism of sexuality, has somehow prevailed. However, the complex variability of the biological world is inherently opposed to this idea.*
 
-![The fall of Man](https://miro.medium.com/max/1500/1*9EVAXp8By5JflVEuFCOrGw.jpeg)
+*This article was originally published in [Diferencial](https://diferencial.tecnico.ulisboa.pt/ciencia/ao-encontro-do-genero-uma-desmistificacao-da-biologia-do-sexo-do-genero-e-das-pessoas-nao-conformantes-com-o-sexo-atribuido-a-nascenca/) in Portuguese*.
 
- *This article was originally published in [Diferencial](https://diferencial.tecnico.ulisboa.pt/ciencia/ao-encontro-do-genero-uma-desmistificacao-da-biologia-do-sexo-do-genero-e-das-pessoas-nao-conformantes-com-o-sexo-atribuido-a-nascenca/) in Portuguese*.
+![The fall of Man](https://miro.medium.com/max/1500/1*9EVAXp8By5JflVEuFCOrGw.jpeg)
 
 The existence of the sexes — that is, the biological distinction between male and female — is, from an evolutionary point of view, something that demands explanation. In living organisms, traits generally vary continuously and independently; jumps are not observed. However, in polymorphisms such as sexual dimorphism, these do occur: a single gene or signaling molecule is enough to give rise to completely different morphologies, that nevertheless are made from essentially the same genomes¹. How can we explain this? [1]
 
