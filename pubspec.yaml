@@ -29,7 +29,7 @@ dependencies:
   # icon_shadow: ^1.0.1
   auto_size_text: ^3.0.0-nullsafety.0
   url_strategy: ^0.2.0
-  flutter_svg: ^0.21.0-nullsafety.0
+  # flutter_svg: ^0.21.0-nullsafety.0
   provider: ^5.0.0
   animations: ^2.0.0
   tuple: ^2.0.0-nullsafety.0
@@ -42,10 +42,13 @@ dependencies:
   flutter_launcher_icons: ^0.9.0
   http: ^0.13.1
   shared_preferences: ^2.0.5
+  flutter_html: ^2.0.0-nullsafety.1
+  drop_cap_text: ^1.1.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+
 
 # flutter_launcher_name:
 #   name: "The Duckling"

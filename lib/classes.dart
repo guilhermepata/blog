@@ -1,5 +1,7 @@
 // import 'dart:html';
 import 'dart:ui';
+import 'package:drop_cap_text/drop_cap_text.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +20,8 @@ class Article {
   late String _rawContent;
   String? _subtitle, _imageUrl, _altText;
   late String _content;
+  late String _initialContent;
+  late String _otherContent;
   String? _url;
   bool _isLoaded = false;
 
@@ -29,6 +33,8 @@ class Article {
   String? get imageUrl => _imageUrl;
   String? get altText => _altText;
   String get content => _content;
+  String get initialContent => _initialContent;
+  String get otherContent => _otherContent;
   bool get isLoaded => _isLoaded;
 
   Article._(
@@ -135,7 +141,11 @@ class Article {
       rawContent = markdown;
       rawContent = rawContent.replaceFirst(titleExp, '');
       rawContent = rawContent.replaceFirst(titleExp, '');
+
+      final parts = rawContent.split(imageExp);
+      _initialContent = parts.first;
       rawContent = rawContent.replaceFirst(imageExp, '');
+      _otherContent = rawContent.replaceFirst(_initialContent, '');
 
       _subtitle = subtitle!;
       _rawContent = rawContent;
@@ -229,7 +239,54 @@ class Article {
     return builder.buildWidgets(context);
   }
 
-  Widget buildMarkdown(BuildContext context,
+  // Widget buildHtml(BuildContext context,
+  //     {double paragraphSpacing = 16,
+  //     TextStyle? style,
+  //     TextStyle? headlineStyle,
+  //     TextStyle? quoteStyle,
+  //     TextAlign textAlign = TextAlign.justify,
+  //     TextOverflow? overflow,
+  //     int? maxLines}) {
+  //   return Html(
+  //     data: """
+  //     <div>
+  //     <h1>Hello world</h1>
+  //     <p>Lorem <a>ipsum</a> dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
+  //     </div>
+  //     """,
+  //     style: {
+  //       "div": Style(
+  //           // block: Block(
+  //           //   margin: EdgeInsets.all(16),
+  //           //   border: Border.all(width: 6),
+  //           //   backgroundColor: Colors.grey,
+  //           // ),
+
+  //           ),
+  //       "p:first-of-type:first-letter": Style(
+  //         // float: left;
+  //         fontSize: FontSize(45, units: 'px'),
+  //         lineHeight: LineHeight(1),
+  //         fontWeight: FontWeight.bold,
+  //         margin: EdgeInsets.only(right: 9),
+  //       )
+  //     },
+  //     // customRender: {
+  //     //   "drop-cap": (contex, child) {
+  //     //     return
+  //     //   }
+  //     // },
+  //     onLinkTap: (url, a, b, c) {
+  //       BodyTextBuilder.onLinkTapped(
+  //         context: context,
+  //         url: url!,
+  //         // label: title,
+  //       );
+  //     },
+  //   );
+  // }
+
+  Widget buildInitialContent(BuildContext context,
       {double paragraphSpacing = 16,
       TextStyle? style,
       TextStyle? headlineStyle,
@@ -238,7 +295,7 @@ class Article {
       TextOverflow? overflow,
       int? maxLines}) {
     return MarkdownBody(
-      data: rawContent,
+      data: initialContent,
       selectable: true,
       onTapLink: (text, url, title) {
         BodyTextBuilder.onLinkTapped(
@@ -267,6 +324,79 @@ class Article {
         blockquoteDecoration: BoxDecoration(),
         blockSpacing: paragraphSpacing,
       ),
+    );
+  }
+
+  Widget buildOtherContent(BuildContext context,
+      {double paragraphSpacing = 16,
+      TextStyle? style,
+      TextStyle? headlineStyle,
+      TextStyle? quoteStyle,
+      TextAlign textAlign = TextAlign.justify,
+      TextOverflow? overflow,
+      int? maxLines}) {
+    String firstPar = '';
+    final parts = otherContent.split('\n');
+    int i = 0;
+    bool assigned = false;
+    while (!assigned && i < parts.length) {
+      if (parts[i].length > 5) {
+        firstPar = parts[i];
+        assigned = true;
+      }
+      i++;
+    }
+    int chars = 1;
+    if (firstPar.startsWith('[\s]'))
+      firstPar = firstPar.replaceFirst('[\s]', '');
+    if (firstPar.split(' ').first.length == 2) chars = 2;
+    return Column(
+      children: [
+        DropCapText(
+          firstPar,
+          dropCapChars: chars,
+          style: style,
+          dropCapPadding: EdgeInsets.only(right: 12, top: 16),
+          // forceNoDescent: true,
+          parseInlineMarkdown: true,
+          dropCapPosition: DropCapPosition.start,
+          mode: DropCapMode.inside,
+          // maxLines: 3,
+          // dropCapStyle: style!.copyWith(fontWeight: FontWeight.bold, height: 40),
+        ),
+        SizedBox(height: paragraphSpacing),
+        MarkdownBody(
+          data: otherContent.replaceFirst(firstPar, ''),
+          selectable: true,
+          onTapLink: (text, url, title) {
+            BodyTextBuilder.onLinkTapped(
+              context: context,
+              url: url!,
+              label: title,
+            );
+          },
+          styleSheet: MarkdownStyleSheet(
+            p: style,
+            a: TextStyle(color: Theme.of(context).colorScheme.secondary),
+            h1: headlineStyle,
+            blockquote: quoteStyle ??
+                GoogleFonts.ibmPlexSerif(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w300,
+                    color: Theme.of(context).colorScheme.onSurface),
+            blockquotePadding: EdgeInsets.symmetric(
+              vertical: paragraphSpacing * 0.5,
+              horizontal: 48,
+            ),
+            tableHead: quoteStyle,
+            tableBody: quoteStyle,
+            code: quoteStyle,
+            listBullet: quoteStyle,
+            blockquoteDecoration: BoxDecoration(),
+            blockSpacing: paragraphSpacing,
+          ),
+        ),
+      ],
     );
   }
 }

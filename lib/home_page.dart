@@ -58,97 +58,104 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Selector<ShellState,
-            Tuple5<bool, double, List<Article>, bool, bool>>(
-        selector: (_, state) => Tuple5(
-              state.displayMobileLayout,
-              state.gutters,
-              state.articles,
-              state.areArticlesLoaded,
-              state.refresher,
-            ),
-        builder: (context, state, _) {
-          // final articleCards = <Widget>[];
+        Tuple5<bool, double, List<Article>, bool, bool>>(
+      selector: (_, state) => Tuple5(
+        state.displayMobileLayout,
+        state.gutters,
+        state.articles,
+        state.areArticlesLoaded,
+        state.refresher,
+      ),
+      builder: (context, state, _) {
+        // final articleCards = <Widget>[];
 
-          // for (var article in articles) {
-          //   articleCards.add(
-          //       ArticleCard(article, onArticleTapped: widget.onArticleTapped));
-          // }
+        // for (var article in articles) {
+        //   articleCards.add(
+        //       ArticleCard(article, onArticleTapped: widget.onArticleTapped));
+        // }
 
-          return Scaffold(
-            body: Scrollbar(
-              thickness: MouseState.isPresent ? null : 0,
-              isAlwaysShown: MouseState.isPresent,
+        return Scaffold(
+          body: Scrollbar(
+            thickness: MouseState.isPresent ? null : 0,
+            isAlwaysShown: MouseState.isPresent,
+            controller: scrollController,
+            // child: RefreshIndicator(
+            //   onRefresh: () async {
+            //     await context.read<AppState>().loadArticles();
+            //     await context.read<ShellState>().refreshArticles();
+            //   },
+            //   displacement: 150,
+            //   // notificationPredicate: (notif) {
+            //   //   notif.metrics.
+            //   // },
+            child: ListView.separated(
+              physics: ClampingScrollPhysics(),
+              // MouseState.isPresent
+              //     ? NeverScrollableScrollPhysics()
+              //     : null,
+              // : AlwaysScrollableScrollPhysics(),
               controller: scrollController,
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  await context.read<AppState>().loadArticles();
-                  await context.read<ShellState>().refreshArticles();
-                },
-                child: ListView.separated(
-                  physics: MouseState.isPresent
-                      ? NeverScrollableScrollPhysics()
-                      : AlwaysScrollableScrollPhysics(),
-                  controller: scrollController,
-                  padding: EdgeInsets.only(
-                      bottom: state.item2 * 4, right: 8, left: 8),
-                  itemCount: state.item3.length == 0
-                      ? 0
-                      : state.item3.length == 1
-                          ? state.item3.length + 1
-                          : state.item3.length + 2,
-                  separatorBuilder: (context, int i) {
-                    if (i == 0 || i == 2)
-                      return SizedBox(
-                        height: 0,
-                      );
-                    if (i == 1) return SizedBox(height: state.item2);
-                    return Center(
-                      child: Container(
-                        constraints: BoxConstraints(maxWidth: 600),
-                        child: Divider(
-                          height: 0,
-                        ),
+              padding:
+                  EdgeInsets.only(bottom: state.item2 * 4, right: 8, left: 8),
+              itemCount: state.item3.length == 0
+                  ? 0
+                  : state.item3.length == 1
+                      ? state.item3.length + 1
+                      : state.item3.length + 2,
+              separatorBuilder: (context, int i) {
+                if (i == 0 || i == 2)
+                  return SizedBox(
+                    height: 0,
+                  );
+                if (i == 1) return SizedBox(height: state.item2);
+                return Center(
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: 600),
+                    child: Divider(
+                      height: 0,
+                    ),
+                  ),
+                );
+              },
+              itemBuilder: (context, int i) {
+                if (i == 0)
+                  return Center(
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: 600),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: state.item2, vertical: 4),
+                        title: Text('Newest essay'),
                       ),
-                    );
-                  },
-                  itemBuilder: (context, int i) {
-                    if (i == 0)
-                      return Center(
-                        child: Container(
-                          constraints: BoxConstraints(maxWidth: 600),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: state.item2, vertical: 4),
-                            title: Text('Newest essay'),
-                          ),
-                        ),
-                      );
-                    if (i == 1)
-                      return ArticleCard3(state.item3[i - 1],
-                          onArticleTapped: widget.onArticleTapped);
-                    if (i == 2)
-                      return Center(
-                        child: Container(
-                          constraints: BoxConstraints(maxWidth: 600),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: state.item2, vertical: 4),
-                            title: Text('Older essays'),
-                          ),
-                        ),
-                      );
-                    return ArticleTile(
-                      state.item3[i - 2],
-                      onArticleTapped: widget.onArticleTapped,
-                      placement: ItemPlacement.placement(
-                          i - 3, state.item3.length - 1),
-                    );
-                  },
-                ),
-              ),
+                    ),
+                  );
+                if (i == 1)
+                  return ArticleCard3(state.item3[i - 1],
+                      onArticleTapped: widget.onArticleTapped);
+                if (i == 2)
+                  return Center(
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: 600),
+                      child: ListTile(
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: state.item2, vertical: 4),
+                        title: Text('Older essays'),
+                      ),
+                    ),
+                  );
+                return ArticleTile(
+                  state.item3[i - 2],
+                  onArticleTapped: widget.onArticleTapped,
+                  placement:
+                      ItemPlacement.placement(i - 3, state.item3.length - 1),
+                );
+              },
             ),
-          );
-        });
+            // ),
+          ),
+        );
+      },
+    );
   }
 }
 

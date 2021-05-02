@@ -436,7 +436,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                 leadingWidth: 56 + appBarMargins,
                 title: Padding(
                   padding: EdgeInsets.only(left: appBarSpacing.value),
-                  child: Title(),
+                  child: AppTitle(),
                 ),
                 leading: IconButton(
                     icon: Icon(
@@ -658,11 +658,11 @@ class _ShellAppBarState extends State<ShellAppBar>
       if (widget.pastTitleNotifier.value == true &&
           appBarState != AppBarState.raised &&
           appBarState != AppBarState.raising) {
-        appBarStateController.fling(velocity: 100);
+        appBarStateController.fling();
       } else if (widget.pastTitleNotifier.value == false &&
           appBarState != AppBarState.lowered &&
           appBarState != AppBarState.lowering) {
-        appBarStateController.fling(velocity: -100);
+        appBarStateController.fling(velocity: -1);
       }
     });
 
@@ -698,7 +698,7 @@ class _ShellAppBarState extends State<ShellAppBar>
   void didChangeDependencies() {
     super.didChangeDependencies();
     appBarColor = ColorTween(
-            begin: Colors.transparent,
+            begin: Theme.of(context).colorScheme.background,
             end: Color.alphaBlend(Colors.white.withOpacity(.09),
                 Theme.of(context).colorScheme.surface))
         .animate(appBarStateController);
@@ -712,16 +712,16 @@ class _ShellAppBarState extends State<ShellAppBar>
     appBarForegroundColor.addListener(() {
       setState(() {});
     });
-    setState(() {
-      appBarColor = ColorTween(
-              begin: Theme.of(context).colorScheme.background,
-              end: Color.alphaBlend(Colors.white.withOpacity(.0),
-                  Theme.of(context).colorScheme.surface))
-          .animate(appBarStateController);
-      appBarColor.addListener(() {
-        setState(() {});
-      });
-    });
+    // setState(() {
+    //   appBarColor = ColorTween(
+    //           begin: Colors.transparent,
+    //           end: Color.alphaBlend(Colors.white.withOpacity(.0),
+    //               Theme.of(context).colorScheme.surface))
+    //       .animate(appBarStateController);
+    //   appBarColor.addListener(() {
+    //     setState(() {});
+    //   });
+    // });
   }
 
   @override
@@ -733,7 +733,8 @@ class _ShellAppBarState extends State<ShellAppBar>
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      elevation: appBarStateController.value * 4,
+      shadowColor: Colors.black.withOpacity(appBarStateController.value),
+      // elevation: appBarStateController.value * 4,
       actions: [
         Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -778,11 +779,15 @@ class _ShellAppBarState extends State<ShellAppBar>
               ],
             ))
       ],
-      backgroundColor: appBarColor.value,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: Container(
+        color: appBarColor.value,
+      ),
+      // centerTitle: true,
       leadingWidth: 56 + widget.appBarMargins,
       title: Padding(
         padding: EdgeInsets.only(left: widget.appBarSpacing.value),
-        child: Title(),
+        child: AppTitle(),
       ),
       leading: !widget.displayMobileLayout
           ? IconButton(
@@ -793,19 +798,27 @@ class _ShellAppBarState extends State<ShellAppBar>
               ),
               onPressed: widget.onPressed, //() => toggleDrawer(context)
             )
-          : null,
+          : IconButton(
+              icon: AnimatedIcon(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
+                progress: widget.standardDrawerController,
+                icon: AnimatedIcons.menu_close,
+              ),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
     );
   }
 }
 
-class Title extends StatelessWidget {
-  const Title({
+class AppTitle extends StatelessWidget {
+  const AppTitle({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           FeatherIcon.feather,
