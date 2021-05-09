@@ -23,17 +23,30 @@ Finally, our concerns ought not to end with animals and simulations thereof. Som
 
 # References
 [1] Alan M. Turing. *[“I. — Computing Machinery And Intelligence”](https://doi.org/10.1093/mind/lix.236.433)*. In: Mind LIX.236 (Oct. 1950), pp. 433– 460. DOI: 10.1093/mind/lix.236.433.
+
 [2] Tom B. Brown et al. *[Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)*. 2020. eprint: arXiv:2005.14165.
+
 [3] Noam Chomsky and Lawrence Krauss. *[An Origins Project Dialogue](https://youtu.be/tbxp8ViBTu8?t=500)*. 2015.
+
 [4] Daniel Dennett. *Consciousness explained*. London: Penguin, 1993. ISBN: 978–0–7139–9037–9.
+
 [5] D. F. Swaab. *We are our brains: a neurobiography of the brain, from the womb to Alzheimer’s*. New York: Spiegel & Grau, 2014. ISBN: 978–0812992960.
+
 [6] Philip Low et al. *[The Cambridge Declaration On Consciousness](http://fcmconference.org/img/CambridgeDeclarationOnConsciousness.pdf)*. University of Cambridge, 2012.
 [7] [Nonhuman Rights Project](https://www.nonhumanrights.org/).
+
 [8] Jeremy Bentham. [“Of Circumstances Influencing Sensibility”](http://www.koeblergerhard.de/Fontes/BenthamJeremyMoralsandLegislation1789.pdf#page=90). In: *An Introduction to the Principles of Morals and Legislation*. London: T. Payne and Sons, 1780.
+
 [9] Jeff Sebo. *[Reconsider The Lobster](https://jeffsebodotnet.files.wordpress.com/2015/07/reconsider-the-lobster.pdf)*. UNC-Chapel Hill, 2015.
+
 [10] Simon Knutsson. [“Reducing Suffering Amongst Invertebrates Such As Insects”](https://was-research.org/writing-by-others/reducingsuffering-amongst-invertebrates-insects/). In: *Wild-Animal Suffering Research* (2016).
+
 [11] Gopal P. Sarma et al. [“OpenWorm: overview and recent advances in integrative biological simulation of Caenorhabditis elegans”](https://doi.org/10.1098/rstb.2017.0382). In: *Philosophical Transactions of the Royal Society B: Biological Sciences* 373.1758 (Sept. 2018), p. 20170382. DOI: 10.1098/rstb.2017.0382.
+
 [12] Fiona MacDonald. [“Scientists Put a Worm Brain in a Lego Robot Body — And It Worked”](https://www.sciencealert.com/scientists-put-worm-brain-in-legorobot-openworm-connectome). In: *Science Altert* (2017).
+
 [13] Frederico A.C. Azevedo et al. “[Equal numbers of neuronal and nonneuronal cells make the human brain an isometrically scaled-up primate brain](https://doi.org/10.1002/cne.21974)”. In: *The Journal of Comparative Neurology* 513.5 (Apr. 2009), pp. 532–541. DOI: 10.1002/cne.21974.
+
 [14] Randolf Menzel and Martin Giurfa. “Cognitive architecture of a mini-brain: the honeybee”. In: *Trends in Cognitive Sciences* 5.2 (Feb. 2001), pp. 62–71. DOI: 10.1016/s1364–6613(00)01601–6.
+
 [15] David Chalmers. [“What Is It Like To Be A Thermostat?”](https://annakaharris.com/chalmers/) In: The conscious mind: in search of a fundamental theory. New York: Oxford University Press, 1996. ISBN: 978–0195117899.
