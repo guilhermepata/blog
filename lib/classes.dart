@@ -296,7 +296,7 @@ class Article {
       int? maxLines}) {
     return MarkdownBody(
       data: initialContent,
-      selectable: true,
+      // selectable: true,
       onTapLink: (text, url, title) {
         BodyTextBuilder.onLinkTapped(
           context: context,
@@ -356,7 +356,7 @@ class Article {
           firstPar,
           dropCapChars: chars,
           style: style,
-          dropCapPadding: EdgeInsets.only(right: 12, top: 16),
+          dropCapPadding: EdgeInsets.only(right: 12, top: 24),
           // forceNoDescent: true,
           parseInlineMarkdown: true,
           dropCapPosition: DropCapPosition.start,
@@ -367,7 +367,7 @@ class Article {
         SizedBox(height: paragraphSpacing),
         MarkdownBody(
           data: otherContent.replaceFirst(firstPar, ''),
-          selectable: true,
+          // selectable: true,
           onTapLink: (text, url, title) {
             BodyTextBuilder.onLinkTapped(
               context: context,

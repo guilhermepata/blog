@@ -33,7 +33,7 @@ class _ArticlePageState extends State<ArticlePage>
   late double width, height, usefulWidth, usefulHeight, gutters;
 
   late double appBarMargins;
-  double maxContentWidth = 672;
+  final double maxContentWidth = 720;
   late double contentWidth;
   late double webLayoutMinWidth;
   late double cardCornerRadius;
@@ -328,7 +328,7 @@ class _ArticlePageState extends State<ArticlePage>
             context,
             // index - 3,
             style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                  fontSize: 16,
+                  fontSize: 17.5,
                   height: 1.5,
                   color:
                       Theme.of(context).colorScheme.onSurface.withOpacity(.87),
@@ -362,12 +362,12 @@ class _ArticlePageState extends State<ArticlePage>
                 fit: StackFit.expand,
                 children: [
                   Skeleton(
-                    height: maxContentWidth * 1.5 * 9 / 16,
-                    width: maxContentWidth * 1.5,
+                    height: maxContentWidth * 1.3 * 9 / 16,
+                    width: maxContentWidth * 1.3,
                   ),
                   ConstrainedBox(
                     constraints:
-                        BoxConstraints(maxWidth: maxContentWidth * 1.5),
+                        BoxConstraints(maxWidth: maxContentWidth * 1.3),
                     child: Image.network(
                       widget.article.imageUrl!,
                       fit: BoxFit.cover,
@@ -400,7 +400,7 @@ class _ArticlePageState extends State<ArticlePage>
           context,
           // index - 3,
           style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                fontSize: 17.5,
+                fontSize: 19,
                 height: 1.75,
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(.87),
               ),
@@ -426,7 +426,7 @@ class _ArticlePageState extends State<ArticlePage>
     return Center(
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: index != 3 ? maxContentWidth : maxContentWidth * 1.5,
+          maxWidth: index != 3 ? maxContentWidth : maxContentWidth * 1.3,
         ),
         child: result,
       ),

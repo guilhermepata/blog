@@ -56,7 +56,8 @@ class AppTheme {
         fontWeight: FontWeight.w500,
         color: finalScheme.onSurface.withOpacity(.87),
       ),
-      subtitle2: GoogleFonts.ibmPlexSerif(
+      subtitle2: TextStyle(
+        fontFamily: 'Newsreader',
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: finalScheme.onSurface.withOpacity(.87),
@@ -68,7 +69,8 @@ class AppTheme {
         letterSpacing: 0.4,
         color: finalScheme.onSurface.withOpacity(.6),
       ),
-      bodyText1: GoogleFonts.ibmPlexSerif(
+      bodyText1: TextStyle(
+        fontFamily: 'Newsreader',
         color: finalScheme.onSurface.withOpacity(.87),
         fontSize: 17,
         height: 2,
